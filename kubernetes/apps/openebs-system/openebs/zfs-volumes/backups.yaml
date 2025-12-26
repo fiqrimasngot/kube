@@ -1,0 +1,14 @@
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: backups
+  finalizers:
+    - cluster.local/data-protection
+spec:
+  capacity: "2199023255552"   # 2 TiB
+  fsType: zfs
+  ownerNodeID: k8s-0
+  poolName: k8s-0-library
+  volumeType: DATASET
+  shared: "no"
+  thinProvision: "yes"
