@@ -1,0 +1,13 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: zfs-k8s-0-library
+provisioner: zfs.csi.openebs.io
+parameters:
+  poolname: k8s-0-library
+  compression: lz4
+  recordsize: 16k
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true

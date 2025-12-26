@@ -26,6 +26,10 @@ import (
 	cilium_bgp_router_asn?: string & !=""
 	cilium_bgp_node_asn?: string & !=""
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
+	minio_root_user: string & !=""
+	minio_root_password: string & !=""
+	aws_access_id: string & !=""
+	aws_secret_access_key: string & !=""
 }
 
 #Config

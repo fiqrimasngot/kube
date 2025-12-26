@@ -7,3 +7,19 @@ machine:
           discard_unpacked_layers = false
         [plugins."io.containerd.cri.v1.runtime"]
           device_ownership_from_security_context = true
+  kernel:
+    modules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+      # Enable V2 Image Engine for Longhorn
+      - name: nvme_tcp
+      - name: vfio_pci
+  # disks:
+  #     - device: /dev/sdb
+  #       partitions:
+  #         - mountpoint: /var/lib/longhorn
+  #     - device: /dev/sdc
+  #       partitions:
+  #         - mountpoint: /var/lib/sdc
