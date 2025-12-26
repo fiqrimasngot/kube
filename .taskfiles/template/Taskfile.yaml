@@ -51,7 +51,6 @@ tasks:
 
   :configure:
     desc: Render and validate configuration files
-    prompt: Any conflicting files in the kubernetes directory will be overwritten... continue?
     cmds:
       - task: validate-schemas
       - task: render-configs
@@ -132,7 +131,6 @@ tasks:
 
   tidy:
     desc: Archive template related files and directories
-    prompt: All files and directories related to the templating process will be archived... continue?
     cmds:
       - mkdir -p {{.TIDY_FOLDER}}
       - rm -rf {{.ROOT_DIR}}/.github/tests
@@ -162,7 +160,6 @@ tasks:
 
   reset:
     desc: Remove templated files and directories
-    prompt: Remove all templated files and directories... continue?
     cmds:
       - rm -rf {{.BOOTSTRAP_DIR}}
       - rm -rf {{.KUBERNETES_DIR}}
