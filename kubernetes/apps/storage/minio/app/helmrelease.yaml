@@ -142,6 +142,7 @@ spec:
                   port: s3
     persistence:
       config:
+        enabled: true
         existingClaim: minio-vault
         # type: nfs
         # server: ${SECRET_NFS_SVC}
