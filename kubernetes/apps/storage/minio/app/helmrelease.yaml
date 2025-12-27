@@ -154,6 +154,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: backups
+  namespace: storage
 spec:
   storageClassName: zfs-k8s-0-library
   accessModes:
