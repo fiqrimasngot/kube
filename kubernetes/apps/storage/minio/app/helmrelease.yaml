@@ -161,7 +161,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: "2199023255552"
+      storage: 2Ti
 
 # ---
 # apiVersion: v1
