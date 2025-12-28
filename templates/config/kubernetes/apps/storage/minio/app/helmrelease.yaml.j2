@@ -117,7 +117,7 @@ spec:
       app:
         ports:
           http:
-            port: 9001
+            port: &port 9001
           s3:
             port: 9000
     serviceMonitor:
@@ -162,7 +162,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: http
+                port: *port
     persistence:
       data:
         enabled: true
