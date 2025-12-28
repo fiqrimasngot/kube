@@ -61,6 +61,11 @@ spec:
               allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
               privileged: true
+    configMaps:
+      nfs-exports:
+        data:
+          exports: |-
+            /export *(rw,fsid=0,crossmnt,all_squash,anonuid=1000,anongid=1000,insecure,no_subtree_check)
     persistence:
       exports:
         type: configMap
@@ -72,23 +77,7 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /export
-      immich:
-        existingClaim: immich
+      minio:
+        existingClaim: minio
         globalMounts:
-          - path: /export/immich
-      files:
-        existingClaim: files
-        globalMounts:
-          - path: /export/files
-      media:
-        existingClaim: media
-        globalMounts:
-          - path: /export/media
-      ssd:
-        existingClaim: nfs-ssd-pvc
-        globalMounts:
-          - path: /export/ssd
-      tank:
-        existingClaim: nfs-tank-pvc
-        globalMounts:
-          - path: /export/tank
+          - path: /export/minio
