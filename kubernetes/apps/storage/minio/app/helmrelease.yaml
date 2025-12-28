@@ -115,7 +115,6 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: minio
         ports:
           http:
             port: 9001
@@ -123,7 +122,6 @@ spec:
             port: 9000
     serviceMonitor:
       app:
-        serviceName: minio
         endpoints:
           - port: s3
             scheme: http
