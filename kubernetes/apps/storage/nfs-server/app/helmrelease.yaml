@@ -80,3 +80,7 @@ spec:
         existingClaim: minio
         globalMounts:
           - path: /export/minio
+      vault:
+        existingClaim: vault
+        globalMounts:
+          - path: /export/vault

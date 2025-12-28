@@ -30,3 +30,35 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-k8s-0-library
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vault-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: "2199023255552"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: vault
+    namespace: storage
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: k8s-0-library
+    volumeHandle: bigboi
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-k8s-0-library
+  volumeMode: Filesystem
