@@ -30,3 +30,25 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-k8s-0-library
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bigboi-k3s-pv
+spec:
+  capacity:
+    storage: 5Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: openebs-hostpath
+  local:
+    path: /k8s-0-library/bigboi/k3s
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0

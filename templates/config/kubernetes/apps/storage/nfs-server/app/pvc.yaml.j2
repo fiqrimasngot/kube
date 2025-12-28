@@ -9,3 +9,15 @@ spec:
     requests:
       storage: 2Ti
   storageClassName: zfs-k8s-0-library
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bigboi-k3s
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: openebs-hostpath
+  resources:
+    requests:
+      storage: 5Ti
