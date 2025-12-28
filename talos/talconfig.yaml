@@ -21,10 +21,10 @@ cniConfig:
 nodes:
   - hostname: "k8s-0"
     ipAddress: "10.32.1.51"
-    installDisk: "/dev/sda"
+    installDisk: "/dev/sde"
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/bbda6f02a224433050cb0e4b77fb7184434c045af3f53b16429d9c913afe4039
+    talosImageURL: factory.talos.dev/installer/672beb3353555f0e9d6f73b6d1daa44433b19226f897eff3f3d5e4c039bc61f7
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
