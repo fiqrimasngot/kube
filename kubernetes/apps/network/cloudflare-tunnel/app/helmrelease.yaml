@@ -27,7 +27,7 @@ spec:
             envFrom:
               - secretRef:
                   name: cloudflare-tunnel-secret
-            args: ["tunnel", "run"]
+            args: ["tunnel", "run","--no-quic"]
             probes:
               liveness: &probes
                 enabled: true
