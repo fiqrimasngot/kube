@@ -170,4 +170,36 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2Ti
+      storage: 4Ti
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backups-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: "4398046511104"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: backups
+    namespace: storage
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: k8s-0-library
+    volumeHandle: backups
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-k8s-0-library
+  volumeMode: Filesystem
