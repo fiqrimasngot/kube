@@ -80,7 +80,3 @@ spec:
         existingClaim: minio
         globalMounts:
           - path: /export/minio
-      bigboi-k3s:
-        existingClaim: bigboi-k3s
-        globalMounts:
-          - path: /export/bigboi-k3s
