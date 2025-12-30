@@ -52,13 +52,13 @@ spec:
           gethomepage.dev/widget.version: "2"
         hosts:
         - auth.${SECRET_DOMAIN}
-    postgresql:
-      enabled: true
-      primary:
-        persistence:
-          existingClaim: authentik-db
-      auth:
-        password: ${SECRET_AUTHENTIK_DB_PASSWORD}
+    # postgresql:
+    #   enabled: true
+    #   primary:
+    #     persistence:
+    #       existingClaim: authentik-db
+    #   auth:
+    #     password: ${SECRET_AUTHENTIK_DB_PASSWORD}
     redis:
       enabled: false
     #   architecture: standalone
