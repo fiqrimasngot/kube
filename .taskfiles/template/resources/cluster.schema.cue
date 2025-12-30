@@ -34,7 +34,11 @@ import (
 	cloudnative_password: string & !=""
 	couchdb_user: string & !=""
 	couchdb_password: string & !=""
+	couchdb_password: string & !=""
 	postgres_svc: net.IPv4
+	pihole_svc: net.IPv4
+	pihole_password: string & !=""
+	pihole_api: string & !=""
 }
 
 #Config

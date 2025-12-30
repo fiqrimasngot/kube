@@ -1,0 +1,280 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name:  pihole
+spec:
+  interval: 2h
+  timeout: 3m
+  url: https://mojo2600.github.io/pihole-kubernetes/
+---
+# https://github.com/MoJo2600/pihole-kubernetes/blob/master/charts/pihole/values.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pihole
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: pihole
+      version: 2.31.0
+      sourceRef:
+        kind: HelmRepository
+        name: pihole
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    DNS1: 10.32.1.1
+    adlists:
+      # DEFAULT LISTS
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+      - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+      # SUSPICIOUS
+      - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts
+      - https://v.firebog.net/hosts/static/w3kbl.txt
+      - https://raw.githubusercontent.com/matomo-org/referrer-spam-blacklist/master/spammers.txt
+      - https://someonewhocares.org/hosts/zero/hosts
+      - https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
+      - https://winhelp2002.mvps.org/hosts.txt
+      - https://v.firebog.net/hosts/neohostsbasic.txt
+      - https://raw.githubusercontent.com/RooneyMcNibNug/pihole-stuff/master/SNAFU.txt
+      - https://paulgb.github.io/BarbBlock/blacklists/hosts-file.txt
+      # Advertizing
+      - https://adaway.org/hosts.txt
+      - https://v.firebog.net/hosts/AdguardDNS.txt
+      - https://v.firebog.net/hosts/Admiral.txt
+      - https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt
+      - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+      - https://v.firebog.net/hosts/Easylist.txt
+      - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
+      - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
+      - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
+      - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
+      # Tracking and Telemetry
+      - https://v.firebog.net/hosts/Easyprivacy.txt
+      - https://v.firebog.net/hosts/Prigent-Ads.txt
+      - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.2o7Net/hosts
+      - https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt
+      - https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt
+      - https://www.github.developerdan.com/hosts/lists/ads-and-tracking-extended.txt
+      - https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/android-tracking.txt
+      - https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
+      - https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/AmazonFireTV.txt
+      - https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-blocklist.txt
+      # Malicious
+      - https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt
+      - https://osint.digitalside.it/Threat-Intel/lists/latestdomains.txt
+      - https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt
+      - https://v.firebog.net/hosts/Prigent-Crypto.txt
+      - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Risk/hosts
+      - https://bitbucket.org/ethanr/dns-blacklists/raw/8575c9f96e5b4a1308f2f12394abd86d0927a4a0/bad_lists/Mandiant_APT1_Report_Appendix_D.txt
+      - https://phishing.army/download/phishing_army_blocklist_extended.txt
+      - https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
+      - https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt
+      - https://v.firebog.net/hosts/RPiList-Malware.txt
+      - https://v.firebog.net/hosts/RPiList-Phishing.txt
+      - https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt
+      - https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts
+      - https://urlhaus.abuse.ch/downloads/hostfile/
+      - https://v.firebog.net/hosts/Prigent-Malware.txt
+    doh:
+      # -- set to true to enabled DNS over HTTPs via cloudflared
+      enabled: true
+      name: "cloudflared"
+      repository: "crazymax/cloudflared"
+      tag: latest@sha256:7e94afadbc1fca729d4187e566697319a8752e471085f4d86396300e21039508
+      pullPolicy: IfNotPresent
+      envVars:
+        TZ: ${TIMEZONE}
+        # TUNNEL_DNS_UPSTREAM: "https://security.cloudflare-dns.com/dns-query" #could also comma-delimit more than one url within the same string for multiple options
+        TUNNEL_DNS_UPSTREAM: "https://y81pq6b35c.cloudflare-gateway.com/dns-query,https://security.cloudflare-dns.com/dns-query" #could also comma-delimit more than one url within the same string for multiple options
+
+      # -- Probes configuration for cloudflared
+      probes:
+        liveness:
+          enabled: true
+          probe:
+            exec:
+              command:
+                - nslookup
+                - -po=5053
+                - cloudflare.com
+                - "127.0.0.1"
+          # -- defines the initial delay for the liveness probe
+          initialDelaySeconds: 60
+          failureThreshold: 10
+          timeoutSeconds: 5
+    admin:
+      existingSecret: pihole-dashboard
+      passwordKey: password
+    affinity: {}
+    antiaff:
+      avoidRelease: pihole1
+      enabled: false
+      strict: true
+    blacklist: {}
+    customVolumes:
+      config: {}
+      enabled: false
+    dnsmasq:
+      customSettings:
+        - rebind-domain-ok=/${SECRET_DOMAIN}/
+        - rev-server=10.32.1.0/24,10.32.1.1
+        - server=//10.32.1.1
+      upstreamServers:
+        - server=/${SECRET_DOMAIN}/${SECRET_GATEWAY_VIP}
+      customDnsEntries:
+        - address=/k8s.${SECRET_DOMAIN}/10.32.1.10
+    dualStack:
+      enabled: false
+    extraEnvVars:
+      DNSMASQ_USER: root
+      # REV_SERVER: true
+      # REV_SERVER_CIDR: 192.168.0.0/24
+      # REV_SERVER_DOMAIN: lan
+      # REV_SERVER_TARGET: 192.168.0.1
+    extraEnvVarsSecret: {}
+    ftl:
+      MAXDBDAYS: 90
+    hostNetwork: "false"
+    hostname: ""
+    image:
+      pullPolicy: IfNotPresent
+      repository: pihole/pihole
+      tag: 2024.07.0
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/app-root: /admin
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Infrastructure
+        gethomepage.dev/name: pihole
+        gethomepage.dev/icon: sh-piholevault
+        gethomepage.dev/description: "DNS Blackhole"
+        gethomepage.dev/widget.url: "http://pihole-web.network.svc.cluster.local:80"
+        gethomepage.dev/widget.type: pihole
+        gethomepage.dev/widget.key: "${PIHOLE_API}"
+        # gethomepage.dev/widget.version: "6"
+      enabled: true
+      hosts:
+        - pihole.${SECRET_DOMAIN}
+      ingressClassName: internal
+      path: /
+    maxSurge: 1
+    maxUnavailable: 0
+    monitoring:
+      podMonitor:
+        enabled: true
+      sidecar:
+        enabled: false
+        image:
+          pullPolicy: IfNotPresent
+          repository: ekofr/pihole-exporter
+          tag: v1.2.0
+        port: 9617
+        resources:
+          limits:
+            memory: 128Mi
+    podAnnotations:
+      prometheus.io/port: "9617"
+      prometheus.io/path: /metrics
+      prometheus.io/scrape: "true"
+    podDnsConfig:
+      enabled: true
+      nameservers:
+        - 127.0.0.1
+        - 10.32.1.1
+      policy: None
+    privileged: "true"
+    probes:
+      liveness:
+        enabled: true
+        failureThreshold: 10
+        initialDelaySeconds: 60
+        timeoutSeconds: 5
+      readiness:
+        enabled: true
+        failureThreshold: 3
+        initialDelaySeconds: 60
+        timeoutSeconds: 5
+    regex:
+      - ^ad([sxv]?[0-9]*|system)[_.-]([^.[:space:]]+\.){1,}|[_.-]ad([sxv]?[0-9]*|system)[_.-]
+      - ^(.+[_.-])?adse?rv(er?|ice)?s?[0-9]*[_.-]
+      - ^(.+[_.-])?telemetry[_.-]
+      - ^adim(age|g)s?[0-9]*[_.-]
+      - ^adtrack(er|ing)?[0-9]*[_.-]
+      - ^advert(s|is(ing|ements?))?[0-9]*[_.-]
+      - ^aff(iliat(es?|ion))?[_.-]
+      - ^analytics?[_.-]
+      - ^banners?[_.-]
+      - ^beacons?[0-9]*[_.-]
+      - ^count(ers?)?[0-9]*[_.-]
+      - ^mads\.
+      - ^pixels?[-.]
+      - ^stat(s|istics)?[0-9]*[_.-]
+      - ^https?://([A-Za-z0-9.-]*\.)?clicks\.beap\.bc\.yahoo\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?secure\.footprint\.net/
+      - ^https?://([A-Za-z0-9.-]*\.)?match\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?clicks\.beap\.bc\.yahoo(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?sitescout(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?appnexus(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?evidon(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?mediamath(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?scorecardresearch(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?doubleclick(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?flashtalking(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?turn(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?mathtag(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?googlesyndication(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?s\.yimg\.com/cv/ae/us/audience/
+      - ^https?://([A-Za-z0-9.-]*\.)?clicks\.beap/
+      - ^https?://([A-Za-z0-9.-]*\.)?.doubleclick(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?yieldmanager(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?w55c(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?adnxs(\.\w{2}\.\w{2}|\.\w{2,4})/
+      - ^https?://([A-Za-z0-9.-]*\.)?advertising\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?evidon\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?scorecardresearch\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?flashtalking\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?turn\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?mathtag\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?surveylink/
+      - ^https?://([A-Za-z0-9.-]*\.)?info\.yahoo\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?ads\.yahoo\.com/
+      - ^https?://([A-Za-z0-9.-]*\.)?global\.ard\.yahoo\.com/
+    replicaCount: 1
+    resources: {}
+    serviceDhcp:
+      enabled: false
+    serviceDns:
+      annotations:
+        "io.cilium/lb-ipam-ips": "${SECRET_PIHOLE_SVC}"
+      externalTrafficPolicy: Cluster
+      mixedService: true
+      port: 53
+      type: LoadBalancer
+    serviceWeb:
+      http:
+        enabled: true
+        port: 80
+      type: ClusterIP
+    strategyType: RollingUpdate
+    tolerations: []
+    topologySpreadConstraints: []
+    virtualHost: pi.hole
+    webHttp: "80"
+    webHttps: "443"
+    whitelist:
+      - translate.google.com
+
