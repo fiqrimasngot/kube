@@ -39,6 +39,14 @@ import (
 	pihole_svc: net.IPv4
 	pihole_password: string & !=""
 	pihole_api: string & !=""
+	authentik_secret_key: string & !=""
+	authentik_email_host: string & !=""
+	authentik_email_username: string & !=""
+	mailgun_authentik_smtp_password: string & !=""
+	authentik_email_from: string & !=""
+	authentik_POSTGRES_USER: string & !=""
+	authentik_POSTGRES_PASS: string & !=""
+	authentik_redis_password: string & !=""
 }
 
 #Config

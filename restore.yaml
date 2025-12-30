@@ -1,0 +1,20 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: data-obsidian-couchdb-0-dst
+  namespace: database
+spec:
+  trigger:
+    manual: restore-now
+  restic:
+    repository: data-obsidian-couchdb-0-volsync-secret
+    storageClassName: ceph-block
+    volumeSnapshotClassName: csi-ceph-blockpool
+    accessModes: ["ReadWriteOnce"]
+    capacity: 5Gi
+    cacheStorageClassName: ceph-block
+    cacheCapacity: 2Gi
+    moverSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
