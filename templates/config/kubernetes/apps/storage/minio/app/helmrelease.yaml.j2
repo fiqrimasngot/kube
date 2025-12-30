@@ -4,7 +4,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app minio
-  namespace: storage
 spec:
   interval: 30m
   chartRef:
@@ -117,14 +116,6 @@ spec:
     # ingress:
     #   app:
     #     className: external
-    #     annotations:
-    #       gethomepage.dev/enabled: "true"
-    #       gethomepage.dev/group: Infrastructure
-    #       gethomepage.dev/name: "{{ title .Release.Name }}"
-    #       gethomepage.dev/icon: "{{ .Release.Name }}"
-    #       gethomepage.dev/description: "S3 storage"
-    #       gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
-    #       external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
     #     hosts:
     #       - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
     #         paths:
@@ -140,6 +131,14 @@ spec:
     #               port: s3
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/description: "S3 storage"
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
