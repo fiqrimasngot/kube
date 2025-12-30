@@ -23,14 +23,14 @@ spec:
             fsGroup: 568
             fsGroupChangePolicy: "OnRootMismatch"
 
-        # statefulset:
-        #   volumeClaimTemplates:
-        #     - name: data
-        #       accessMode: ReadWriteOnce
-        #       size: 2Gi
-        #       storageClass: ceph-block
-        #       globalMounts:
-        #         - path: /opt/couchdb/data
+        statefulset:
+          volumeClaimTemplates:
+            - name: data
+              accessMode: ReadWriteOnce
+              size: 2Gi
+              storageClass: ceph-block
+              globalMounts:
+                - path: /opt/couchdb/data
 
         initContainers:
           init-config:
@@ -97,8 +97,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /opt/couchdb/etc/default.d
-      data:
-        enabled: true
-        existingClaim: volsync-data-obsidian-couchdb-0-dst-dest
-        globalMounts:
-          - path: /opt/couchdb/data
