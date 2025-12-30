@@ -16,6 +16,12 @@ spec:
   path: ./kubernetes/apps/security/authentik/app
   components:
     - ../../../../components/volsync
+  postBuild:
+    substitute:
+      APP: authentik-db
+      VOLSYNC_CAPACITY: 2Gi
+      APP_UID: "1001"
+      APP_GID: "1001"
   prune: true
   sourceRef:
     kind: GitRepository
