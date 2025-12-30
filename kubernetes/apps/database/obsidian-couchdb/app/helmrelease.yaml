@@ -73,7 +73,7 @@ spec:
             port: &port 5984
 
     route:
-      ingress:
+      main:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
