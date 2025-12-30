@@ -68,7 +68,7 @@ spec:
         supplementalGroups: [10000]
         seccompProfile: { type: RuntimeDefault }
       nodeSelector:
-        kubernetes.io/hostname: "k3s-2"
+        nvidia.feature.node.kubernetes.io/gpu: "true"
     service:
       app:
         controller: radarr
