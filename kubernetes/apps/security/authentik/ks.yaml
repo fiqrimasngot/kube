@@ -13,15 +13,14 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
-  path: ./kubernetes/apps/security/authentik/app
-  components:
-    - ../../../../components/volsync
-  postBuild:
     substitute:
       APP: authentik-db
       VOLSYNC_CAPACITY: 2Gi
       APP_UID: "1001"
       APP_GID: "1001"
+  path: ./kubernetes/apps/security/authentik/app
+  components:
+    - ../../../../components/volsync
   prune: true
   sourceRef:
     kind: GitRepository
