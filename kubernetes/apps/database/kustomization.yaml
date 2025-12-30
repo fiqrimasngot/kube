@@ -5,7 +5,6 @@ namespace: database
 components:
   - ../../components/sops
   - ../../components/repos
-  - ../../components/volsync
 resources:
   - ./namespace.yaml
   - ./obsidian-couchdb/ks.yaml
