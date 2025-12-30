@@ -57,7 +57,6 @@ spec:
       path: /
 
     defaultSettings:
-      backupTarget: nfs://:
       backupstorePollInterval: 300
       orphanAutoDeletion: true
       concurrentAutomaticEngineUpgradePerNodeLimit: 1
