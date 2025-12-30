@@ -1,0 +1,25 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app obsidian-couchdb
+spec:
+  targetNamespace: database
+  path: ./kubernetes/apps/database/obsidian-couchdb/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+    substitute:
+      APP: data-obsidian-couchdb-0
+      APP_UID: "568"
+      APP_GID: "568"
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m

@@ -1,0 +1,77 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgis
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.4
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 10Gi
+    storageClass: ceph-block
+  superuserSecret:
+    name: cloudnative-pg
+  enableSuperuserAccess: true
+  postgresql:
+    parameters:
+      max_connections: "600"
+      max_slot_wal_keep_size: 5GB
+      shared_buffers: 512MB
+  resources:
+    requests:
+      cpu: 200m
+    limits:
+      memory: 2Gi
+  monitoring:
+    enablePodMonitor: true
+  backup:
+    retentionPolicy: 7d
+    barmanObjectStore: &barmanObjectStore
+      data:
+        compression: bzip2
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://cloudnative-pg/
+      endpointURL: http://minio.storage.svc.cluster.local:9000
+      # Note: serverName version needs to be incremented
+      # when recovering from an existing cnpg cluster
+      serverName: &currentCluster postgis-v2
+      s3Credentials:
+        accessKeyId:
+          name: cloudnative-pg
+          key: aws-access-key-id
+        secretAccessKey:
+          name: cloudnative-pg
+          key: aws-secret-access-key
+  # Note: previousCluster needs to be set to the name of the previous
+  # cluster when recovering from an existing cnpg cluster
+  bootstrap:
+    recovery:
+      source: &previousCluster postgres
+  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+  externalClusters:
+    - name: *previousCluster
+      barmanObjectStore:
+        <<: *barmanObjectStore
+        serverName: *previousCluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgis-lb
+  annotations:
+    io.cilium/lb-ipam-ips: ${SECRET_POSTGIS_SVC}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: postgis
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    cnpg.io/cluster: postgresql
+    role: primary

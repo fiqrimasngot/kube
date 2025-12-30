@@ -30,6 +30,11 @@ import (
 	minio_root_password: string & !=""
 	aws_access_id: string & !=""
 	aws_secret_access_key: string & !=""
+	cloudnative_user: string & !=""
+	cloudnative_password: string & !=""
+	couchdb_user: string & !=""
+	couchdb_password: string & !=""
+	postgres_svc: net.IPv4
 }
 
 #Config
