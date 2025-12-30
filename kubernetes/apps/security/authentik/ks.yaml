@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: &app authentik
 spec:
-  targetNamespace: authentik
+  targetNamespace: security
   dependsOn:
     - name: minio
       namespace: storage
