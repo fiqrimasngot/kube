@@ -101,12 +101,12 @@ spec:
         existingClaim: *app
       tmp:
         type: emptyDir
-      movies:
-        existingClaim: dump
-        globalMounts:
-          - path: /movies
-            subPath: movies
-      downloads:
-        type: nfs
-        server: ${SECRET_NFS_SVC}
-        path: ${SECRET_NFS_MNT}/Downloads
+      # movies:
+      #   existingClaim: dump
+      #   globalMounts:
+      #     - path: /movies
+      #       subPath: movies
+      # downloads:
+      #   type: nfs
+      #   server: ${SECRET_NFS_SVC}
+      #   path: ${SECRET_NFS_MNT}/Downloads
