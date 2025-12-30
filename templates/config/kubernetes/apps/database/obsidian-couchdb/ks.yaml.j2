@@ -4,6 +4,8 @@ kind: Kustomization
 metadata:
   name: &app obsidian-couchdb
 spec:
+  components:
+    - ../../../../components/volsync
   targetNamespace: database
   path: ./kubernetes/apps/database/obsidian-couchdb/app
   prune: true
