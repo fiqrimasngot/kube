@@ -2,7 +2,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: bytestash
+  name: &app bytestash
 spec:
   interval: 1h
   path: ./kubernetes/apps/default/bytestash/app
