@@ -101,15 +101,15 @@ spec:
                 port: *port
       code:
         enabled: true
-        className: envoy-internal
-        annotations:
-          hajimari.io/icon: "mdi:microsoft-visual-studio-code"
-          hajimari.io/group: "Automation"
-        hosts:
-          - host: &host2 "coder.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-                service:
-                  identifier: code
-                  port: http
+        # className: envoy-internal
+        # annotations:
+        #   hajimari.io/icon: "mdi:microsoft-visual-studio-code"
+        #   hajimari.io/group: "Automation"
+        # hosts:
+        #   - host: &host2 "coder.${SECRET_DOMAIN}"
+        #     paths:
+        #       - path: /
+        #         pathType: Prefix
+        #         service:
+        #           identifier: code
+        #           port: http
