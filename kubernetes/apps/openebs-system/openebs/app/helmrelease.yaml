@@ -42,7 +42,7 @@ spec:
     openebs-crds:
       csi:
         volumeSnapshots:
-          enabled: true  # snapshot-controller manages those CRDs
+          enabled: false  # snapshot-controller manages those CRDs
     sidecar:
       image:
         repository: ghcr.io/kiwigrid/k8s-sidecar
@@ -80,7 +80,7 @@ spec:
       crds:
         csi:
           volumeSnapshots:
-            enabled: true
+            enabled: false
 
     # https://github.com/openebs/lvm-localpv/blob/HEAD/deploy/helm/charts/values.yaml
     lvm-localpv:
