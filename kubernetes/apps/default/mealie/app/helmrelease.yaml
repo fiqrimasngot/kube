@@ -100,7 +100,7 @@ spec:
           gethomepage.dev/icon: "sh-{{ .Release.Name }}"
           gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
           gethomepage.dev/widget.type: mealie
-          gethomepage.dev/widget.key: "${MEALIE_API}"
+          gethomepage.dev/widget.key: "${MEALIE_API:-}"
           gethomepage.dev/widget.version: "2"
         hostnames: ["recipes.${SECRET_DOMAIN}"]
         parentRefs:
