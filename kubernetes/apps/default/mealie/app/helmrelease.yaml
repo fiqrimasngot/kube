@@ -102,7 +102,7 @@ spec:
           gethomepage.dev/widget.type: mealie
           gethomepage.dev/widget.key: "${MEALIE_API}"
           gethomepage.dev/widget.version: "2"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["recipes.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
             namespace: network
