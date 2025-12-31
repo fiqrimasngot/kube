@@ -29,15 +29,6 @@ spec:
       createPrometheusRules: true
     toolbox:
       enabled: true
-    route:
-      dashboard:
-        host:
-          name: rook.${SECRET_DOMAIN}
-          path: /
-          pathType: PathPrefix
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
     cephClusterSpec:
       cephConfig:
         global:
@@ -66,6 +57,22 @@ spec:
       csi:
         readAffinity:
           enabled: true
+      route:
+        dashboard:
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/name: Rook Ceph Dashboard
+            gethomepage.dev/group: Storage
+            gethomepage.dev/description: "Rook Ceph Storage Dashboard"
+            gethomepage.dev/icon: rook.png
+          host:
+            name: rook.${SECRET_DOMAIN}
+            path: /
+            pathType: PathPrefix
+          parentRefs:
+            - name: envoy-internal
+              namespace: networking
+
       dashboard:
         enabled: true
         urlPrefix: /
