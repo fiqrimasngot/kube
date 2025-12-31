@@ -47,6 +47,22 @@ import (
 	authentik_POSTGRES_USER: string & !=""
 	authentik_POSTGRES_PASS: string & !=""
 	authentik_redis_password: string & !=""
+	paperless_admin_user: string & !=""
+	paperless_admin_password: string & !=""
+	mealie_secret: string & !=""
+	paperless_secret_key: string & !=""
+	paperless_client_id: string & !=""
+	paperless_client_secret: string & !=""
+	ha_api: string & !=""
+	n8n_encryption_key: string & !=""
+	nextcloud_user: string & !=""
+	nextcloud_password: string & !=""
+	nextcloud_client_id: string & !=""
+	nextcloud_client_secret: string & !=""
+	nextcloud_redis_password: string & !=""
+	smtp_relay_server: string & !=""
+	smtp_relay_username: string & !=""
+	smtp_relay_password: string & !=""
 }
 
 #Config

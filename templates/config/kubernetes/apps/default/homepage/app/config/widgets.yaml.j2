@@ -1,0 +1,32 @@
+---
+- logo:
+    icon: https://i.pinimg.com/736x/77/25/3a/77253a53ce061b5eed2e3924739ab89b.jpg
+- search:
+    provider: [google,searx]
+    focus: false
+    target: _self
+    suggestionUrl: https://search.${SECRET_DOMAIN}/search?q=<query>
+    showSearchSuggestions: true
+- greeting:
+    text_size: xl
+    text: "Hey Fiq, how are you doing today?"
+- kubernetes:
+    cluster:
+      cpu: true
+      memory: true
+      show: true
+      showLabel: true
+    nodes:
+      cpu: true
+      memory: true
+      show: true
+      showLabel: true
+- openmeteo:
+    label: Malaysia
+    latitude: ${LAT}
+    longitude: ${LONG}
+    timezone: ${TIMEZONE}
+    units: metric
+    cache: 5
+    format:
+      maximumFractionDigits: 1

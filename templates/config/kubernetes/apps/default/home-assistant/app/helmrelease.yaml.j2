@@ -1,0 +1,115 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: home-assistant
+spec:
+  interval: 15m
+  dependsOn:
+    - name: authentik
+      namespace: security
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    defaultPodOptions:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+        fsGroupChangePolicy: "OnRootMismatch"
+      # nodeSelector:
+      #   nvidia.feature.node.kubernetes.io/gpu: "true"
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: homeassistant/home-assistant
+              tag: "2025.12"
+            env:
+              TZ: "${TIMEZONE}"
+            securityContext:
+              privileged: true
+          code:
+            dependsOn: main
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.106.3
+            args:
+              - --auth
+              - "none"
+              - --user-data-dir
+              - "/config/.vscode"
+              - --extensions-dir
+              - "/config/.vscode"
+              - --port
+              - "8081"
+              - "/config"
+    persistence:
+      config:
+        enabled: true
+        existingClaim: home-assistant-pvc
+        globalMounts:
+          - path: /config
+      usb:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_1e649599ccc2ef11bbf856ac8048b910-if00-port0
+        hostPathType: CharDevice
+        globalMounts:
+          - path: /dev/ttyUSB0
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: &port 8123
+      code:
+        type: ClusterIP
+        controller: main
+        ports:
+          http:
+            port: 8081
+    route:
+      main:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Home Assistant
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/widget.type: homeassistant
+          gethomepage.dev/widget.url: http://home-assistant-main.home.svc.cluster.local:8123
+          gethomepage.dev/widget.key: "${HA_API}"
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: *port
+      code:
+        enabled: true
+        className: envoy-internal
+        annotations:
+          hajimari.io/icon: "mdi:microsoft-visual-studio-code"
+          hajimari.io/group: "Automation"
+        hosts:
+          - host: &host2 "coder.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+                service:
+                  identifier: code
+                  port: http

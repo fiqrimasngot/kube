@@ -1,0 +1,124 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mealie
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    controllers:
+      mealie:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            env:
+              INIT_POSTGRES_HOST: &dbHost postgres-rw.database.svc.cluster.local
+              INIT_POSTGRES_DBNAME: *app
+              INIT_POSTGRES_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: *app
+                    key: POSTGRES_USER
+              INIT_POSTGRES_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: *app
+                    key: POSTGRES_PASSWORD
+              INIT_POSTGRES_SUPER_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: *app
+                    key: INIT_POSTGRES_SUPER_PASS
+        containers:
+          app:
+            image:
+              repository: ghcr.io/mealie-recipes/mealie
+              tag: v3.7.0
+            env:
+              TZ: ${TIMEZONE}
+              BASE_URL: https://recipes.${SECRET_DOMAIN}
+              PUID: 65534
+              PGID: 65534
+              AUTO_BACKUP_ENABLED: true
+              ALLOW_SIGNUP: false
+              SMTP_HOST: smtp-relay.network.svc.cluster.local
+              SMTP_PORT: 25
+              SMTP_FROM_NAME: Mealie
+              SMTP_FROM_EMAIL: "${SECRET_DOMAIN}"
+              SMTP_AUTH_STRATEGY: NONE
+              DB_ENGINE: postgres
+              POSTGRES_SERVER: *dbHost
+              POSTGRES_PORT: 5432
+              POSTGRES_DB: *app
+              OIDC_AUTH_ENABLED: true
+              OIDC_SIGNUP_ENABLED: true
+              OIDC_CONFIGURATION_URL: "https://auth.${SECRET_DOMAIN}/application/o/mealie/.well-known/openid-configuration"
+              OIDC_CLIENT_ID: mealie
+              OIDC_AUTO_REDIRECT: false
+              OIDC_ADMIN_GROUP: consoleAdmin
+              OIDC_USER_GROUP: internal-user
+            envFrom:
+              - secretRef:
+                  name: *app
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: &port 9000
+    route:
+      main:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Recipe
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "sh-{{ .Release.Name }}"
+          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          gethomepage.dev/widget.type: mealie
+          gethomepage.dev/widget.key: "${MEALIE_API}"
+          gethomepage.dev/widget.version: "2"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /app/data
+      tmp:
+        type: emptyDir
+      nltk:
+        type: emptyDir
+        globalMounts:
+          - path: /usr/lib/nltk_data

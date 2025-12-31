@@ -1,0 +1,69 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app shlink-web
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      shlink-web:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/shlinkio/shlink-web-client
+              tag: 4.6.2
+            env:
+              TIMEZONE: ${TIMEZONE}
+              SHLINK_SERVER_URL: https://link.${SECRET_DOMAIN}
+            envFrom:
+              - secretRef:
+                  name: *app
+            resources:
+              requests:
+                cpu: 5m
+                memory: 50M
+              limits:
+                memory: 100M
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+    service:
+      app:
+        controller: shlink-web
+        ports:
+          http:
+            port: &port 8080
+    route:
+      main:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Shortcut link
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: sh-shlink
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port

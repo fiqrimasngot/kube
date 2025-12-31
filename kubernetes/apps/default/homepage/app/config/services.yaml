@@ -1,0 +1,42 @@
+---
+- Infrastructure:
+    - Store:
+        href: https://truenas.${SECRET_DOMAIN}
+        target: _self
+        icon: truenas.png
+        description: TrueNAS Scale
+        widget:
+          type: truenas
+          url: http://${SECRET_NFS_SVC}
+          key: ${TRUENAS_API}
+          enablePools: true
+- Home:
+    - Sonarr:
+        href: https://sonarr.${SECRET_DOMAIN}
+        icon: sonarr.png
+        description: TV
+        widget:
+          type: sonarr
+          url: http://sonarr.media.svc.cluster.local
+          key: ${SONARR_API}
+    - Radarr:
+        href: https://radarr.${SECRET_DOMAIN}
+        icon: radarr.png
+        description: Movies
+        widget:
+          type: radarr
+          url: http://radarr.media.svc.cluster.local
+          key: ${RADARR_API}
+    - Agenda:
+        widget:
+          type: calendar
+          firstDayInWeek: sunday # optional - defaults to monday
+          view: monthly # optional - possible values monthly, agenda
+          maxEvents: 10 # optional - defaults to 10
+          integrations:
+            - type: sonarr
+              service_group: Home
+              service_name: Sonarr
+            - type: radarr
+              service_group: Home
+              service_name: Radarr

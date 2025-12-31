@@ -1,0 +1,100 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app wallabag
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+
+    controllers:
+      wallabag:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # strategy: RollingUpdate
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18
+            envFrom: &envFrom
+              - secretRef:
+                  name: *app
+          migrations:
+            image:
+              repository: wallabag/wallabag
+              tag: 2.6.14
+            envFrom: *envFrom
+            env: &env
+              TZ: ${TIMEZONE}
+              SYMFONY__ENV__DOMAIN_NAME: https://wallabag.${SECRET_DOMAIN}
+              SYMFONY__ENV__SERVER_NAME: Wallabag
+              SYMFONY__ENV__FOSUSER_REGISTRATION: "true"
+              SYMFONY__ENV__FOSUSER_CONFIRMATION: "false"
+              SYMFONY__ENV__FROM_EMAIL: wallabag@${SECRET_DOMAIN}
+              SYMFONY__ENV__MAILER_DSN: smtp://smtp-relay.networking.svc.cluster.local:2525
+              POPULATE_DATABASE: "false"
+            command:
+              - /var/www/wallabag/bin/console
+              - doctrine:migrations:migrate
+              - --env=prod
+              - --no-interaction
+        containers:
+          app:
+            image:
+              repository: wallabag/wallabag
+              tag: 2.6.14
+            env: *env
+            envFrom: *envFrom
+            resources:
+              requests:
+                cpu: 50m
+                memory: 300Mi
+              limits:
+                memory: 400Mi
+    service:
+      app:
+        controller: wallabag
+        ports:
+          http:
+            port: &port 80
+    route:
+      main:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Offline bookmark
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        enabled: true
+        existingClaim: *app
+        globalMounts:
+          - path: /images
