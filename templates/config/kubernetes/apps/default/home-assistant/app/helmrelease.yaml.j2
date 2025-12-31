@@ -90,14 +90,14 @@ spec:
           gethomepage.dev/widget.url: http://home-assistant-main.home.svc.cluster.local:8123
           gethomepage.dev/widget.key: "${HA_API}"
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["ha.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: main
+              - name: main
                 port: *port
       code:
         enabled: true
