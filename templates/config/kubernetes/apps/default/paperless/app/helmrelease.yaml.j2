@@ -132,25 +132,25 @@ spec:
          - path: /usr/src/paperless/data
        type: nfs
        server: ${SECRET_NFS_SVC}
-       path: "/paperless/data"
+       path: "/doc/paperless/data"
      media:
        enabled: true
        globalMounts:
          - path: /usr/src/paperless/media
        type: nfs
        server: ${SECRET_NFS_SVC}
-       path: "/paperless/media"
+       path: "/doc/paperless/media"
      consume:
        enabled: true
        globalMounts:
          - path: /usr/src/paperless/consume
        type: nfs
        server: ${SECRET_NFS_SVC}
-       path: "/paperless/incoming"
+       path: "/doc/paperless/incoming"
      export:
        enabled: true
        globalMounts:
          - path: /usr/src/paperless/export
        type: nfs
        server: ${SECRET_NFS_SVC}
-       path: "/paperless/export"
+       path: "/doc/paperless/export"
