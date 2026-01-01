@@ -124,8 +124,8 @@ spec:
 
 
     persistence:
-     backup:
-       existingClaim: backups
+     # backup:
+     #   existingClaim: backups
      data:
        enabled: true
        globalMounts:

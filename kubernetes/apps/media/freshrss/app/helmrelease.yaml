@@ -56,17 +56,17 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-        annotations:
-          hajimari.io/icon: mdi:rss
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Updates
-          gethomepage.dev/description: FreshRSS Feed Aggregator
-          gethomepage.dev/icon: freshrss.png
-          gethomepage.dev/name: FreshRSS
-          gethomepage.dev/widget.type: freshrss
-          gethomepage.dev/widget.url: "http://freshrss.media.svc.cluster.local:80"
-          gethomepage.dev/widget.username: "${FRESHRSS_USER}"
-          gethomepage.dev/widget.password: "${FRESHRSS_PWD}"
+        # annotations:
+          # hajimari.io/icon: mdi:rss
+          # gethomepage.dev/enabled: "true"
+          # gethomepage.dev/group: Updates
+          # gethomepage.dev/description: FreshRSS Feed Aggregator
+          # gethomepage.dev/icon: freshrss.png
+          # gethomepage.dev/name: FreshRSS
+          # gethomepage.dev/widget.type: freshrss
+          # gethomepage.dev/widget.url: "http://freshrss.media.svc.cluster.local:80"
+          # gethomepage.dev/widget.username: "${FRESHRSS_USER}"
+          # gethomepage.dev/widget.password: "${FRESHRSS_PWD}"
     persistence:
       config:
         enabled: true

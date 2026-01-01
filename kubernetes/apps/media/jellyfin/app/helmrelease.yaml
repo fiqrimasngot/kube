@@ -65,7 +65,7 @@ spec:
             port: &port 8096
 
     route:
-      app:
+      jellyfin:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
@@ -73,7 +73,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: jellyfin
                 port: *port
         annotations:
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
@@ -95,17 +95,24 @@ spec:
         existingClaim: ${APP}
         globalMounts:
           - path: /config
-      media:
-        existingClaim: media
-        # advancedMounts:
-        #   jellyfin:
-        #     app:
-        #       - path: /movies
-        #         subPath: movies
-        #       - path: /tv
-        #         subPath: tv
-        #       - path: /music
-        #         subPath: music
+      movies:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /movies
+        # globalMounts:
+        #   - path: /media/movies
+      tv:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /tv
+        # globalMounts:
+        #   - path: /media/tv
+      music:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /music
+        # globalMounts:
+        #   - path: /media/music
       tmp:
         type: emptyDir
         advancedMounts:
