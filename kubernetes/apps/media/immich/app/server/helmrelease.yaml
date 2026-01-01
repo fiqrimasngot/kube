@@ -47,11 +47,11 @@ spec:
                   name: immich-secret
               - configMapRef:
                   name: immich-config
-            resources:
-              requests:
-                nvidia.com/gpu: 1
-              limits:
-                nvidia.com/gpu: 1
+            # resources:
+            #   requests:
+            #     nvidia.com/gpu: 1
+            #   limits:
+            #     nvidia.com/gpu: 1
     service:
       immich-server:
         controller: main
