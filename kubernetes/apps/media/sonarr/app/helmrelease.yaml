@@ -103,8 +103,8 @@ spec:
       tv:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /tv
+        path: /media/tv
       downloads:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /downloads
+        path: /media/downloads

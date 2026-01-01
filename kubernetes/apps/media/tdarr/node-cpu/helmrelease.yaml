@@ -84,24 +84,24 @@ spec:
       movies:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /movies
+        path: /media/movies
         # globalMounts:
         #   - path: /media/movies
       tv:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /tv
+        path: /media/tv
         # globalMounts:
         #   - path: /media/tv
       music:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /music
+        path: /media/music
         # globalMounts:
         #   - path: /media/music
       transcode:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /temp
+        path: /media/temp
         globalMounts:
           - path: /temp
