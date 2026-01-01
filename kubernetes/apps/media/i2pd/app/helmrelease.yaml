@@ -60,7 +60,7 @@ spec:
           # io.cilium/lb-ipam-ips: ${SECRET_I2P_SVC}
         ports:
           http:
-            port: 7070
+            port: &port 7070
           httpproxy:
             port: 4444
           socksproxy:
