@@ -1,0 +1,13 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "nfs-csi"
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: ${SECRET_NFS_SVC}
+  share: /
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions: ["hard", "noatime"]

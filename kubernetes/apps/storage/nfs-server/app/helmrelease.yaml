@@ -66,12 +66,6 @@ spec:
           exports: |-
             /export *(rw,fsid=0,crossmnt,all_squash,anonuid=1000,anongid=1000,insecure,no_subtree_check)
     persistence:
-      exports:
-        type: configMap
-        name: nfs-exports
-        globalMounts:
-          - path: /etc/exports
-            subPath: exports
       fake-export:
         type: emptyDir
         globalMounts:
