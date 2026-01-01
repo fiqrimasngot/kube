@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: speedtest-exporter
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/miguelndecarvalho/speedtest-exporter
+              tag: v3.5.4
+            # env:
+            #   SPEEDTEST_SERVER: "10292"
+            resources:
+              requests:
+                cpu: 15m
+                memory: 50M
+              limits:
+                memory: 100M
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 9798
+
+    serviceMonitor:
+      main:
+        serviceName: speedtest-exporter
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 30m
+            scrapeTimeout: 1m

@@ -71,10 +71,10 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /export
-      paperless:
+      doc:
         existingClaim: doc
         globalMounts:
-          - path: /export/paperless
+          - path: /export/doc
       immich:
         existingClaim: photos
         globalMounts:

@@ -1,0 +1,156 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrepository-source-v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: prometheus-community
+spec:
+  type: oci
+  interval: 5m
+  url: oci://ghcr.io/prometheus-community/charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app blackbox-exporter
+spec:
+  interval: 30m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: prometheus-blackbox-exporter
+      version: 11.6.1
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+  values:
+    fullnameOverride: *app
+    ingress:
+      enabled: true
+      className: internal
+      hosts:
+        - host: &host "blackbox.${SECRET_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+
+    allowIcmp: true
+    pspEnabled: false
+    podSecurityContext:
+      sysctls:
+        - name: net.ipv4.ping_group_range
+          value: "1000 1000"
+
+    # extraArgs:
+    #   - "--log.level=debug"
+
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    # Add NET_RAW to enable ICMP
+        add: ["NET_RAW"]
+
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+            follow_redirects: true
+            preferred_ip_protocol: "ip4"
+
+        icmp:
+          prober: icmp
+          timeout: 30s
+          icmp:
+            preferred_ip_protocol: "ip4"
+
+        dns_public:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "www.google.com"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "www\\.google\\.com\\.\\t.*\\tIN\\tA\\t.*"
+
+        dns_private:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "radarr.${SECRET_DOMAIN}"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "radarr\\.${SECRET_DOMAIN}\\.\\t.*\\tIN\\tA\\t.*"
+
+
+        dns_ad_blocking:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "googleadservices.com"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "googleadservices\\.com\\.\\t.*\\tIN\\tA\\t0\\.0\\.0\\.0"
+
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 2m
+        scrapeTimeout: 30s
+      targets:
+        # Nodes
+        - module: icmp
+          name: k8s-0-icmp
+          url: 10.32.1.51
+        # - module: icmp
+        #   name: control-02-icmp
+        #   url: control-02.home
+
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+        # - alert: BlackboxSslCertificateWillExpireSoon
+        #   expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
+        #   for: 5m
+        #   labels:
+        #     severity: critical
+        #   annotations:
+        #     description: |-
+        #       The SSL certificate for {{"{{ $labels.target }}"}} will expire in less than 3 days
+        # - alert: BlackboxSslCertificateExpired
+        #   expr: probe_ssl_earliest_cert_expiry - time() <= 0
+        #   for: 5m
+        #   labels:
+        #     severity: critical
+        #   annotations:
+        #     description: |-
+        #       The SSL certificate for {{"{{ $labels.target }}"}} has expired
+        - alert: BlackboxProbeFailed
+          expr: probe_success == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            description: |-
+              The host {{"{{ $labels.target }}"}} is currently unreachable
