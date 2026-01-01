@@ -79,6 +79,10 @@ spec:
         existingClaim: doc
         globalMounts:
           - path: /export/paperless
+      vault:
+        existingClaim: backups
+        globalMounts:
+          - path: /export/backups
       immich:
         existingClaim: photos
         globalMounts:
