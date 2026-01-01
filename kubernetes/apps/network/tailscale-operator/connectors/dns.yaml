@@ -1,0 +1,11 @@
+---
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: ts-dns-cidrs
+spec:
+  hostname: ts-dns-cidrs
+  exitNode: true
+  subnetRouter:
+    advertiseRoutes:
+      - "${SECRET_PIHOLE_SVC}/32"

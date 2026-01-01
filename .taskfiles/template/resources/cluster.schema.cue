@@ -67,6 +67,11 @@ import (
 	immich_jwt_secret: string & !=""
 	grafana_client_id: string & !=""
 	grafana_client_secret: string & !=""
+	tailscale_client_id: string & !=""
+	tailscale_client_secret: string & !=""
+	smtp_relay_server: string & !=""
+	smtp_relay_username: string & !=""
+	smtp_relay_password: string & !=""
 }
 
 #Config

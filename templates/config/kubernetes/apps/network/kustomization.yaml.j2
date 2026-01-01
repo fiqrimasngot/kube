@@ -5,6 +5,7 @@ namespace: network
 
 components:
   - ../../components/sops
+  - ../../components/repos
 
 resources:
   - ./namespace.yaml
@@ -13,3 +14,5 @@ resources:
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./pihole/ks.yaml
+  - ./smtp-relay/ks.yaml
+  - ./tailscale-operator/ks.yaml
