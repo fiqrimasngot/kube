@@ -108,7 +108,7 @@ spec:
           insecure: false
 
     gateway:
-      replicas: 2
+      replicas: 1
       enabled: true
       image:
         registry: ghcr.io
@@ -119,14 +119,14 @@ spec:
         rollingUpdate:
           maxUnavailable: 50%
           maxSurge: 50%
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: loki
-              app.kubernetes.io/component: gateway
+      # topologySpreadConstraints:
+      #   - maxSkew: 1
+      #     topologyKey: kubernetes.io/hostname
+      #     whenUnsatisfiable: DoNotSchedule
+      #     labelSelector:
+      #       matchLabels:
+      #         app.kubernetes.io/name: loki
+      #         app.kubernetes.io/component: gateway
 
       ingress:
         enabled: true
