@@ -60,12 +60,13 @@ spec:
               allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
               privileged: true
-    configMaps:
-      nfs-exports:
-        data:
-          exports: |-
-            /export *(rw,fsid=0,sync,no_subtree_check,no_auth_nlm,insecure,no_root_squash)
     persistence:
+      exports:
+        type: configMap
+        name: nfs-exports
+        globalMounts:
+          - path: /etc/exports
+            subPath: exports
       fake-export:
         type: emptyDir
         globalMounts:

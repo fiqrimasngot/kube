@@ -5,3 +5,4 @@ resources:
   - ./helmrelease.yaml
   - ./pv.yaml
   - ./pvc.yaml
+  - ./exports.yaml
