@@ -71,10 +71,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /export
-      media:
-        existingClaim: media
-        globalMounts:
-          - path: /export/media
       paperless:
         existingClaim: doc
         globalMounts:
@@ -83,3 +79,7 @@ spec:
         existingClaim: photos
         globalMounts:
           - path: /export/immich
+      media:
+        existingClaim: media
+        globalMounts:
+          - path: /export/media
