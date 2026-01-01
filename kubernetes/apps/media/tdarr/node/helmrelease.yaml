@@ -1,0 +1,116 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# NOTE: GPU nodes are DISABLED via HPA (min/max replicas = 0)
+# Tesla P100 GPUs lack NVENC hardware encoding support
+# All transcoding is done by CPU nodes instead
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tdarr-node
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      tdarr-node:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # Replicas managed by HPA - don't set here
+        # Replicas managed by HPA - don't set here
+        strategy: RollingUpdate
+        pod:
+          nodeSelector:
+            nvidia.feature.node.kubernetes.io/gpu: "true"
+        containers:
+          app: &node
+            image:
+              repository: ghcr.io/haveagitgat/tdarr_node
+              tag: 2.58.02@sha256:62e14509bc19dea9b6f5dc85d0942163b6fa240d780a53eb590d894d46c9e1f2
+            envFrom:
+              - configMapRef:
+                  name: tdarr-config
+                  optional: true
+            env:
+              TZ: ${TIME_ZONE}
+              PGID: 140
+              PUID: 1000
+              # Tdarr Server connection
+              serverIP: tdarr.media
+              serverPort: "8266"
+              # GPU configuration
+              NVIDIA_DRIVER_CAPABILITIES: all
+              NVIDIA_VISIBLE_DEVICES: all
+              # Node identification
+              nodeName: "GPU-$(POD_NAME)"
+              nodeID: "GPU-$(POD_NAME)"
+              # Node configuration
+              inContainer: "true"
+              ffmpegVersion: "7"
+              # Performance settings
+              nodeIP: "0.0.0.0"
+              nodePort: "8267"
+
+              # Worker configuration for GPU nodes
+              transcodegpuWorkers: "1"  # Use GPU for transcoding
+              transcodecpuWorkers: "0"  # Don't use CPU for transcoding on GPU nodes
+              healthcheckgpuWorkers: "1"  # Use GPU for health checks
+              healthcheckcpuWorkers: "0"  # Don't use CPU for health checks on GPU nodes
+              pollInterval: "2000"  # Poll every 2 seconds
+              startPaused: "false"  # Start processing immediately
+              maxLogSizeMB: "10"  # Log size limit
+              logLevel: "INFO"
+              priority: "-1"
+
+              POD_NAME:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+    defaultPodOptions:
+      runtimeClassName: nvidia
+      priorityClassName: tdarr-priority  # Use lower priority for batch processing
+      # nodeSelector:
+      #   kubernetes.io/hostname: "k3s-2"
+    service:
+      app:
+        controller: tdarr-node
+        ports:
+          server:
+            enabled: true
+            protocol: TCP
+            port: 8266
+
+    persistence:
+      movies:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /movies
+        # globalMounts:
+        #   - path: /media/movies
+      tv:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /tv
+        # globalMounts:
+        #   - path: /media/tv
+      music:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /music
+        # globalMounts:
+        #   - path: /media/music
+      transcode:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /temp
+        globalMounts:
+          - path: /temp

@@ -67,8 +67,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [10000]
         seccompProfile: { type: RuntimeDefault }
-      # nodeSelector:
-      #   nvidia.feature.node.kubernetes.io/gpu: "true"
+    #   nodeSelector:
+    #     kubernetes.io/hostname: "k3s-2"
     service:
       app:
         controller: radarr
@@ -86,17 +86,26 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/description: "Movie Request Management"
+          gethomepage.dev/widget.type: "{{ .Release.Name }}"
+          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          # gethomepage.dev/widget.key: "${RADARR_API}"
+          gethomepage.dev/widget.enableQueue: "true"
     persistence:
       config:
         existingClaim: *app
       tmp:
         type: emptyDir
-      # movies:
-      #   existingClaim: dump
-      #   globalMounts:
-      #     - path: /movies
-      #       subPath: movies
-      # downloads:
-      #   type: nfs
-      #   server: ${SECRET_NFS_SVC}
-      #   path: ${SECRET_NFS_MNT}/Downloads
+      movies:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /movies
+      downloads:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /downloads

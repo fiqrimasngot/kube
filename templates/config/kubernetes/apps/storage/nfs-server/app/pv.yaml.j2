@@ -2,23 +2,87 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: minio-pv
+  name: media-pv
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   capacity:
     storage: "4398046511104"
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: minio
-    namespace: storage
+    name: media
+    namespace: media
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
     volumeAttributes:
       openebs.io/poolname: k8s-0-library
-    volumeHandle: backups
+    volumeHandle: media
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-k8s-0-library
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: doc-pv
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: "4398046511104"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: doc
+    namespace: default
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: k8s-0-library
+    volumeHandle: doc
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-k8s-0-library
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: photos-pv
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: "4398046511104"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: photos
+    namespace: media
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: k8s-0-library
+    volumeHandle: photos
   nodeAffinity:
     required:
       nodeSelectorTerms:

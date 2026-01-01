@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2beta2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app immich-server
+spec:
+  interval: 15m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      main:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          01-init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 17.4
+              pullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: immich-secret
+        containers:
+          immich-server:
+            image:
+              repository: ghcr.io/immich-app/immich-server
+              tag: v2.3.1
+              pullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: immich-secret
+              - configMapRef:
+                  name: immich-config
+            resources:
+              requests:
+                nvidia.com/gpu: 1
+              limits:
+                nvidia.com/gpu: 1
+    service:
+      immich-server:
+        controller: main
+        ports:
+          http:
+            port: &port 2283
+    route:
+      immich-server:
+        hostnames: ["photos.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: immich-server
+                port: *port
+        annotations:
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Photo storage
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: Immich
+          gethomepage.dev/icon: sh-immich
+          # gethomepage.dev/widget.url: "hhttp://immich-server.media.svc.cluster.local:2283"
+          # gethomepage.dev/widget.type: immich
+          # gethomepage.dev/widget.key: "${IMMICH_API}"
+          # gethomepage.dev/widget.version: "2"
+          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "1g"
+          nginx.ingress.kubernetes.io/upstream-hash-by: "$client_ip"
+          # external-dns.alpha.kubernetes.io/cloudflare-custom-hostname: &host photos.${SECRET_DOMAIN}
+    persistence:
+      data:
+        existingClaim: backups
+
+      library:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /immich
+        globalMounts:
+          - path: /usr/src/app/upload

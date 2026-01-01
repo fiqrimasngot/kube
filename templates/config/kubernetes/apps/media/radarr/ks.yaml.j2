@@ -4,23 +4,26 @@ kind: Kustomization
 metadata:
   name: &app radarr
 spec:
-  interval: 1h
+  targetNamespace: media
   path: ./kubernetes/apps/media/radarr/app
-  components:
-    - ../../../../components/volsync
-  postBuild:
-    substitute:
-      APP: *app
-      APP_UID: "568"
-      APP_GID: "568"
-      VOLSYNC_CAPACITY: 5Gi
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: media
-  wait: false
+  wait: true
+  components:
+    - ../../../../components/volsync
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+    substitute:
+      APP: *app
+      APP_UID: "568"
+      APP_GID: "568"
+      VOLSYNC_CAPACITY: 5Gi
+      # VOLSYNC_STORAGECLASS: longhorn
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m

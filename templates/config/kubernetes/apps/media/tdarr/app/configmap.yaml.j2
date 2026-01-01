@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/configmap.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tdarr-config
+data:
+  # FFmpeg settings
+  FFMPEG_PATH: "/usr/local/bin/ffmpeg"
+  HANDBRAKE_PATH: "/usr/local/bin/HandBrakeCLI"
+
+  # Performance tuning - Default values (can be overridden per node type)
+  NODE_WORKER_LIMIT: "2"  # Default workers per node
+  NODE_CONCURRENT_LIMIT: "1"  # Concurrent jobs per worker (keep at 1 for stability)
+
+  # File handling
+  SKIP_TRANSCODE_AFTER_ATTEMPTS: "3"  # Skip files after N failed attempts
+  FILE_SIZE_LIMIT_GB: "100"  # Skip files larger than this
+
+  # Quality settings
+  DEFAULT_QUALITY_CRF: "22"  # CRF for H.265 encoding
+  DEFAULT_PRESET: "medium"  # Encoding preset (ultrafast, fast, medium, slow, slower)
+
+  # Language preferences
+  PREFERRED_AUDIO_LANG: "eng"
+  PREFERRED_SUB_LANG: "eng"
+
+  # Container preferences
+  PREFERRED_CONTAINER: "mkv"  # Default output container
+
+  # Worker Configuration - GPU Nodes
+  GPU_TRANSCODE_WORKERS: "1"  # GPU transcode workers per node
+  GPU_HEALTHCHECK_WORKERS: "1"  # GPU health check workers per node
+  GPU_CPU_TRANSCODE_WORKERS: "0"  # CPU workers on GPU nodes (set to 0)
+  GPU_CPU_HEALTHCHECK_WORKERS: "0"  # CPU health check on GPU nodes (set to 0)
+
+  # Worker Configuration - CPU Nodes
+  CPU_TRANSCODE_WORKERS: "2"  # CPU transcode workers per node
+  CPU_HEALTHCHECK_WORKERS: "1"  # CPU health check workers per node
+
+  # Node Performance Settings
+  NODE_POLL_INTERVAL: "2000"  # How often nodes poll for work (ms)
+  NODE_START_PAUSED: "false"  # Whether nodes start paused
+  NODE_MAX_LOG_SIZE: "10"  # Max log size in MB per node
+
+  # Path Configuration
+  # Both server and nodes mount media at /safe and transcode at /temp
+  # No path translation needed in our setup
+  PATH_TRANSLATORS: "[]"
+
+  # Priority and logging
+  NODE_PRIORITY: "-1"  # Default priority (-10 to 10)
+  LOG_LEVEL: "INFO"  # Log verbosity (DEBUG, INFO, WARN, ERROR)

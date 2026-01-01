@@ -76,7 +76,15 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /export
-      # minio:
-      #   existingClaim: minio
-      #   globalMounts:
-      #     - path: /export/minio
+      media:
+        existingClaim: media
+        globalMounts:
+          - path: /export/media
+      paperless:
+        existingClaim: doc
+        globalMounts:
+          - path: /export/paperless
+      immich:
+        existingClaim: photos
+        globalMounts:
+          - path: /export/immich

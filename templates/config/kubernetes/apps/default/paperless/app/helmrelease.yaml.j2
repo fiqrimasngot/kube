@@ -125,32 +125,32 @@ spec:
 
     persistence:
      backup:
-       existingClaim: *app
-     # data:
-     #   enabled: true
-     #   globalMounts:
-     #     - path: /usr/src/paperless/data
-     #   type: nfs
-     #   server: ${SECRET_NFS_SVC}
-     #   path: "${SECRET_NFS_MNT}/paperless/data"
-     # media:
-     #   enabled: true
-     #   globalMounts:
-     #     - path: /usr/src/paperless/media
-     #   type: nfs
-     #   server: ${SECRET_NFS_SVC}
-     #   path: "${SECRET_NFS_MNT}/paperless/media"
-     # consume:
-     #   enabled: true
-     #   globalMounts:
-     #     - path: /usr/src/paperless/consume
-     #   type: nfs
-     #   server: ${SECRET_NFS_SVC}
-     #   path: "${SECRET_NFS_MNT}/paperless/incoming"
-     # export:
-     #   enabled: true
-     #   globalMounts:
-     #     - path: /usr/src/paperless/export
-     #   type: nfs
-     #   server: ${SECRET_NFS_SVC}
-     #   path: "${SECRET_NFS_MNT}/paperless/export"
+       existingClaim: backups
+     data:
+       enabled: true
+       globalMounts:
+         - path: /usr/src/paperless/data
+       type: nfs
+       server: ${SECRET_NFS_SVC}
+       path: "/paperless/data"
+     media:
+       enabled: true
+       globalMounts:
+         - path: /usr/src/paperless/media
+       type: nfs
+       server: ${SECRET_NFS_SVC}
+       path: "/paperless/media"
+     consume:
+       enabled: true
+       globalMounts:
+         - path: /usr/src/paperless/consume
+       type: nfs
+       server: ${SECRET_NFS_SVC}
+       path: "/paperless/incoming"
+     export:
+       enabled: true
+       globalMounts:
+         - path: /usr/src/paperless/export
+       type: nfs
+       server: ${SECRET_NFS_SVC}
+       path: "/paperless/export"
