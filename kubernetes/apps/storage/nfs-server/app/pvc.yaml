@@ -4,6 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: media
 spec:
+  volumeName: media-pv
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
@@ -15,6 +16,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: doc
 spec:
+  volumeName: doc-pv
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
@@ -26,6 +28,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: photos
 spec:
+  volumeName: photos-pv
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
