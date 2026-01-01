@@ -63,6 +63,7 @@ import (
 	smtp_relay_server: string & !=""
 	smtp_relay_username: string & !=""
 	smtp_relay_password: string & !=""
+	nfs_svc: net.IPv4
 }
 
 #Config
