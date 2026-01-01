@@ -7,16 +7,16 @@ components:
   - ../../components/repos
 resources:
   - ./namespace.yaml
-  # - ./bazarr/ks.yaml
-  # - ./flaresolverr/ks.yaml
-  # - ./freshrss/ks.yaml
-  # - ./ghost/ks.yaml
+  - ./bazarr/ks.yaml
+  - ./flaresolverr/ks.yaml
+  - ./freshrss/ks.yaml
+  - ./ghost/ks.yaml
   - ./immich/ks.yaml
-  # - ./jellyfin/ks.yaml
-  # - ./jellyseerr/ks.yaml
-  # - ./prowlarr/ks.yaml
-  # - ./sabnzbd/ks.yaml
-  # - ./tdarr/ks.yaml
-  # - ./lidarr/ks.yaml
-  # - ./radarr/ks.yaml
-  # - ./sonarr/ks.yaml
+  - ./jellyfin/ks.yaml
+  - ./jellyseerr/ks.yaml
+  - ./prowlarr/ks.yaml
+  - ./sabnzbd/ks.yaml
+  - ./tdarr/ks.yaml
+  - ./lidarr/ks.yaml
+  - ./radarr/ks.yaml
+  - ./sonarr/ks.yaml
