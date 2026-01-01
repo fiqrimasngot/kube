@@ -64,7 +64,6 @@ import (
 	smtp_relay_username: string & !=""
 	smtp_relay_password: string & !=""
 	nfs_svc: net.IPv4
-	postgres_svc: net.IPv4
 	immich_jwt_secret: string & !=""
 }
 

@@ -72,9 +72,8 @@ spec:
 
     persistence:
       library:
-        type: nfs
-        server: ${SECRET_NFS_SVC}
-        path: /immich
+        enabled: true
+        existingClaim: immich
         globalMounts:
           - path: /usr/src/app/upload
       cache:
