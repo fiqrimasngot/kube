@@ -65,6 +65,8 @@ import (
 	smtp_relay_password: string & !=""
 	nfs_svc: net.IPv4
 	immich_jwt_secret: string & !=""
+	grafana_client_id: string & !=""
+	grafana_client_secret: string & !=""
 }
 
 #Config

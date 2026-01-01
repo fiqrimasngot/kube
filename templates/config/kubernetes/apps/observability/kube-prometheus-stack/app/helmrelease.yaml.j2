@@ -1,0 +1,773 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta1.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  interval: 30m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      version: 80.4.1
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    kubeApiServer:
+      enabled: true
+      serviceMonitor:
+        selector:
+          k8s-app: kube-apiserver
+        metricRelabelings:
+          # Drop high cardinality labels by onedr0p
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
+    kubeEtcd:
+      enabled: true
+      endpoints:
+        - 10.32.1.23
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+      serviceMonitor:
+        scheme: http
+    kubeControllerManager:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        scheme: https
+        selector:
+          k8s-app: kube-controller-manager
+    kubeScheduler:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        scheme: https
+        selector:
+          k8s-app: kube-scheduler
+    kubeProxy:
+      enabled: false
+    coreDns:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        selector:
+          k8s-app: kube-dns
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          # Drop high cardinality labels
+          - action: labeldrop
+            regex: (uid)
+          - action: labeldrop
+            regex: (id|name)
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+      # endpoints:
+      #   - 10.32.1.23
+      # service:
+      #   enabled: true
+      #   port: 10250
+      #   targetPort: 10250
+    nodeExporter:
+      serviceMonitor:
+        relabelings:
+          - action: replace
+            regex: (.*)
+            replacement: $1
+            sourceLabels:
+              - __meta_kubernetes_pod_node_name
+            targetLabel: kubernetes_node
+    kubeStateMetrics:
+      enabled: true
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
+    kube-state-metrics:
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
+      fullnameOverride: kube-state-metrics
+      metricLabelsAllowlist:
+        - pods=[*]
+        - deployments=[*]
+        - persistentvolumeclaims=[*]
+      rbac:
+        extraRules:
+          - apiGroups:
+              - source.toolkit.fluxcd.io
+              - kustomize.toolkit.fluxcd.io
+              - helm.toolkit.fluxcd.io
+              - notification.toolkit.fluxcd.io
+              - image.toolkit.fluxcd.io
+            resources:
+              - gitrepositories
+              - buckets
+              - helmrepositories
+              - helmcharts
+              - ocirepositories
+              - kustomizations
+              - helmreleases
+              - alerts
+              - providers
+              - receivers
+              - imagerepositories
+              - imagepolicies
+              - imageupdateautomations
+            verbs: ["list", "watch"]
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: kustomize.toolkit.fluxcd.io
+                  version: v1
+                  kind: Kustomization
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux Kustomization resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      revision: [status, lastAppliedRevision]
+                      source_name: [spec, sourceRef, name]
+              - groupVersionKind:
+                  group: helm.toolkit.fluxcd.io
+                  version: v2
+                  kind: HelmRelease
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux HelmRelease resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      revision: [status, history, "0", chartVersion]
+                      chart_name: [status, history, "0", chartName]
+                      chart_app_version: [status, history, "0", appVersion]
+                      chart_ref_name: [spec, chartRef, name]
+                      bucket_name: [spec, bucketName]
+              - groupVersionKind:
+                  group: source.toolkit.fluxcd.io
+                  version: v1
+                  kind: HelmRepository
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux HelmRepository resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      revision: [status, artifact, revision]
+                      url: [spec, url]
+              - groupVersionKind:
+                  group: source.toolkit.fluxcd.io
+                  version: v1
+                  kind: HelmChart
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux HelmChart resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      revision: [status, artifact, revision]
+                      chart_name: [spec, chart]
+                      chart_version: [spec, version]
+              - groupVersionKind:
+                  group: source.toolkit.fluxcd.io
+                  version: v1beta2
+                  kind: OCIRepository
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux OCIRepository resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      revision: [status, artifact, revision]
+                      url: [spec, url]
+              - groupVersionKind:
+                  group: notification.toolkit.fluxcd.io
+                  version: v1beta3
+                  kind: Alert
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux Alert resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      suspended: [spec, suspend]
+              - groupVersionKind:
+                  group: notification.toolkit.fluxcd.io
+                  version: v1beta3
+                  kind: Provider
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux Provider resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      suspended: [spec, suspend]
+              - groupVersionKind:
+                  group: notification.toolkit.fluxcd.io
+                  version: v1
+                  kind: Receiver
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux Receiver resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      webhook_path: [status, webhookPath]
+              - groupVersionKind:
+                  group: image.toolkit.fluxcd.io
+                  version: v1beta2
+                  kind: ImageRepository
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux ImageRepository resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      image: [spec, image]
+              - groupVersionKind:
+                  group: image.toolkit.fluxcd.io
+                  version: v1beta2
+                  kind: ImagePolicy
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux ImagePolicy resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      source_name: [spec, imageRepositoryRef, name]
+              - groupVersionKind:
+                  group: image.toolkit.fluxcd.io
+                  version: v1beta2
+                  kind: ImageUpdateAutomation
+                metricNamePrefix: gotk
+                metrics:
+                  - name: "resource_info"
+                    help: "The current state of a Flux ImageUpdateAutomation resource."
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          name: [metadata, name]
+                    labelsFromPath:
+                      exported_namespace: [metadata, namespace]
+                      ready: [status, conditions, "[type=Ready]", status]
+                      suspended: [spec, suspend]
+                      source_name: [spec, sourceRef, name]
+    prometheus-node-exporter:
+      # fullnameOverride: node-exporter
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
+    grafana:
+      assertNoLeakedSecrets: false
+      envFromSecret: grafana-admin-secret
+      env:
+        GF_EXPLORE_ENABLED: true
+        GF_DATE_FORMATS_USE_BROWSER_LOCALE: true
+        GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel
+        GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
+        GF_SERVER_ROOT_URL: https://grafana.${SECRET_DOMAIN}
+      defaultDashboardsTimezone: browser
+      deploymentStrategy:
+        type: Recreate
+      plugins:
+        - grafana-piechart-panel
+        - grafana-clock-panel
+        - grafana-piechart-panel
+        - grafana-worldmap-panel
+        - natel-discrete-panel
+        - pr0ps-trackmap-panel
+        - vonage-status-panel
+      serviceMonitor:
+        enabled: true
+      route:
+        main:
+          enabled: true
+          parentRefs:
+            - namespace: network
+              name: envoy-external
+          hostnames:
+            - grafana.${SECRET_DOMAIN}
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: Grafana
+          gethomepage.dev/icon: sh-grafana
+          gethomepage.dev/description: "Monitoring"
+      grafana.ini:
+        auth.generic_oauth:
+          name: Authentik
+          enabled: true
+          client_id: $__env{openid-config-client-id}
+          client_secret: $__env{openid-config-client-secret}
+          scopes: "openid email profile"
+          auth_url: "https://auth.${SECRET_DOMAIN}/application/o/authorize/"
+          token_url: "https://auth.${SECRET_DOMAIN}/application/o/token/"
+          api_url: "https://auth.${SECRET_DOMAIN}/application/o/userinfo/"
+          role_attribute_path: |
+            contains(groups[*], 'Grafana Admins') && 'Admin' || 'Viewer'
+        auth:
+          signout_redirect_url: "https://auth.${SECRET_DOMAIN}/application/o/grafana/end-session/"
+          oauth_auto_login: true
+        users:
+          viewers_can_edit: true
+        auth.anonymous:
+          enabled: false
+          org_role: Viewer
+        auth.basic:
+          enabled: false
+        feature_toggles:
+          autoMigrateOldPanels: true
+      sidecar:
+        logLevel: WARN
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+          label: grafana-dashboard
+          labelValue: 'true'
+          provider:
+            foldersFromFilesStructure: true
+      datasources:
+        datasource.yaml:
+          apiVersion: 1
+          deleteDatasources:
+            - name: Loki
+              orgId: 1
+            - name: Alertmanager
+              orgId: 1
+            - name: Prometheus
+              orgId: 1
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              access: proxy
+              url: http://kube-prometheus-stack-prometheus.observability:9090
+              isDefault: true
+              uid: Prometheus
+            - name: Loki
+              editable: false
+              orgId: 1
+              type: loki
+              url: http://loki-gateway.observability.svc.cluster.local:80
+              version: 1
+              jsonData:
+                timeout: 60
+                maxLines: 200
+            - name: Alertmanager
+              type: alertmanager
+              access: proxy
+              url: http://kube-prometheus-stack-alertmanager.observability:9093
+              jsonData:
+                implementation: prometheus
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: "default"
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+            - name: network
+              orgId: 1
+              folder: network
+              type: file
+              disableDeletion: true
+              editable: false
+              allowUiUpdates: false
+              options:
+                path: /var/lib/grafana/dashboards/network
+            - name: "kubernetes"
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/kubernetes
+            - type: file
+              name: Cluster
+              folder: Cluster
+              editable: true
+              allowUiUpdates: true
+              disableDeletion: false
+              options:
+                path: /tmp/dashboards/Cluster
+                foldersFromFilesStructure: true
+      dashboards:
+        default:
+          spegel:
+            # renovate: depName="Spegel"
+            gnetId: 18089
+            revision: 1
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus
+          nginx-ingress-controller:
+            gnetId: 14314
+            revision: 2
+            datasource: "Prometheus"
+          cloudflared:
+            # renovate: depName="Cloudflare Tunnels (cloudflared)"
+            gnetId: 17457 # https://grafana.com/grafana/dashboards/17457?tab=revisions
+            revision: 6
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/13502-minio-dashboard/
+          blackbox:
+            gnetId: 13659
+            revision: 1
+            datasource: Prometheus
+          minio:
+            gnetId: 13502
+            revision: 19
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/1860-node-exporter-full/
+          node-exporter-full:
+            gnetId: 1860
+            revision: 29
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/5342-ceph-pools/
+          cert-manager:
+            url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/cert-manager/dashboards/overview.json
+            datasource: Prometheus
+          flux-cluster:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/cluster.json
+            datasource: Prometheus
+          flux-control-plane:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/control-plane.json
+            datasource: Prometheus
+          flux-logs:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/logs.json
+            datasource: Prometheus
+          # Ref: https://grafana.com/grafana/dashboards/21356-volsync-dashboard/
+          volsync:
+            gnetId: 21356
+            revision: 3
+            datasource: Prometheus
+        kubernetes:
+          kubernetes-api-server:
+            # renovate: depName="Kubernetes / System / API Server"
+            gnetId: 15761
+            revision: 14
+            datasource: Prometheus
+          kubernetes-coredns:
+            # renovate: depName="Kubernetes / System / CoreDNS"
+            gnetId: 15762
+            revision: 13
+            datasource: Prometheus
+          kubernetes-global:
+            # renovate: depName="Kubernetes / Views / Global"
+            gnetId: 15757
+            revision: 31
+            datasource: Prometheus
+          cloudnative-pg:
+            url: https://raw.githubusercontent.com/cloudnative-pg/grafana-dashboards/main/charts/cluster/grafana-dashboard.json
+            datasource: Prometheus
+          kubernetes-namespaces:
+            # renovate: depName="Kubernetes / Views / Namespaces"
+            gnetId: 15758
+            revision: 27
+            datasource: Prometheus
+          kubernetes-nodes:
+            # renovate: depName="Kubernetes / Views / Nodes"
+            gnetId: 15759
+            revision: 19
+            datasource: Prometheus
+          kubernetes-pods:
+            # renovate: depName="Kubernetes / Views / Pods"
+            gnetId: 15760
+            revision: 22
+            datasource: Prometheus
+          node-exporter-full:
+            # renovate: depName="Node Exporter Full"
+            gnetId: 1860
+            revision: 37
+            datasource: Prometheus
+          node-exporter-windows:
+            # renovate: depName="Node Exporter Full"
+            gnetId: 15620
+            revision: 3
+            datasource: Prometheus
+          node-feature-discovery:
+            url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
+            datasource: Prometheus
+          qbitorrent:
+            url: https://raw.githubusercontent.com/esanchezm/prometheus-qbittorrent-exporter/master/grafana/dashboard.json
+            datasource:
+              - { name: DS_PROMETHEUS, value: Prometheus }
+          pfsense:
+            url: https://raw.githubusercontent.com/fiqrimasngot/k3s/refs/heads/main/kubernetes/apps/observability/kube-prometheus-stack/app/dashboard/pfsense.json
+            datasource:
+              - { name: DS_PROMETHEUS, value: Prometheus }
+          volsync:
+            # renovate: depName="VolSync Dashboard"
+            gnetId: 21356
+            revision: 3
+            datasource:
+              - { name: DS_PROMETHEUS, value: Prometheus }
+              - { name: VAR_REPLICATIONDESTNAME, value: .*-dst }
+          nvidia-dcgm-exporter:
+            url: https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/refs/heads/main/grafana/dcgm-exporter-dashboard.json
+            datasource: Prometheus
+          dragonfly:
+            url: https://raw.githubusercontent.com/dragonflydb/dragonfly/refs/heads/main/tools/local/monitoring/grafana/provisioning/dashboards/dragonfly.json
+            datasource: Prometheus
+        network:
+          speedtest:
+            datasource: Prometheus
+            gnetId: 13665
+            revision: 1
+          pihole:
+            # renovate: depName="Omada Exporter: Client Insights - Prometheus"
+            gnetId: 10176
+            revision: 3
+            datasource: Prometheus
+          cert-manager:
+            url: https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/cert-manager/dashboards/cert-manager.json
+            datasource: Prometheus
+          cloudflared:
+            # renovate: depName="Cloudflare Tunnels (cloudflared)"
+            gnetId: 17457
+            revision: 6
+            datasource:
+              - { name: DS_PROMETHEUS, value: Prometheus }
+          external-dns:
+            # renovate: depName="External-dns"
+            gnetId: 15038
+            revision: 3
+            datasource: Prometheus
+          flux-cluster:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+            datasource: Prometheus
+          flux-control-plane:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+            datasource: Prometheus
+          miniflux:
+            url: https://raw.githubusercontent.com/miniflux/v2/main/contrib/grafana/dashboard.json
+            datasource: Prometheus
+          nginx:
+            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
+            datasource: Prometheus
+          nginx-request-handling-performance:
+            url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/request-handling-performance.json
+            datasource: Prometheus
+    prometheusOperator:
+      configReloaderCpu: 0
+    prometheus:
+      route:
+        main:
+          enabled: true
+          parentRefs:
+            - namespace: network
+              name: envoy-internal
+          hostnames:
+            - prometheus.${SECRET_DOMAIN}
+
+      prometheusSpec:
+        additionalScrapeConfigs:
+          - job_name: node-exporter
+            static_configs:
+              - targets:
+                  - 10.32.1.1:9100
+                  - 10.32.1.52:9100
+                  - 10.32.1.23:9100
+          # - job_name: node-exporter-openwrt
+          #   static_configs:
+          #     - targets:
+          #         - 192.168.100.1:9101
+        retention: 15d
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 750m
+            memory: 2Gi
+        podMonitorSelector: &selector
+          matchLabels: null
+        probeSelector: *selector
+        ruleSelector: *selector
+        scrapeConfigSelector: *selector
+        serviceMonitorSelector: *selector
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        enableAdminAPI: true
+        walCompression: true
+        enableFeatures:
+          - auto-gomemlimit
+          - memory-snapshot-on-shutdown
+          - new-service-discovery-manager
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              resources:
+                requests:
+                  storage: 50Gi
+    alertmanager:
+      # fullnameOverride: alertmanager
+      # config:
+      #   global:
+      #     resolve_timeout: 5m
+      #   receivers:
+      #     - name: "null"
+      #     - name: "pagerduty"
+      #       pagerduty_configs:
+      #         - service_key: ${PAGERDUTY_KEY}
+      #     - name: dead-mans-switch
+      #       webhook_configs:
+      #         - url: ${HEALTHCHECKS_IO_URL}
+      #   route:
+      #     group_by: ["alertname", "job"]
+      #     group_wait: 1m
+      #     group_interval: 10m
+      #     repeat_interval: 12h
+      #     receiver: "pagerduty"
+      #     routes:
+      #       - receiver: dead-mans-switch
+      #         group_wait: 0s
+      #         group_interval: 5m
+      #         repeat_interval: 5m
+      #         match:
+      #           alertname: "Watchdog"
+      #       - receiver: "null"
+      #         matchers:
+      #           - alertname =~ "InfoInhibitor"
+      #       - receiver: "pagerduty"
+      #         matchers:
+      #           - severity=~"warning|critical|page"
+      #         continue: true
+      route:
+        main:
+          enabled: true
+          parentRefs:
+            - namespace: network
+              name: envoy-internal
+          hostnames:
+            - alert-manager.${SECRET_DOMAIN}
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Alertmanager
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: Alertmanager
+          gethomepage.dev/icon: sh-telegraf
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              resources:
+                requests:
+                  storage: 1Gi
