@@ -74,15 +74,15 @@ spec:
             port: *port
     route:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/description: Subtitle finder
-          gethomepage.dev/group: "{{ title .Release.Namespace }}"
-          gethomepage.dev/name: "{{ title .Release.Name }}"
-          gethomepage.dev/icon: "{{ .Release.Name }}"
-          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
-          gethomepage.dev/widget.type: bazarr
-          gethomepage.dev/widget.key: "${BAZARR_API}"
+        # annotations:
+        #   gethomepage.dev/enabled: "true"
+        #   gethomepage.dev/description: Subtitle finder
+        #   gethomepage.dev/group: "{{ title .Release.Namespace }}"
+        #   gethomepage.dev/name: "{{ title .Release.Name }}"
+        #   gethomepage.dev/icon: "{{ .Release.Name }}"
+        #   gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+        #   gethomepage.dev/widget.type: bazarr
+        #   gethomepage.dev/widget.key: "${BAZARR_API}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
