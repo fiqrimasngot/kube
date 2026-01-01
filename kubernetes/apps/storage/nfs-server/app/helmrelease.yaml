@@ -67,10 +67,10 @@ spec:
         globalMounts:
           - path: /etc/exports
             subPath: exports
-      fake-export:
-        type: emptyDir
-        globalMounts:
-          - path: /export
+      # fake-export:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /export
       media:
         existingClaim: media
         globalMounts:
