@@ -72,6 +72,17 @@ import (
 	smtp_relay_server: string & !=""
 	smtp_relay_username: string & !=""
 	smtp_relay_password: string & !=""
+	searxng_secret: string & !=""
+	action_runner_controller_github_app_id: string & !=""
+	action_runner_controller_github_client_id: string & !=""
+	action_runner_controller_github_installation_id: string & !=""
+	action_runner_controller_github_client_secret: string & !=""
+	action_runner_controller_github_runner_token: string & !=""
+	action_runner_controller_github_webhook_secret_token: string & !=""
+	action_runner_controller_github_private_key: string & !=""
+	open_webui_client_id: string & !=""
+	open_webui_client_secret: string & !=""
+	open_webui_redirect: string & !=""
 }
 
 #Config

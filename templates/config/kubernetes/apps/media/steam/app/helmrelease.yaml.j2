@@ -52,6 +52,11 @@ spec:
               startup: *probe
             securityContext:
               privileged: true
+              seccompProfile:
+                type: Unconfined
+              capabilities:
+                add:
+                  - SYS_PTRACE
             # resources:
             #   requests:
             #     memory: 24G
@@ -61,6 +66,7 @@ spec:
             #     cpu: 6
             #     nvidia.com/gpu: 3
     defaultPodOptions:
+      runtimeClassName: nvidia
       hostNetwork: true
       securityContext:
         fsGroup: 1000
@@ -127,6 +133,8 @@ spec:
       dev:
         type: hostPath
         hostPath: /dev
+        globalMounts:
+          - path: /dev
       proc:
         type: hostPath
         hostPath: /proc

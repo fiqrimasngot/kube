@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app ollama
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  maxHistory: 3
+  install:
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
+  values:
+    controllers:
+      ollama:
+        replicas: 1
+        containers:
+          app:
+            image:
+              repository: docker.io/ollama/ollama
+              tag: 0.13.4
+            env:
+              TZ: ${TIMEZONE}
+              NVIDIA_VISIBLE_DEVICES: all
+              NVIDIA_DRIVER_CAPABILITIES: all
+              OLLAMA_HOST: 0.0.0.0
+              OLLAMA_ORIGINS: "*"
+              OLLAMA_DEBUG: 1
+
+              OLLAMA_MODELS: &modelPath "/models"
+              OLLAMA_KEEP_ALIVE: "24h"
+              OLLAMA_LOAD_TIMEOUT: "600"
+              # Force nvidia runtime instead of default
+              HARDWARE_DEVICE_PATH: "/dev/nvidia0"
+            resources:
+              requests:
+                nvidia.com/gpu: 1
+              limits:
+                memory: 5Gi
+                nvidia.com/gpu: 1
+                # cpu: 500m
+
+
+
+        pod:
+          runtimeClassName: nvidia
+          nodeSelector:
+            nvidia.feature.node.kubernetes.io/gpu: "true"
+    service:
+      app:
+        controller: ollama
+        # type: LoadBalancer
+        # annotations:
+        #   io.cilium/lb-ipam-ips: 192.168.2.85
+        ports:
+          http:
+            port: 11434
+    route:
+      main:
+        hostnames: ["ollama.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: main
+                port: *port
+    persistence:
+      config:
+        existingClaim: ollama
+      models:
+        existingClaim: ollama-model
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "ollama-model"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: ceph-block
