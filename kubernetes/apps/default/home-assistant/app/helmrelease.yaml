@@ -93,16 +93,7 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-            sectionName: http
         rules:
-          - filters:
-              - type: RequestHeaderModifier
-                requestHeaderModifier:
-                  set:
-                    - name: Connection
-                      value: "upgrade"
-                    - name: Upgrade
-                      value: "websocket"
           - backendRefs:
               - name: main
                 port: *port
