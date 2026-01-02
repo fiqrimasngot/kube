@@ -22,5 +22,5 @@ resources:
   # # - ./nextcloud/ks.yaml
   - ./paperless/ks.yaml
   - ./home-assistant/ks.yaml
-  - ./searxng/ks.yaml
+  # - ./searxng/ks.yaml
   - ./web-app/ks.yaml
