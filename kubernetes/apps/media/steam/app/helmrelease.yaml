@@ -113,10 +113,12 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: *homeDir
-      # games:
-      #   existingClaim: steam-library
-      #   globalMounts:
-      #     - path: *gameDir
+      games:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /media/games
+        globalMounts:
+          - path: *gameDir
       dev-shm:
         type: emptyDir
         medium: Memory
