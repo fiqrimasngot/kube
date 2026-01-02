@@ -17,10 +17,8 @@ spec:
         options:
           - name: ndots
             value: "1"
-      # dnsPolicy: ClusterFirstWithHostNet
-      # hostNetwork: true
-      hostNetwork: false
-      dnsPolicy: ClusterFirst
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       automountServiceAccountToken: false
       securityContext:
         runAsUser: 0
@@ -97,8 +95,16 @@ spec:
             namespace: network
             sectionName: http
         rules:
+          - filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set:
+                    - name: Connection
+                      value: "upgrade"
+                    - name: Upgrade
+                      value: "websocket"
           - backendRefs:
-              - name: home-assistant-main
+              - name: main
                 port: *port
       code:
         hostnames: ["coder.${SECRET_DOMAIN}"]
