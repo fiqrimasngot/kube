@@ -94,6 +94,7 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+            sectionName: https
         rules:
           - backendRefs:
               - name: main
@@ -102,9 +103,10 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
+            sectionName: https
         rules:
           - backendRefs:
-              - name: code
+              - name: main
                 port: *port1
       # code:
       #   enabled: true
