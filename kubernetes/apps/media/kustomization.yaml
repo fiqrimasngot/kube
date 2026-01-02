@@ -20,3 +20,4 @@ resources:
   - ./lidarr/ks.yaml
   - ./radarr/ks.yaml
   - ./sonarr/ks.yaml
+  - ./steam/ks.yaml
