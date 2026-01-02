@@ -17,8 +17,10 @@ spec:
         options:
           - name: ndots
             value: "1"
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
+      # dnsPolicy: ClusterFirstWithHostNet
+      # hostNetwork: true
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
       automountServiceAccountToken: false
       securityContext:
         runAsUser: 0
