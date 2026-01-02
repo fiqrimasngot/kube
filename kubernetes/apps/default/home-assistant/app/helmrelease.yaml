@@ -98,7 +98,7 @@ spec:
             sectionName: http
         rules:
           - backendRefs:
-              - name: main
+              - name: home-assistant-main
                 port: *port
       code:
         hostnames: ["coder.${SECRET_DOMAIN}"]
