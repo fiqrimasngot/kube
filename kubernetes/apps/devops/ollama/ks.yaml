@@ -5,7 +5,7 @@ metadata:
   name: &app ollama-backend
 spec:
   targetNamespace: devops
-  path: ./kubernetes/apps/ai/ollama/backend
+  path: ./kubernetes/apps/devops/ollama/backend
   prune: true
   postBuild:
     substituteFrom:
@@ -29,7 +29,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/ai/ollama/ui
+  path: ./kubernetes/apps/devops/ollama/ui
   prune: true
   sourceRef:
     kind: GitRepository
