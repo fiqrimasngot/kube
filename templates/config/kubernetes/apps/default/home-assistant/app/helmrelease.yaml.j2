@@ -93,20 +93,20 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-        rules:
-          - backendRefs:
-              - name: main
-                port: *port
+        # rules:
+        #   - backendRefs:
+        #       - name: main
+        #         port: *port
       code:
         hostnames: ["coder.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
             namespace: network
             sectionName: http
-        rules:
-          - backendRefs:
-              - name: main
-                port: *port1
+        # rules:
+        #   - backendRefs:
+        #       - name: main
+        #         port: *port1
       # code:
       #   enabled: true
         # className: envoy-internal
