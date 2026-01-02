@@ -47,16 +47,11 @@ spec:
           http:
             port: &port 3000
     route:
-      main:
+      app:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
             namespace: network
-            sectionName: https
-        rules:
-          - backendRefs:
-              - name: app
-                port: *port
     persistence:
       config:
         type: configMap

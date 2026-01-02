@@ -45,7 +45,7 @@ spec:
             port: &port 3000
 
     route:
-      main:
+      paperless-ai:
         hostnames: ["paperless-ai.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
@@ -53,7 +53,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: *app
                 port: *port
     persistence:
       data:
