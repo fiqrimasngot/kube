@@ -64,6 +64,7 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+        annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Blender
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
