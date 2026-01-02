@@ -94,11 +94,16 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-            sectionName: https
         rules:
           - backendRefs:
               - name: main
-                port: *port
+      code:
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - name: code
       # code:
       #   enabled: true
         # className: envoy-internal
