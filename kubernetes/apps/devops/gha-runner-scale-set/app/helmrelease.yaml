@@ -106,7 +106,7 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: gha-k3s
+  name: gha-kube
 spec:
   interval: 30m
   chart:
@@ -138,8 +138,8 @@ spec:
       name: actions-runner-controller-auth-secrets
       valuesKey: ACTION_RUNNER_CONTROLLER_GITHUB_PRIVATE_KEY
   values:
-    runnerScaleSetName: gha-k3s
-    githubConfigUrl: https://github.com/fiqrimasngot/k3s
+    runnerScaleSetName: gha-kube
+    githubConfigUrl: https://github.com/fiqrimasngot/kube
     minRunners: 1
     maxRunners: 10
     containerMode:
