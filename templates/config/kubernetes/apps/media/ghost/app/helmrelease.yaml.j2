@@ -63,7 +63,7 @@ spec:
             port: &port 2368
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
