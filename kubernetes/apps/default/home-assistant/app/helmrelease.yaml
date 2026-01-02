@@ -94,7 +94,7 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-            sectionName: https
+            sectionName: http
         rules:
           - backendRefs:
               - name: main
@@ -104,7 +104,7 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-            sectionName: https
+            sectionName: http
         rules:
           - backendRefs:
               - name: main
