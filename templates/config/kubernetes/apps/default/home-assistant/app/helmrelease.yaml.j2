@@ -72,12 +72,12 @@ spec:
         ports:
           http:
             port: &port 8123
-      code:
-        type: ClusterIP
-        controller: main
-        ports:
-          http:
-            port: &port1 8081
+      # code:
+      #   type: ClusterIP
+      #   controller: main
+      #   ports:
+      #     http:
+      #       port: &port1 8081
     route:
       main:
         annotations:
