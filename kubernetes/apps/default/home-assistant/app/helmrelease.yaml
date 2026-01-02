@@ -89,7 +89,6 @@ spec:
           gethomepage.dev/widget.type: homeassistant
           gethomepage.dev/widget.url: http://home-assistant-main.home.svc.cluster.local:8123
           gethomepage.dev/widget.key: "${HA_API}"
-          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hostnames: ["ha.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
