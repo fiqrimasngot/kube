@@ -1,0 +1,127 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app steam
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      app:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          steam:
+            image:
+              repository: josh5/steam-headless
+              tag: latest@sha256:fc2c681b46cec608411dbed0a879c5084a372aec91c16885c050bea9bd355f92
+              pullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: *app
+            env:
+              NAME: SteamHeadless
+              TZ: ${TIMEZONE}
+              HOME_DIR: &homeDir /home/default
+              GAMES_DIR: &gameDir /mnt/games
+
+              MODE: primary
+              WEB_UI_MODE: vnc
+              ENABLE_VNC_AUDIO: false
+              PORT_NOVNC_WEB: &port 8083
+              ENABLE_EVDEV_INPUTS: true
+
+              STEAM_ARGS: -silent
+              ENABLE_SUNSHINE: true
+            probes:
+              liveness: &probe
+                enabled: true
+              readiness: *probe
+              startup: *probe
+            securityContext:
+              privileged: true
+            # resources:
+            #   requests:
+            #     memory: 24G
+            #     cpu: 6
+            #   limits:
+            #     memory: 24G
+            #     cpu: 6
+            #     nvidia.com/gpu: 3
+    defaultPodOptions:
+      hostNetwork: true
+      securityContext:
+        fsGroup: 1000
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+    service:
+      app:
+        controller: app
+        type: LoadBalancer
+        # annotations:
+        #   lbipam.cilium.io/ips: 192.168.20.16, ::ffff:c0a8:1410
+        ports:
+          http:
+            port: *port
+          s-t1:
+            port: 47984
+            protocol: TCP
+          s-t2:
+            port: 47989
+            protocol: TCP
+          sunshine-ui:
+            port: 47990
+          s-t3:
+            port: 48010
+            protocol: TCP
+          s-u1:
+            port: 47998
+            protocol: UDP
+          s-u2:
+            port: 47999
+            protocol: UDP
+          s-u3:
+            port: 48000
+            protocol: UDP
+    route:
+      app:
+        hostnames: ["steam.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      home:
+        existingClaim: *app
+        globalMounts:
+          - path: *homeDir
+      # games:
+      #   existingClaim: steam-library
+      #   globalMounts:
+      #     - path: *gameDir
+      dev-shm:
+        type: emptyDir
+        medium: Memory
+        globalMounts:
+          - path: /dev/shm
+      dev:
+        type: hostPath
+        hostPath: /dev
