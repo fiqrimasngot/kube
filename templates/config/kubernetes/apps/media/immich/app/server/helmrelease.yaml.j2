@@ -40,8 +40,10 @@ spec:
           immich-server:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v2.3.1
+              tag: v2.4.1
               pullPolicy: IfNotPresent
+            env:
+              DB_SKIP_MIGRATIONS: true
             envFrom:
               - secretRef:
                   name: immich-secret
@@ -70,7 +72,6 @@ spec:
               - identifier: immich-server
                 port: *port
         annotations:
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Photo storage
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
