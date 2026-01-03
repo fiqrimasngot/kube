@@ -6,8 +6,8 @@ metadata:
   name: postgres
 spec:
   instances: 1
-  # imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.2-v0.2.0
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.3.0
+  imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.2-v0.2.0
+  # imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.3.0
   primaryUpdateStrategy: unsupervised
   storage:
     size: 10Gi
@@ -17,8 +17,8 @@ spec:
   enableSuperuserAccess: true
   postgresql:
     shared_preload_libraries:
-      # - "vectors.so"
-      - "vchord.so"
+      - "vectors.so"
+      # - "vchord.so"
     parameters:
       max_connections: "600"
       max_slot_wal_keep_size: 5GB
@@ -51,7 +51,7 @@ spec:
       endpointURL: http://minio.storage.svc.cluster.local:9000
       # Note: serverName version needs to be incremented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster postgres-v17
+      serverName: &currentCluster postgres-v2
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg
