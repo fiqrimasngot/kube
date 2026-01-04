@@ -94,3 +94,8 @@ spec:
         path: /immich
         globalMounts:
           - path: /usr/src/app/upload
+      config:
+        type: configMap
+        name: *app
+        globalMounts:
+          - path: /config
