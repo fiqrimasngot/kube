@@ -47,11 +47,11 @@ spec:
                   name: immich-secret
               - configMapRef:
                   name: immich-config
-            # resources:
-            #   requests:
-            #     nvidia.com/gpu: 1
-            #   limits:
-            #     nvidia.com/gpu: 1
+            resources:
+              requests:
+                nvidia.com/gpu: 1
+              limits:
+                nvidia.com/gpu: 1
     service:
       immich-server:
         controller: main
@@ -75,7 +75,7 @@ spec:
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: Immich
           gethomepage.dev/icon: sh-immich
-          # gethomepage.dev/widget.url: "hhttp://immich-server.media.svc.cluster.local:2283"
+          # gethomepage.dev/widget.url: "http://immich-server.media.svc.cluster.local:2283"
           # gethomepage.dev/widget.type: immich
           # gethomepage.dev/widget.key: "${IMMICH_API}"
           # gethomepage.dev/widget.version: "2"
