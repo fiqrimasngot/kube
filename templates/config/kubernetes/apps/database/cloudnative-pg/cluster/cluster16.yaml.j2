@@ -6,7 +6,8 @@ metadata:
   name: postgres
 spec:
   instances: 1
-  imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.2-v0.2.0
+  # imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.2-v0.2.0
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16-0.2.1
   # imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.3.0
   primaryUpdateStrategy: unsupervised
   storage:
@@ -17,8 +18,8 @@ spec:
   enableSuperuserAccess: true
   postgresql:
     shared_preload_libraries:
-      - "vectors.so"
-      # - "vchord.so"
+      # - "vectors.so"
+      - "vchord.so"
     parameters:
       max_connections: "600"
       max_slot_wal_keep_size: 5GB
