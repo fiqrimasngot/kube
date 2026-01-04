@@ -42,8 +42,8 @@ spec:
               repository: ghcr.io/immich-app/immich-server
               tag: v2.4.1
               pullPolicy: IfNotPresent
-            env:
-              DB_SKIP_MIGRATIONS: true
+            # env:
+            #   DB_SKIP_MIGRATIONS: true
             envFrom:
               - secretRef:
                   name: immich-secret
