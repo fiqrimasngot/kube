@@ -43,7 +43,7 @@ spec:
               tag: v2.4.1
               pullPolicy: IfNotPresent
             env:
-              DB_SKIP_MIGRATIONS: true
+              # DB_SKIP_MIGRATIONS: true
             envFrom:
               - secretRef:
                   name: immich-secret
