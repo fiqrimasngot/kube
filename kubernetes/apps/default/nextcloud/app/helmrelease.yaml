@@ -85,6 +85,9 @@ spec:
         nfs:
           server: ${SECRET_NFS_SVC}
           path: /doc/nextcloud
+      extraVolumeMounts:
+      - name: nfs-home
+        mountPath: "/mnt/data/home"
       extraEnv:
         - name: REDIS_HOST
           value: dragonfly.database.svc.cluster.local
