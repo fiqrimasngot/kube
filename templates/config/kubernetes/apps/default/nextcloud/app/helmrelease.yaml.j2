@@ -80,6 +80,11 @@ spec:
           envFrom:
             - secretRef:
                 name: *secret
+      extraVolumes:
+      - name: nfs-home
+        nfs:
+          server: ${SECRET_NFS_SVC}
+          path: /doc/nextcloud
       extraEnv:
         - name: REDIS_HOST
           value: dragonfly.database.svc.cluster.local
