@@ -59,9 +59,9 @@ spec:
   values:
     deploymentAnnotations:
       secret.reloader.stakater.com/reload: &secret nextcloud-secret
-    image:
-      repository: public.ecr.aws/docker/library/nextcloud
-      flavor: fpm-alpine
+    # image:
+    #   repository: public.ecr.aws/docker/library/nextcloud
+    #   flavor: fpm-alpine
     phpClientHttpsFix:
       enabled: true
     nextcloud:
