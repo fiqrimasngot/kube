@@ -220,61 +220,6 @@ spec:
       timeoutSeconds: 5
       failureThreshold: 3
       successThreshold: 1
-    ingress:
-      enabled: true
-      className: external
-      annotations:
-        external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        # external-dns.alpha.kubernetes.io/cloudflare-custom-hostname: *host
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/description: Cloud storage
-        gethomepage.dev/group: Home
-        gethomepage.dev/name: NextCloud
-        gethomepage.dev/icon: sh-nextcloud
-        nginx.ingress.kubernetes.io/enable-cors: "true"
-        nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For"
-        nginx.ingress.kubernetes.io/custom-http-errors: "502,503"
-        nginx.ingress.kubernetes.io/server-snippet: |-
-          server_tokens off;
-          proxy_hide_header X-Powered-By;
-          rewrite ^/.well-known/webfinger /index.php/.well-known/webfinger last;
-          rewrite ^/.well-known/nodeinfo /index.php/.well-known/nodeinfo last;
-          rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
-          rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json;
-          location = /.well-known/carddav {
-            return 301 $scheme://$host/remote.php/dav;
-          }
-          location = /.well-known/caldav {
-            return 301 $scheme://$host/remote.php/dav;
-          }
-          location = /robots.txt {
-            allow all;
-            log_not_found off;
-            access_log off;
-          }
-          location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
-            deny all;
-          }
-          location ~ ^/(?:autotest|occ|issue|indie|db_|console) {
-            deny all;
-          }
-      tls:
-        - hosts:
-            - *host
-    # nginx:
-    #   enabled: true
-    #   image:
-    #     repository: public.ecr.aws/nginx/nginx
-    #   config:
-    #     default: true
-    #   securityContext:
-    #     runAsGroup: 82
-    #   resources:
-    #     requests:
-    #       cpu: 50m
-    #       memory: 20Mi
-    #     limits:
-    #       memory: 100Mi
     internalDatabase:
       enabled: false
     externalDatabase:
@@ -300,3 +245,34 @@ spec:
         runAsGroup: 82
     securityContext:
       fsGroupChangePolicy: OnRootMismatch
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: nextcloud
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  hostnames:
+    - "cloud.${SECRET_DOMAIN}"
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  rules:
+    - backendRefs:
+        - name: nextcloud
+          namespace: default
+          port: 8080
+# ---
+# apiVersion: externaldns.k8s.io/v1alpha1
+# kind: DNSEndpoint
+# metadata:
+#   name: nextcloud
+# spec:
+#   endpoints:
+#     - dnsName: "cloud.${SECRET_DOMAIN}"
+#       recordType: CNAME
+#       targets: ["ipv4.${SECRET_DOMAIN}"]
+#       providerSpecific:
+#         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+#           value: "false"
