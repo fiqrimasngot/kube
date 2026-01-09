@@ -23,4 +23,4 @@ resources:
   - ./home-assistant/ks.yaml
   - ./web-app/ks.yaml
   # - ./searxng/ks.yaml
-  - ./nextcloud/ks.yaml
+  # - ./nextcloud/ks.yaml
