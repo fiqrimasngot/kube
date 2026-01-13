@@ -174,7 +174,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 4Ti
+      storage: 2Ti
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -184,7 +184,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: "4398046511104"
+    storage: "2199023255552"
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
