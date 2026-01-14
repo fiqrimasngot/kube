@@ -6,6 +6,8 @@ metadata:
 spec:
   interval: 1h
   path: ./kubernetes/apps/storage/scrutiny/app
+  components:
+    - ../../../../components/volsync
   postBuild:
     substituteFrom:
       - name: cluster-secrets
