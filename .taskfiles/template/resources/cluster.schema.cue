@@ -83,6 +83,8 @@ import (
 	open_webui_client_id: string & !=""
 	open_webui_client_secret: string & !=""
 	open_webui_redirect: string & !=""
+	nextcloud_db_user: string & !=""
+	nextcloud_db_password: string & !=""
 }
 
 #Config
