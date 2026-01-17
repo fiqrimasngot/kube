@@ -17,8 +17,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      APP_UID: "0"
-      APP_GID: "0"
+      APP_UID: "33"
+      APP_GID: "33"
       VOLSYNC_CAPACITY: 5Gi
     substituteFrom:
       - name: cluster-secrets
