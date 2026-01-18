@@ -53,8 +53,8 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Actual Finance
-          gethomepage.dev/group: "{{ title .Release.Namespace }}"
-          # gethomepage.dev/group: "Home"
+          # gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/group: "Updates"
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: sh-actual-budget
           # gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"main\" \"ports\" \"http\" \"port\" }}"
