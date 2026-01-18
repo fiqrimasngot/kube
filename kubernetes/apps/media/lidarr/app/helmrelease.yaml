@@ -107,7 +107,7 @@ spec:
           gethomepage.dev/icon: "{{ .Release.Name }}"
           gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
           gethomepage.dev/widget.type: lidarr
-          # gethomepage.dev/widget.key: "${LIDARR_API}"
+          gethomepage.dev/widget.key: "${LIDARR_API}"
 
     persistence:
       downloads:

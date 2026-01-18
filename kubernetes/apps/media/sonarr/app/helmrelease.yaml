@@ -94,7 +94,7 @@ spec:
           gethomepage.dev/description: "TV request"
           gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
           gethomepage.dev/widget.type: sonarr
-          # gethomepage.dev/widget.key: "${SONARR_API}"
+          gethomepage.dev/widget.key: "${SONARR_API}"
     persistence:
       config:
         existingClaim: sonarr
