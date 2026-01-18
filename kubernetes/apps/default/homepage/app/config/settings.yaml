@@ -48,6 +48,10 @@ layout:
     style: row
     columns: 4
     icon: mdi-server
+  Default:
+    style: row
+    columns: 3
+    icon: mdi-home-analytics
   Home:
     style: row
     columns: 3
