@@ -85,6 +85,23 @@ import (
 	open_webui_redirect: string & !=""
 	nextcloud_db_user: string & !=""
 	nextcloud_db_password: string & !=""
+	shlink_api_key: string & !=""
+	sonarr_api: string & !=""
+	radarr_api: string & !=""
+	sabnzbd_api: string & !=""
+	mealie_api: string & !=""
+	nextcloud_api: string & !=""
+	paperless_api: string & !=""
+	bazarr_api: string & !=""
+	immich_api: string & !=""
+	jellyfin_api: string & !=""
+	jellyseerr_api: string & !=""
+	lidarr_api: string & !=""
+	sabnzbd_api: string & !=""
+	prowlarr_api: string & !=""
+	radarr_api: string & !=""
+	lat: string & !=""
+	long: string & !=""
 }
 
 #Config
