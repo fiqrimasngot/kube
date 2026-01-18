@@ -45,6 +45,11 @@ spec:
 
     route:
       main:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Actual Finance
@@ -53,15 +58,6 @@ spec:
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: sh-actual-budget
           # gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"main\" \"ports\" \"http\" \"port\" }}"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: main
-                port: *port
     persistence:
       data:
         enabled: true
