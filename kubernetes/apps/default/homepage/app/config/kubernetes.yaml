@@ -1,2 +1,4 @@
 ---
 mode: cluster
+gateway:
+  enabled: true
