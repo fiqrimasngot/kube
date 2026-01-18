@@ -8,7 +8,7 @@ spec:
   capacity: "4398046511104" # 4 TiB
   fsType: zfs
   ownerNodeID: k8s-0
-  poolName: k8s-0-library
+  poolName: bigboi
   volumeType: DATASET
   shared: "no"
   thinProvision: "yes"

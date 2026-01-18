@@ -12,7 +12,7 @@ spec:
     driver: zfs.csi.openebs.io
     fsType: zfs
     volumeAttributes:
-      openebs.io/poolname: k8s-0-library
+      openebs.io/poolname: bigboi
     volumeHandle: media
   nodeAffinity:
     required:
@@ -23,7 +23,7 @@ spec:
               values:
                 - k8s-0
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: zfs-k8s-0-library
+  storageClassName: zfs-bigboi
   volumeMode: Filesystem
 ---
 apiVersion: v1

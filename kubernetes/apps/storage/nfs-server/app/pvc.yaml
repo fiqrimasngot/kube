@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 4Ti
-  storageClassName: zfs-k8s-0-library
+  storageClassName: zfs-bigboi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
