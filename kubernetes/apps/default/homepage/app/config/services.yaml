@@ -1,15 +1,4 @@
 ---
-- Infrastructure:
-    - Store:
-        href: https://truenas.${SECRET_DOMAIN}
-        target: _self
-        icon: truenas.png
-        description: TrueNAS Scale
-        widget:
-          type: truenas
-          url: http://${SECRET_NFS_SVC}
-          key: ${TRUENAS_API}
-          enablePools: true
 - Home:
     - Sonarr:
         href: https://sonarr.${SECRET_DOMAIN}
