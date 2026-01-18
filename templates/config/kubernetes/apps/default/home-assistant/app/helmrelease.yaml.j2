@@ -87,7 +87,7 @@ spec:
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: "{{ .Release.Name }}"
           gethomepage.dev/widget.type: homeassistant
-          gethomepage.dev/widget.url: http://home-assistant-main.default.svc.cluster.local:8123
+          gethomepage.dev/widget.url: https://ha.${SECRET_DOMAIN}
           gethomepage.dev/widget.key: "${HA_API}"
         hostnames: ["ha.${SECRET_DOMAIN}"]
         parentRefs:
