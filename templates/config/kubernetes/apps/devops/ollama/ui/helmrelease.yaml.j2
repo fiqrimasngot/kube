@@ -37,7 +37,7 @@ spec:
       enabled: false
     # -- A list of Ollama API endpoints. These can be added in lieu of automatically installing the Ollama Helm chart, or in addition to it.
     # ollamaUrls: ["http://ollama.${EXTERNAL_DOMAIN}:11434"]
-    ollamaUrls: ["http://ollama.ai.svc:11434"]
+    ollamaUrls: ["http://ollama.devops.svc:11434"]
     # ollamaUrls: ["http://ollama.ai.svc:11434/api"]
     extraEnvVars:
       - name: ENABLE_LOGIN_FORM
@@ -61,17 +61,31 @@ spec:
           secretKeyRef:
             name: *app
             key: OAUTH_CLIENT_SECRET
-    ingress:
-      enabled: true
-      class: envoy-external
-      annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: "Home"
-          gethomepage.dev/description: "AI Chat"
-          gethomepage.dev/name: Open WebUI
-          gethomepage.dev/icon: sh-open-webui
-          gethomepage.dev/siteMonitor: "http://open-webui.ai.svc.cluster.local:80"
-      host: &host "chad.${SECRET_DOMAIN}"
     persistence:
       enabled: true
       existingClaim: "ollama"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: open-webui
+  # annotations:
+  #   external-dns.alpha.kubernetes.io/controller: none
+spec:
+  annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/group: "Home"
+      gethomepage.dev/description: "AI Chat"
+      gethomepage.dev/name: Open WebUI
+      gethomepage.dev/icon: sh-open-webui
+      gethomepage.dev/siteMonitor: "http://open-webui.devops.svc.cluster.local:80"
+  hostnames:
+    - "chad.${SECRET_DOMAIN}"
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+  # rules:
+  #   - backendRefs:
+  #       - name: nextcloud
+  #         namespace: devops
+  #         port: 8080
