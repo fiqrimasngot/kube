@@ -57,14 +57,14 @@ spec:
               capabilities:
                 add:
                   - SYS_PTRACE
-            # resources:
+            resources:
             #   requests:
             #     memory: 24G
             #     cpu: 6
-            #   limits:
+              limits:
             #     memory: 24G
             #     cpu: 6
-            #     nvidia.com/gpu: 3
+                nvidia.com/gpu: 1
     defaultPodOptions:
       runtimeClassName: nvidia
       hostNetwork: true
