@@ -13,5 +13,3 @@ spec:
     - smtp.${SECRET_DOMAIN}
   privateKey:
     rotationPolicy: Always
-
-              SMTP_RELAY_SERVER_PORT: 465
