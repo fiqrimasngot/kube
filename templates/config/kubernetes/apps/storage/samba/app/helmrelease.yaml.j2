@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: samba
+spec:
+  interval: 1h
+  maxHistory: 1
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    timeout: 2m
+    remediation:
+      retries: 1
+  upgrade:
+    timeout: 2m
+    remediation:
+      retries: 1
+  values:
+    controllers:
+      samba:
+        strategy: RollingUpdate
+        pod:
+          securityContext:
+            runAsNonRoot: false
+            runAsGroup: 0
+            runAsUser: 0
+        containers:
+          main:
+            image:
+              repository: ghcr.io/crazy-max/samba
+              tag: 4.21.4@sha256:75f5037770eab774b82f298268305af8a18a01a1daad679f8d2d17c54059c847
+            envFrom:
+              - secretRef:
+                  name: samba
+            resources:
+              requests:
+                cpu: 500m
+                memory: 20Mi
+              limits:
+                memory: 1Gi
+    service:
+      main:
+        controller: samba
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: "${SAMBA_LB_IP:-1.1.1.1}"
+        #   coredns.io/hostname: "${APP_URL}"
+        ports:
+          smb:
+            port: 445
+            protocol: TCP
+    persistence:
+      config:
+        type: configMap
+        name: samba
+        globalMounts:
+          - path: /data/config.yml
+            subPath: config.yml
+      time-machine:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /doc/TimeMachine
+        globalMounts:
+          - path: /samba/time-machine
+    configMaps:
+      config:
+        data:
+          config.yml: |
+            auth:
+              - user: time_machine_users
+                group: time_machine_users
+                uid: 1000
+                gid: 1000
+                password: $${SMB_PASS}
+
+            global:
+              - "ea support = yes"
+              - "vfs objects = catia fruit streams_xattr"
+              - "fruit:aapl = yes"
+              - "fruit:metadata = stream"
+              - "fruit:model = MacSamba"
+              - "fruit:veto_appledouble = no"
+              - "fruit:nfs_aces = no"
+              - "fruit:posix_rename = yes"
+              - "fruit:zero_file_id = yes"
+              - "fruit:wipe_intentionally_left_blank_rfork = yes"
+              - "fruit:delete_empty_adfiles = yes"
+              - "fruit:time machine = yes"
+              - "spotlight = no"
+              - "server min protocol = SMB2"
+              - "server max protocol = SMB3"
+              # Allow use of LB IP
+              - "host msdfs = no"
+
+            share:
+              - name: time_machine
+                path: /samba/time-machine
+                browsable: yes
+                readonly: no
+                guestok: no
+                validusers: time_machine_users
+                writelist: time_machine_users

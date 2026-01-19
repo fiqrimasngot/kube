@@ -102,6 +102,8 @@ import (
 	radarr_api: string & !=""
 	lat: string & !=""
 	long: string & !=""
+	smb_pass: string & !=""
+	samba_lb_ip: net.IPv4 & !=""
 }
 
 #Config
