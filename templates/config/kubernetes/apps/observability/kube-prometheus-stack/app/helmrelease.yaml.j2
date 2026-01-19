@@ -557,6 +557,12 @@ spec:
             gnetId: 21356
             revision: 3
             datasource: Prometheus
+          smartctl-exporter:
+            # renovate: depName="SMARTctl Exporter Dashboard"
+            gnetId: 22604
+            revision: 2
+            datasource:
+              - { name: DS_PROMETHEUS, value: Prometheus }
         kubernetes:
           kubernetes-api-server:
             # renovate: depName="Kubernetes / System / API Server"
