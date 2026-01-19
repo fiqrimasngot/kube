@@ -66,8 +66,8 @@ spec:
       app:
         controller: smtp-relay
         type: LoadBalancer
-        # annotations:
-        #   io.cilium/lb-ipam-ips: ${SECRET_SMTP_SVC}
+        annotations:
+          io.cilium/lb-ipam-ips: ${SECRET_SMTP_SVC}
         ports:
           http:
             primary: true
