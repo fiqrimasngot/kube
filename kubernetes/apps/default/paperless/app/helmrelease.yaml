@@ -103,15 +103,15 @@ spec:
 
     route:
       app:
-        # annotations:
-        #   gethomepage.dev/enabled: "true"
-        #   gethomepage.dev/description: Paperless storage
-        #   gethomepage.dev/group: "{{ title .Release.Namespace }}"
-        #   gethomepage.dev/name: "{{ title .Release.Name }}"
-        #   gethomepage.dev/icon: "{{ .Release.Name }}"
-        #   gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
-        #   gethomepage.dev/widget.type: paperlessngx
-        #   gethomepage.dev/widget.key: "${PAPERLESS_API}"
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Paperless storage
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          gethomepage.dev/widget.type: paperlessngx
+          gethomepage.dev/widget.key: "${PAPERLESS_API}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
