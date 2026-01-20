@@ -130,13 +130,13 @@ spec:
         medium: Memory
         globalMounts:
           - path: /dev/shm
-      dev:
-        type: hostPath
-        hostPath: /dev
-        globalMounts:
-          - path: /dev
-      proc:
-        type: hostPath
-        hostPath: /proc
-        globalMounts:
-          - path: /proc
+      # dev:
+      #   type: hostPath
+      #   hostPath: /dev
+      #   globalMounts:
+      #     - path: /dev
+      # proc:
+      #   type: hostPath
+      #   hostPath: /proc
+      #   globalMounts:
+      #     - path: /proc
