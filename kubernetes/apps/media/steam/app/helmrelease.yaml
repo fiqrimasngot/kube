@@ -45,11 +45,11 @@ spec:
 
               STEAM_ARGS: -silent
               ENABLE_SUNSHINE: true
-            probes:
-              liveness: &probe
-                enabled: true
-              readiness: *probe
-              startup: *probe
+            # probes:
+            #   liveness: &probe
+            #     enabled: true
+            #   readiness: *probe
+            #   startup: *probe
             securityContext:
               privileged: true
               seccompProfile:
@@ -67,7 +67,7 @@ spec:
                 nvidia.com/gpu: 1
     defaultPodOptions:
       runtimeClassName: nvidia
-      hostNetwork: true
+      # hostNetwork: true
       securityContext:
         fsGroup: 1000
       tolerations:
