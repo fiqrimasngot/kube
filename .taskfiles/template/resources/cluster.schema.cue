@@ -105,6 +105,7 @@ import (
 	smb_pass: string & !=""
 	samba_lb_ip: net.IPv4 & !=""
 	secret_smtp_svc: net.IPv4 & !=""
+	secret_sunshine_svc: net.IPv4 & !=""
 }
 
 #Config
