@@ -702,8 +702,6 @@ spec:
                 requests:
                   storage: 50Gi
     alertmanager:
-      alertmanagerSpec:
-        logLevel: debug
       config:
         receivers:
           - name: "Discord"
@@ -752,6 +750,7 @@ spec:
           gethomepage.dev/name: Alertmanager
           gethomepage.dev/icon: sh-telegraf
       alertmanagerSpec:
+        logLevel: debug
         storage:
           volumeClaimTemplate:
             spec:
