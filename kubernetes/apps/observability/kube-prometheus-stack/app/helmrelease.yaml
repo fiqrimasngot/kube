@@ -735,7 +735,7 @@ spec:
           - receiver: 'null'
             matchers:
             - severity =~ "none"
-          - receiver: 'discord'
+          - receiver: 'Discord'
       route:
         main:
           enabled: true
