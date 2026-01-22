@@ -110,6 +110,7 @@ import (
 	samba_lb_ip: net.IPv4 & !=""
 	secret_smtp_svc: net.IPv4 & !=""
 	secret_sunshine_svc: net.IPv4 & !=""
+	alert_manager_discord_webhook: string & !=""
 }
 
 #Config

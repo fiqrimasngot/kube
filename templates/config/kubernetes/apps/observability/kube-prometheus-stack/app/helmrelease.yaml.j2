@@ -702,38 +702,45 @@ spec:
                 requests:
                   storage: 50Gi
     alertmanager:
+      image:
+        registry: quay.io
+        repository: prometheus/alertmanager
+        tag: v0.30.1@sha256:286ad8838533a5a01d89bd09643f43d2b68b65203123b5700e54a8f80ff9c1f4
       # fullnameOverride: alertmanager
-      # config:
-      #   global:
-      #     resolve_timeout: 5m
-      #   receivers:
-      #     - name: "null"
-      #     - name: "pagerduty"
-      #       pagerduty_configs:
-      #         - service_key: ${PAGERDUTY_KEY}
-      #     - name: dead-mans-switch
-      #       webhook_configs:
-      #         - url: ${HEALTHCHECKS_IO_URL}
-      #   route:
-      #     group_by: ["alertname", "job"]
-      #     group_wait: 1m
-      #     group_interval: 10m
-      #     repeat_interval: 12h
-      #     receiver: "pagerduty"
-      #     routes:
-      #       - receiver: dead-mans-switch
-      #         group_wait: 0s
-      #         group_interval: 5m
-      #         repeat_interval: 5m
-      #         match:
-      #           alertname: "Watchdog"
-      #       - receiver: "null"
-      #         matchers:
-      #           - alertname =~ "InfoInhibitor"
-      #       - receiver: "pagerduty"
-      #         matchers:
-      #           - severity=~"warning|critical|page"
-      #         continue: true
+      config:
+        global:
+          slack_api_url: "${SECRET_ALERT_MANAGER_DISCORD_WEBHOOK}"
+          resolve_timeout: 5m
+        receivers:
+        - name: 'null'
+        - name: 'discord'
+          slack_configs:
+          - channel: '#events'
+            icon_url: https://avatars3.githubusercontent.com/u/3380462
+            username: 'Prometheus'
+            send_resolved: true
+            # https://github.com/onedr0p/home-cluster/blob/main/cluster/apps/monitoring/kube-prometheus-stack/helm-release.yaml#L33
+            title: |-
+              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if ne .CommonAnnotations.summary ""}}{{ .CommonAnnotations.summary }} {{ else if ne .CommonAnnotations.message ""}}{{ .CommonAnnotations.message }} {{ else if ne .CommonAnnotations.description ""}}{{ .CommonAnnotations.description }} {{ else }}{{ .CommonLabels.alertname }}{{ end }}
+            text: >-
+              {{ range .Alerts -}}
+                **Alert:** {{ .Annotations.title }}{{ if .Labels.severity }} `{{ .Labels.severity }}`{{ end }}
+              {{ if ne .Annotations.summary ""}}**Summary:** {{ .Annotations.summary }} {{ else if ne .Annotations.message ""}}**Message:** {{ .Annotations.message }} {{ else if ne .Annotations.description ""}}**Description:** {{ .Annotations.description }}{{ end }}
+                **Details:**
+                {{ range .Labels.SortedPairs }} • {{ .Name }}: `{{ .Value }}`
+                {{ end }}
+              {{ end }}
+        route:
+          group_by: ['...'] #['alertname', 'job']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 6h
+          receiver: 'discord'
+          routes:
+          - receiver: 'null'
+            matchers:
+            - severity =~ "none"
+          - receiver: 'discord'
       route:
         main:
           enabled: true
