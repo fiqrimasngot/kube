@@ -702,7 +702,8 @@ spec:
                 requests:
                   storage: 50Gi
     alertmanager:
-      # fullnameOverride: alertmanager
+      alertmanagerSpec:
+        logLevel: debug
       config:
         receivers:
           - name: "Discord"
@@ -725,17 +726,17 @@ spec:
                     {{- end }}
                     {{ if ne .Annotations.runbook_url "" }}**Runbook: ** {{ .Annotations.runbook_url }} {{ end }}
                   {{- end }}
+          - name: "dummy"
         route:
-          group_by: ['...'] #['alertname', 'job']
+          group_by: ["..."]
           group_wait: 30s
           group_interval: 5m
-          repeat_interval: 6h
-          receiver: 'Discord'
+          repeat_interval: 1d
+          receiver: "Discord"
           routes:
           - receiver: 'null'
             matchers:
             - severity =~ "none"
-          - receiver: 'Discord'
       route:
         main:
           enabled: true
