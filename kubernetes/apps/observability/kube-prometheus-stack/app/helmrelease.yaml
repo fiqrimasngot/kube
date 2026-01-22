@@ -729,7 +729,7 @@ spec:
                   {{- end }}
           - name: "Slack"
             slack_configs:
-            - channel: '#prometheus'
+            - channel: 'prometheus'
               icon_url: https://avatars3.githubusercontent.com/u/3380462
               username: 'Prometheus'
               send_resolved: true
