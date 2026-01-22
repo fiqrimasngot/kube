@@ -23,71 +23,21 @@ spec:
       retries: 3
   values:
     kubeApiServer:
-      enabled: true
       serviceMonitor:
         selector:
           k8s-app: kube-apiserver
-        metricRelabelings:
-          # Drop high cardinality labels by onedr0p
-          - action: drop
-            sourceLabels: ["__name__"]
-            regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
-          - action: drop
-            sourceLabels: ["__name__"]
-            regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
-    kubeEtcd:
-      enabled: true
-      endpoints:
-        - 10.32.1.51
-      service:
-        enabled: true
-        port: 2381
-        targetPort: 2381
-      serviceMonitor:
-        endpoints:
-          - port: metrics
-            scheme: http
-    kubeControllerManager:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        scheme: http
-        selector:
-          k8s-app: kube-controller-manager
     kubeScheduler:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        scheme: http
+      service:
         selector:
           k8s-app: kube-scheduler
+    kubeControllerManager: &kubeControllerManager
+      service:
+        selector:
+          k8s-app: kube-controller-manager
+    kubeEtcd:
+      <<: *kubeControllerManager # etcd runs on control plane nodes
     kubeProxy:
       enabled: false
-    coreDns:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        selector:
-          k8s-app: kube-dns
-        endpoints:
-          - port: metrics
-            scheme: http
-    kubelet:
-      enabled: true
-      serviceMonitor:
-        metricRelabelings:
-          # Drop high cardinality labels
-          - action: labeldrop
-            regex: (uid)
-          - action: labeldrop
-            regex: (id|name)
-          - action: drop
-            sourceLabels: ["__name__"]
-            regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
-        endpoints:
-          - port: https-metrics
-            scheme: https
-            insecureSkipVerify: true
     nodeExporter:
       serviceMonitor:
         relabelings:
