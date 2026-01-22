@@ -131,13 +131,13 @@ spec:
     #               port: s3
     route:
       app:
-        # annotations:
-        #   gethomepage.dev/enabled: "true"
-        #   gethomepage.dev/group: Infrastructure
-        #   gethomepage.dev/name: "{{ title .Release.Name }}"
-        #   gethomepage.dev/icon: "{{ .Release.Name }}"
-        #   gethomepage.dev/description: "S3 storage"
-        #   gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: "{{ .Release.Name }}"
+          gethomepage.dev/description: "S3 storage"
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
         #   external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
