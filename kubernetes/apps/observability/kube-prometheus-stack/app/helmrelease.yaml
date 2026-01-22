@@ -734,7 +734,7 @@ spec:
           repeat_interval: 1d
           receiver: "Discord"
           routes:
-          - receiver: 'null'
+          - receiver: 'dummy'
             matchers:
             - severity =~ "none"
       route:
