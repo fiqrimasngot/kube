@@ -44,7 +44,9 @@ spec:
         port: 2381
         targetPort: 2381
       serviceMonitor:
-        scheme: http
+        endpoints:
+          - port: metrics
+            scheme: http
     kubeControllerManager:
       enabled: true
       serviceMonitor:
@@ -67,7 +69,9 @@ spec:
         enabled: true
         selector:
           k8s-app: kube-dns
-        scheme: http
+        endpoints:
+          - port: metrics
+            scheme: http
     kubelet:
       enabled: true
       serviceMonitor:
@@ -80,12 +84,10 @@ spec:
           - action: drop
             sourceLabels: ["__name__"]
             regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
-      endpoints:
-        - 10.32.1.51
-      service:
-        enabled: true
-        port: 10250
-        targetPort: 10250
+        endpoints:
+          - port: https-metrics
+            scheme: https
+            insecureSkipVerify: true
     nodeExporter:
       serviceMonitor:
         relabelings:
