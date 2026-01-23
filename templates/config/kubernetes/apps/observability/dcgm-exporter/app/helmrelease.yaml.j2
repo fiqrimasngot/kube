@@ -38,9 +38,9 @@ spec:
       NVIDIA_DRIVER_CAPABILITIES: all
       NVIDIA_VISIBLE_DEVICES: all
     runtimeClassName: nvidia
-    resources:
-      limits:
-        nvidia.com/gpu: 1
+    # resources:
+    #   limits:
+    #     nvidia.com/gpu: 1
     serviceMonitor:
       interval: 15s
       honorLabels: true
