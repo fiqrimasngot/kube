@@ -38,9 +38,13 @@ spec:
       NVIDIA_DRIVER_CAPABILITIES: all
       NVIDIA_VISIBLE_DEVICES: all
     runtimeClassName: nvidia
-    # resources:
-    #   limits:
-    #     nvidia.com/gpu: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     serviceMonitor:
       interval: 15s
       honorLabels: true
