@@ -41,9 +41,9 @@ spec:
               NVIDIA_DISABLE_DRIVER_INSTALL: "true"
               DISABLE_NVIDIA_DRIVER_INSTALL: "true"
 
-              # MODE: primary
-              # WEB_UI_MODE: vnc
-              # ENABLE_VNC_AUDIO: false
+              MODE: primary
+              WEB_UI_MODE: vnc
+              ENABLE_VNC_AUDIO: false
               PORT_NOVNC_WEB: &port 8083
               ENABLE_EVDEV_INPUTS: "true"
 
@@ -62,6 +62,9 @@ spec:
               capabilities:
                 add:
                   - SYS_PTRACE
+                  - NET_ADMIN
+                  - SYS_ADMIN
+                  - SYS_NICE
             resources:
             #   requests:
             #     memory: 24G
