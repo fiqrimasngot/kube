@@ -75,7 +75,7 @@ spec:
                 nvidia.com/gpu: 1
     defaultPodOptions:
       runtimeClassName: nvidia
-      # hostNetwork: true
+      hostNetwork: true
       securityContext:
         fsGroup: 1000
       tolerations:
