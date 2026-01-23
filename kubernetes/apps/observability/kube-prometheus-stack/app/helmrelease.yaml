@@ -478,34 +478,10 @@ spec:
                 foldersFromFilesStructure: true
       dashboards:
         default:
-          spegel:
-            # renovate: depName="Spegel"
-            gnetId: 18089
-            revision: 1
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          nginx-ingress-controller:
-            gnetId: 14314
-            revision: 2
-            datasource: "Prometheus"
-          cloudflared:
-            # renovate: depName="Cloudflare Tunnels (cloudflared)"
-            gnetId: 17457 # https://grafana.com/grafana/dashboards/17457?tab=revisions
-            revision: 6
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/13502-minio-dashboard/
           blackbox:
             gnetId: 13659
             revision: 1
             datasource: Prometheus
-          minio:
-            gnetId: 13502
-            revision: 19
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/1860-node-exporter-full/
           node-exporter-full:
             gnetId: 1860
             revision: 29
@@ -515,23 +491,6 @@ spec:
             revision: 18
             datasource: Prometheus
           # Ref: https://grafana.com/grafana/dashboards/5342-ceph-pools/
-          cert-manager:
-            url: https://raw.githubusercontent.com/monitoring-mixins/website/refs/heads/master/assets/cert-manager/dashboards/overview.json
-            datasource: Prometheus
-          flux-cluster:
-            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/cluster.json
-            datasource: Prometheus
-          flux-control-plane:
-            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/control-plane.json
-            datasource: Prometheus
-          flux-logs:
-            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/refs/heads/main/monitoring/configs/dashboards/logs.json
-            datasource: Prometheus
-          # Ref: https://grafana.com/grafana/dashboards/21356-volsync-dashboard/
-          volsync:
-            gnetId: 21356
-            revision: 3
-            datasource: Prometheus
           smartctl-exporter:
             # renovate: depName="SMARTctl Exporter Dashboard"
             gnetId: 22604
@@ -577,22 +536,6 @@ spec:
             gnetId: 1860
             revision: 37
             datasource: Prometheus
-          node-exporter-windows:
-            # renovate: depName="Node Exporter Full"
-            gnetId: 15620
-            revision: 3
-            datasource: Prometheus
-          node-feature-discovery:
-            url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
-            datasource: Prometheus
-          qbitorrent:
-            url: https://raw.githubusercontent.com/esanchezm/prometheus-qbittorrent-exporter/master/grafana/dashboard.json
-            datasource:
-              - { name: DS_PROMETHEUS, value: Prometheus }
-          pfsense:
-            url: https://raw.githubusercontent.com/fiqrimasngot/k3s/refs/heads/main/kubernetes/apps/observability/kube-prometheus-stack/app/dashboard/pfsense.json
-            datasource:
-              - { name: DS_PROMETHEUS, value: Prometheus }
           volsync:
             # renovate: depName="VolSync Dashboard"
             gnetId: 21356
