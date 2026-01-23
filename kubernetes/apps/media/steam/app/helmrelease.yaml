@@ -139,6 +139,11 @@ spec:
         hostPath: /dev/input
         globalMounts:
           - path: /dev/input
+      dev-uinput:
+        type: hostPath
+        hostPath: /dev/uinput
+        globalMounts:
+          - path: /dev/uinput
       # dev:
       #   type: hostPath
       #   hostPath: /dev
