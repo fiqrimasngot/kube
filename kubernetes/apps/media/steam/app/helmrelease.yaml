@@ -142,6 +142,7 @@ spec:
       dev-uinput:
         type: hostPath
         hostPath: /dev/uinput
+        hostPathType: CharDevice
         globalMounts:
           - path: /dev/uinput
       # dev:
