@@ -72,20 +72,20 @@ metadata:
   # annotations:
   #   external-dns.alpha.kubernetes.io/controller: none
 spec:
-  annotations:
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: "Home"
-    gethomepage.dev/description: "AI Chat"
-    gethomepage.dev/name: Open WebUI
-    gethomepage.dev/icon: sh-open-webui
-    gethomepage.dev/siteMonitor: "http://open-webui.devops.svc.cluster.local:80"
+  # annotations:
+  #   gethomepage.dev/enabled: "true"
+  #   gethomepage.dev/group: "Home"
+  #   gethomepage.dev/description: "AI Chat"
+  #   gethomepage.dev/name: Open WebUI
+  #   gethomepage.dev/icon: sh-open-webui
+  #   gethomepage.dev/siteMonitor: "http://open-webui.devops.svc.cluster.local:80"
   hostnames:
     - "chad.${SECRET_DOMAIN}"
   parentRefs:
     - name: envoy-external
       namespace: network
-  rules:
-    - backendRefs:
-        - name: open-webui
-          namespace: devops
-          port: 80
+  # rules:
+  #   - backendRefs:
+  #       - name: open-webui
+  #         namespace: devops
+  #         port: 80
