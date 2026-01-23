@@ -134,6 +134,11 @@ spec:
         medium: Memory
         globalMounts:
           - path: /dev/shm
+      dev-input:
+        type: hostPath
+        hostPath: /dev/input
+        globalMounts:
+          - path: /dev/input
       # dev:
       #   type: hostPath
       #   hostPath: /dev
