@@ -16,6 +16,7 @@ machine:
       # Enable V2 Image Engine for Longhorn
       - name: nvme_tcp
       - name: vfio_pci
+      - name: uinput
   # disks:
   #     - device: /dev/sdb
   #       partitions:

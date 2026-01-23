@@ -69,7 +69,7 @@ spec:
 
     route:
       app:
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["requests.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
