@@ -150,8 +150,8 @@ spec:
         hostPath: /dev
         globalMounts:
           - path: /dev
-      # proc:
-      #   type: hostPath
-      #   hostPath: /proc
-      #   globalMounts:
-      #     - path: /proc
+      proc:
+        type: hostPath
+        hostPath: /proc
+        globalMounts:
+          - path: /proc

@@ -69,7 +69,7 @@ spec:
 
     route:
       app:
-        hostnames: ["requests.${SECRET_DOMAIN}"]
+        hostnames: ["request.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
