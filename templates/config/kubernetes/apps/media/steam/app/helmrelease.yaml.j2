@@ -134,22 +134,22 @@ spec:
         medium: Memory
         globalMounts:
           - path: /dev/shm
-      dev-input:
-        type: hostPath
-        hostPath: /dev/input
-        globalMounts:
-          - path: /dev/input
-      dev-uinput:
-        type: hostPath
-        hostPath: /dev/uinput
-        hostPathType: CharDevice
-        globalMounts:
-          - path: /dev/uinput
-      # dev:
+      # dev-input:
       #   type: hostPath
-      #   hostPath: /dev
+      #   hostPath: /dev/input
       #   globalMounts:
-      #     - path: /dev
+      #     - path: /dev/input
+      # dev-uinput:
+      #   type: hostPath
+      #   hostPath: /dev/uinput
+      #   hostPathType: CharDevice
+      #   globalMounts:
+      #     - path: /dev/uinput
+      dev:
+        type: hostPath
+        hostPath: /dev
+        globalMounts:
+          - path: /dev
       # proc:
       #   type: hostPath
       #   hostPath: /proc
