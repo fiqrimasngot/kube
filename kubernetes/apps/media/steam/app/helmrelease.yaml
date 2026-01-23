@@ -141,15 +141,15 @@ spec:
         globalMounts:
           - path: /dev/input
 
-      dev-uinput:
-        type: hostPath
-        hostPath: /dev/uinput
-        hostPathType: CharDevice
-        globalMounts:
-          - path: /dev/uinput
-
-      dev-fd:
-        type: hostPath
-        hostPath: /proc/self/fd
-        globalMounts:
-          - path: /dev/fd
+      # dev-uinput:
+      #   type: hostPath
+      #   hostPath: /dev/uinput
+      #   hostPathType: CharDevice
+      #   globalMounts:
+      #     - path: /dev/uinput
+      #
+      # dev-fd:
+      #   type: hostPath
+      #   hostPath: /proc/self/fd
+      #   globalMounts:
+      #     - path: /dev/fd
