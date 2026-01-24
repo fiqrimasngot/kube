@@ -79,8 +79,8 @@ spec:
     defaultPodOptions:
       runtimeClassName: nvidia
       hostNetwork: true
-      securityContext:
-        fsGroup: 1000
+      # securityContext:
+      #   fsGroup: 1000
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
