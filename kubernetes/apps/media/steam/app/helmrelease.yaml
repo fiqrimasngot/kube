@@ -148,6 +148,12 @@ spec:
         globalMounts:
           - path: /dev/input
 
+      dev-virtual-input:
+        type: hostPath
+        hostPath: /devices/virtual/input
+        globalMounts:
+          - path: /dev/input
+
       dev-uinput:
         type: hostPath
         hostPath: /dev/uinput
