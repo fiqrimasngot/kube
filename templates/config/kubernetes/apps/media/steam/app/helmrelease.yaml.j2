@@ -36,8 +36,8 @@ spec:
               TZ: ${TIMEZONE}
               HOME_DIR: &homeDir /home/default
               GAMES_DIR: &gameDir /mnt/games
-              NVIDIA_VISIBLE_DEVICES: all
-              NVIDIA_DRIVER_CAPABILITIES: compute,utility,graphics
+              NVIDIA_VISIBLE_DEVICES: "all"
+              NVIDIA_DRIVER_CAPABILITIES: "compute,utility,graphics"
               NVIDIA_DISABLE_DRIVER_INSTALL: "true"
               DISABLE_NVIDIA_DRIVER_INSTALL: "true"
 
