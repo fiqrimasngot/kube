@@ -32,6 +32,8 @@ spec:
               - secretRef:
                   name: *app
             env:
+              PUID: "0"
+              PGID: "0"
               NAME: SteamHeadless
               TZ: ${TIMEZONE}
               HOME_DIR: &homeDir /home/default
