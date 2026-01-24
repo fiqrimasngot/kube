@@ -41,8 +41,8 @@ spec:
               NVIDIA_DISABLE_DRIVER_INSTALL: "true"
               DISABLE_NVIDIA_DRIVER_INSTALL: "true"
 
-              MODE: primary
-              WEB_UI_MODE: vnc
+              MODE: "primary"
+              WEB_UI_MODE: "vnc"
               ENABLE_VNC_AUDIO: false
               PORT_NOVNC_WEB: &port 8083
               ENABLE_EVDEV_INPUTS: "true"
@@ -78,7 +78,7 @@ spec:
       runtimeClassName: nvidia
       hostNetwork: true
       securityContext:
-        fsGroup: 1000
+        fsGroup: 0
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
