@@ -122,8 +122,8 @@ spec:
                 subPath: cache
               - path: /transcode
                 subPath: transcode
-#       dri:
-#         type: hostPath
-#         hostPath: /dev/dri
-#         globalMounts:
-#           - path: /dev/dri
+      dri:
+        type: hostPath
+        hostPath: /dev/dri
+        globalMounts:
+          - path: /dev/dri
