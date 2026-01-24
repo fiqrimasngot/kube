@@ -142,25 +142,25 @@ spec:
         globalMounts:
           - path: /dev/shm
 
-      dev-input:
-        type: hostPath
-        hostPath: /dev/input
-        globalMounts:
-          - path: /dev/input
-
+      # dev-input:
+      #   type: hostPath
+      #   hostPath: /dev/input
+      #   globalMounts:
+      #     - path: /dev/input
+      #
       # dev-virtual-input:
       #   type: hostPath
       #   hostPath: /devices/virtual/input
       #   globalMounts:
       #     - path: /dev/input
       #     # - path: /devices/virtual/input
-
-      dev-uinput:
-        type: hostPath
-        hostPath: /dev/uinput
-        hostPathType: CharDevice
-        globalMounts:
-          - path: /dev/uinput
+      #
+      # dev-uinput:
+      #   type: hostPath
+      #   hostPath: /dev/uinput
+      #   hostPathType: CharDevice
+      #   globalMounts:
+      #     - path: /dev/uinput
       #
       # dev-fd:
       #   type: hostPath
