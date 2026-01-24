@@ -107,10 +107,10 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        rules:
-          - backendRefs:
-              - name: app
-                port: *port
+        # rules:
+        #   - backendRefs:
+        #       - name: app
+        #         port: *port
     persistence:
       data:
         existingClaim: *app
