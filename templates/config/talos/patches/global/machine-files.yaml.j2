@@ -3,7 +3,7 @@ machine:
     # List of udev rules to apply to the udev system
     rules:
       - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
-      - KERNEL=="event*", SUBSYSTEM=="input", ATTRS{name}=="Sunshine X-Box One*", ENV{ID_INPUT}="1", ENV{ID_INPUT_JOYSTICK}="1", ENV{ID_INPUT_GAMEPAD}="1"
+      - KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
   files:
     - op: create
       path: /etc/cri/conf.d/20-customization.part
