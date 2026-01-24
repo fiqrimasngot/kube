@@ -50,7 +50,7 @@ spec:
               ENABLE_EVDEV_INPUTS: "true"
 
               ENABLE_STEAM: "true"
-              STEAM_ARGS: "-silent STEAM_INPUT_FORCE=1  SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD=1"
+              STEAM_ARGS: "-silent"
               ENABLE_SUNSHINE: "true"
               DISPLAY: ":0"
             probes:
