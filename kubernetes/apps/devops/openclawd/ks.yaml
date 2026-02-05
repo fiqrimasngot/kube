@@ -23,6 +23,8 @@ spec:
         kind: Secret
     substitute:
       APP: clawdbot
+      APP_UID: "1000"
+      APP_GID: "1000"
       VOLSYNC_CAPACITY: 5Gi
       # VOLSYNC_STORAGECLASS: longhorn
   interval: 30m
