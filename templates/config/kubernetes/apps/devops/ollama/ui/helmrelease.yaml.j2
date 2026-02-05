@@ -69,7 +69,7 @@ spec:
         strategy: RollingUpdate
     persistence:
       data:
-        existingClaim: ollama-model
+        existingClaim: ollama
         globalMounts:
           - path: /app/backend/data
       tmpfs:

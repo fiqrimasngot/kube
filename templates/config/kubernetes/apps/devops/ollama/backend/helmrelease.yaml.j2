@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: docker.io/ollama/ollama
-              tag: 0.13.4
+              tag: 0.15.4
             env:
               TZ: ${TIMEZONE}
               NVIDIA_VISIBLE_DEVICES: all
@@ -38,6 +38,9 @@ spec:
               OLLAMA_LOAD_TIMEOUT: "600"
               # Force nvidia runtime instead of default
               HARDWARE_DEVICE_PATH: "/dev/nvidia0"
+              LIBVA_DRIVER_NAME: nvidia
+              OLLAMA_CONTEXT_LENGTH: 32768
+              OLLAMA_NUM_PARALLEL: "4"
             resources:
               requests:
                 nvidia.com/gpu: 1
