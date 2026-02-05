@@ -68,7 +68,9 @@ spec:
         strategy: RollingUpdate
     persistence:
       data:
-        existingClaim: open-webui
+        existingClaim: ollama
+        globalMounts:
+          - path: /app/backend/data
       tmpfs:
         advancedMounts:
           open-webui:
