@@ -1,36 +1,21 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/app-template-4.6.2/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app open-webui
+  name: open-webui
 spec:
   chartRef:
     kind: OCIRepository
     name: app-template
   interval: 1h
-  driftDetection:
-    mode: enabled
   values:
     controllers:
       open-webui:
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/home-operations/postgres-init
-              tag: 18.1.0@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
-            envFrom: &envFrom
-              - secretRef:
-                  name: *app
         containers:
           app:
-            image:
-              repository: ghcr.io/open-webui/open-webui
-              tag: 0.7.2@sha256:16d9a3615b45f14a0c89f7ad7a3bf151f923ed32c2e68f9204eb17d1ce40774b
-              pullPolicy: IfNotPresent
-            envFrom: *envFrom
             env:
               DATABASE_TYPE: postgresql
-              DEFAULT_LOCALE: ${TIMEZONE}
+              DEFAULT_LOCALE: de
               DEFAULT_USER_ROLE: user
               ENABLE_LOGIN_FORM: false
               ENABLE_OAUTH_GROUP_CREATION: true
@@ -47,69 +32,73 @@ spec:
               IMAGE_GENERATION_MODEL: dreamshaper_8
               IMAGE_SIZE: 400x400
               IMAGE_STEPS: 8
-              # OAUTH_ADMIN_ROLES: admin
-              # OAUTH_ALLOWED_ROLES: users, admin
+              OAUTH_ADMIN_ROLES: admin
+              OAUTH_ALLOWED_ROLES: users, admin
               OAUTH_MERGE_ACCOUNTS_BY_EMAIL: true
               OAUTH_PICTURE_CLAIM: avatar
-              # OAUTH_PROVIDER_NAME: t-node
-              # OAUTH_ROLES_CLAIM: groups
-              # OAUTH_SCOPES: openid email profile avatar
+              OAUTH_PROVIDER_NAME: t-node
+              OAUTH_ROLES_CLAIM: groups
+              OAUTH_SCOPES: openid email profile avatar
               OAUTH_UPDATE_PICTURE_ON_LOGIN: true
               RAG_WEB_SEARCH_ENGINE: tavily
               WEBSOCKET_MANAGER: redis
               WEBSOCKET_REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379/6
               WEBUI_URL: https://chad.${SECRET_DOMAIN}
-            probes:
-              liveness: &probe
-                enabled: true
-                type: HTTP
-                path: /health
-              readiness: *probe
-              startup:
-                <<: *probe
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 5
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: {drop: [ALL]}
+            envFrom: &envFrom
+              - secretRef:
+                  name: open-webui
+            image:
+              repository: ghcr.io/open-webui/open-webui
+              tag: 0.7.2@sha256:16d9a3615b45f14a0c89f7ad7a3bf151f923ed32c2e68f9204eb17d1ce40774b
+            resources:
+              limits:
+                memory: 2Gi
+              requests:
+                cpu: 250m
+                memory: 1Gi
+        initContainers:
+          init-db:
+            envFrom: *envFrom
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18.1.0@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
         pod:
-          securityContext:
-            runAsUser: 65534
-            runAsGroup: 65534
-            fsGroup: 65534
-            fsGroupChangePolicy: OnRootMismatch
-            seccompProfile: {type: RuntimeDefault}
-          # labels:
-          #   policy.gabe565.com/egress-authentik: "true"
-          #   policy.gabe565.com/egress-namespace: "true"
-          #   policy.gabe565.com/egress-world: "true"
-          #   policy.gabe565.com/ingress-envoy-public: "true"
-          # hostAliases:
-          #   - ip: 10.43.0.20
-          #     hostnames:
-          #       - ${oauth_host}
-
+          annotations:
+            reloader.stakater.com/auto: "true"
+        strategy: RollingUpdate
+    persistence:
+      data:
+        accessMode: ReadWriteOnce
+        existingClaim: open-webui
+      tmpfs:
+        advancedMounts:
+          open-webui:
+            app:
+              - path: /tmp
+                subPath: tmp
+        type: emptyDir
+    route:
+      app:
+        annotations:
+          gethomepage.dev/app: open-webui
+          gethomepage.dev/description: Interact with your AI models
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: AI
+          gethomepage.dev/icon: sh-open-webui.svg
+          gethomepage.dev/name: Open WebUI
+        hostnames: ["chad.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: 80
     service:
-      open-webui:
+      app:
         controller: open-webui
         ports:
           http:
-            port: 8080
-
-    persistence:
-      data:
-        existingClaim: "ollama"
-      tmp:
-        type: emptyDir
-        medium: Memory
-        sizeLimit: 128Mi
-
-    route:
-      open-webui:
-        parentRefs:
-        - name: envoy-external
-          namespace: network
-        hostnames:
-          - chad.${SECRET_DOMAIN}
+            port: 80
+            targetPort: 8080
