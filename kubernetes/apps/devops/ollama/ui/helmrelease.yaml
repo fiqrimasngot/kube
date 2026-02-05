@@ -82,13 +82,6 @@ spec:
         sizeLimit: 128Mi
 
     route:
-      annotations:
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: "Home"
-        gethomepage.dev/description: "AI Chat"
-        gethomepage.dev/name: Open WebUI
-        gethomepage.dev/icon: sh-open-webui
-        gethomepage.dev/siteMonitor: "http://open-webui.devops.svc.cluster.local:80"
       open-webui:
         parentRefs:
         - name: envoy-external
