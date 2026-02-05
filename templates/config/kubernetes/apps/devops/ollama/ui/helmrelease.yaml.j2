@@ -28,10 +28,6 @@ spec:
               GLOBAL_LOG_LEVEL: WARNING
               # WEBUI_SECRET_KEY: ${secret_key}
               CORS_ALLOW_ORIGIN: https://chad.${SECRET_DOMAIN}
-              DATABASE_URL:
-                secretKeyRef:
-                  name: postgresql-app
-                  key: uri
               # OPENAI_API_KEY: ${openai_api_key}
               ENABLE_LITELLM: "false"
               ENABLE_LOGIN_FORM: "false"
