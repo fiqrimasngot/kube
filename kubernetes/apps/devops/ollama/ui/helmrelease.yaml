@@ -68,7 +68,6 @@ spec:
         strategy: RollingUpdate
     persistence:
       data:
-        accessMode: ReadWriteOnce
         existingClaim: open-webui
       tmpfs:
         advancedMounts:
