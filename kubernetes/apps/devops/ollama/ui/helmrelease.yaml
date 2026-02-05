@@ -32,6 +32,7 @@ spec:
               IMAGE_GENERATION_MODEL: dreamshaper_8
               IMAGE_SIZE: 400x400
               IMAGE_STEPS: 8
+              OLLAMA_BASE_URLS: http://ollama.devops.svc.cluster.local:11434
               # OAUTH_ADMIN_ROLES: admin
               # OAUTH_ALLOWED_ROLES: users, admin
               OAUTH_MERGE_ACCOUNTS_BY_EMAIL: true
@@ -68,7 +69,7 @@ spec:
         strategy: RollingUpdate
     persistence:
       data:
-        existingClaim: ollama
+        existingClaim: ollama-model
         globalMounts:
           - path: /app/backend/data
       tmpfs:
