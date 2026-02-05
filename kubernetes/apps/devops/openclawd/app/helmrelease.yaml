@@ -1,187 +1,127 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: openclaw
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 4.6.2
+  url: oci://ghcr.io/bjw-s-labs/helm/app-template
+---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app clawdbot
+  name: openclaw
 spec:
   chartRef:
     kind: OCIRepository
-    name: app-template
+    name: openclaw
   interval: 1h
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
   values:
     controllers:
-      clawdbot:
+      openclaw:
         annotations:
           reloader.stakater.com/auto: "true"
-        containers:
-          app:
+        initContainers:
+          install-tools:
             image:
               repository: ghcr.io/openclaw/openclaw
-              tag: 2026.1.29-amd64
-              pullPolicy: IfNotPresent
+              tag: 2026.2.2@sha256:50121e1f025db70599365dc84162b514f0c79d91eb850e9152e4b2c71594a392
             command:
               - /bin/sh
               - -c
               - |
                 set -e
-                mkdir -p /home/node/.local/bin /home/node/.local/go
+                mkdir -p /home/node/.local/bin /home/node/.openclaw
 
-                # Install gh CLI if not present on PVC
-                if [ ! -f /home/node/.local/bin/gh ]; then
-                  echo "Installing gh CLI..."
+                # Copy config from secret mount (writable copy on PVC)
+                cp /tmp/openclaw-config/openclaw.json /home/node/.openclaw/openclaw.json
+                chmod 600 /home/node/.openclaw/openclaw.json
+
+                # Install uv if not present on PVC
+                if [ ! -f /home/node/.local/bin/uv ]; then
+                  echo "Installing uv..."
                   cd /tmp
-                  curl -fsSL https://github.com/cli/cli/releases/download/v2.61.0/gh_2.61.0_linux_amd64.tar.gz -o gh.tar.gz
-                  tar xzf gh.tar.gz
-                  cp gh_2.61.0_linux_amd64/bin/gh /home/node/.local/bin/
-                  rm -rf gh.tar.gz gh_2.61.0_linux_amd64
+                  curl -fsSL https://astral.sh/uv/install.sh | INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR=/home/node/.local/bin sh
                 fi
 
-                # Install Go if not present on PVC
-                if [ ! -f /home/node/.local/go/bin/go ]; then
-                  echo "Installing Go..."
-                  cd /tmp
-                  curl -fsSL https://go.dev/dl/go1.23.5.linux-amd64.tar.gz -o go.tar.gz
-                  tar xzf go.tar.gz
-                  mv go /home/node/.local/
-                  rm -rf go.tar.gz
-                fi
+                echo "Init container completed successfully"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/openclaw/openclaw
+              tag: 2026.2.2@sha256:50121e1f025db70599365dc84162b514f0c79d91eb850e9152e4b2c71594a392
+            command:
+              - /bin/sh
+              - -c
+              - |
+                # Set up openclawbot CLI symlink
+                ln -sf /app/openclawbot.mjs /home/node/.local/bin/openclawbot
 
-                # Install Homebrew if not present on PVC
-                if [ ! -f /home/node/.local/homebrew/bin/brew ]; then
-                  echo "Installing Homebrew..."
-                  export HOMEBREW_PREFIX=/home/node/.local/homebrew
-                  export HOMEBREW_CELLAR=/home/node/.local/homebrew/Cellar
-                  export HOMEBREW_REPOSITORY=/home/node/.local/homebrew
-                  mkdir -p $HOMEBREW_PREFIX
-                  cd /tmp
-                  git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
-                fi
+                # Run doctor before gateway starts
+                node dist/index.js doctor --fix || true
 
-                # Set up symlink and PATH
-                ln -sf /app/openclaw.mjs /home/node/.local/bin/openclaw
-                export PATH="/home/node/.local/bin:/home/node/.local/go/bin:/home/node/.local/homebrew/bin:$PATH"
-                export GOPATH=/home/node/go
-                export HOMEBREW_PREFIX=/home/node/.local/homebrew
-                export HOMEBREW_CELLAR=/home/node/.local/homebrew/Cellar
-                export HOMEBREW_REPOSITORY=/home/node/.local/homebrew
-
-                exec node /app/dist/index.js gateway --bind lan --port 18789 --allow-unconfigured
+                # Start gateway
+                exec node dist/index.js gateway --bind lan --port 18789 --allow-unconfigured
             env:
               HOME: &homepath /home/node
               TERM: xterm-256color
-              PATH: /home/node/.local/bin:/home/node/.local/go/bin:/home/node/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-              GOPATH: /home/node/go
-              HOMEBREW_PREFIX: /home/node/.local/homebrew
-              HOMEBREW_CELLAR: /home/node/.local/homebrew/Cellar
-              HOMEBREW_REPOSITORY: /home/node/.local/homebrew
-              NODE_ENV: production
-              OPENCLAW_CONFIG_DIR: /home/node/.openclaw
-              OPENCLAW_WORKSPACE_DIR: /home/node/.openclaw/workspace
-              TZ: ${TIMEZONE}
+              PATH: /home/node/.local/bin:/home/node/.local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              TZ: Australia/Sydney
             envFrom:
               - secretRef:
-                  name: *app
-            probes:
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: &port 18789
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-                  failureThreshold: 5
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: *port
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  failureThreshold: 5
-              startup:
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 10
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities: { drop: ["ALL"] }
+                  name: openclaw
             resources:
               requests:
-                cpu: 100m
-                memory: 512Mi
-              limits:
-                memory: 2Gi
+                cpu: 10m
+                memory: 64Mi
+
     defaultPodOptions:
       shareProcessNamespace: true
       securityContext:
-        runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
-        fsGroup: 100
+        fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
-      gateway:
+      app:
         ports:
           http:
-            port: *port
-    ingress:
-      app:
-        enabled: false
-
+            port: 18789
     route:
       app:
-        hostnames: ["clawd.${SECRET_DOMAIN}"]
+        hostnames:
+          - openclaw.${SECRET_DOMAIN}
         parentRefs:
           - name: envoy-internal
             namespace: network
-            sectionName: https
-    persistence:
-      config:
-        existingClaim: "clawdbot"
-      #   globalMounts:
-      #     - path: *homepath
-      # documents:
-      #   existingClaim: "openclaw-documents"
-      #   globalMounts:
-      #     - path: /documents
-      tmp:
-        type: emptyDir
     rbac:
       roles:
-        clawdbot-read-all:
+        openclaw-read-all:
           type: ClusterRole
           rules:
             - apiGroups: [""]
-              resources:
-                [
-                  "nodes",
-                  "services",
-                  "namespaces",
-                  "configmaps",
-                  "persistentvolumes",
-                  "persistentvolumeclaims",
-                  "endpoints",
-                  "resourcequotas",
-                  "limitranges",
-                  "serviceaccounts",
-                ]
+              resources: ["pods", "nodes", "services", "namespaces", "configmaps", "persistentvolumes", "persistentvolumeclaims", "endpoints", "resourcequotas", "limitranges", "serviceaccounts"]
               verbs: ["get", "list", "watch"]
             - apiGroups: [""]
-              resources: ["pods"]
-              verbs: ["get", "list", "watch", "delete"]
+              resources: ["pods/log"]
+              verbs: ["get", "list"]
             - apiGroups: ["apps"]
-              resources: ["daemonsets", "statefulsets", "replicasets"]
+              resources: ["deployments", "daemonsets", "statefulsets", "replicasets"]
               verbs: ["get", "list", "watch"]
-            - apiGroups: ["apps"]
-              resources: ["deployments"]
-              verbs: ["get", "list", "watch", "patch", "update"]
             - apiGroups: ["batch"]
               resources: ["jobs", "cronjobs"]
               verbs: ["get", "list", "watch"]
@@ -192,19 +132,12 @@ spec:
               resources: ["storageclasses"]
               verbs: ["get", "list", "watch"]
             - apiGroups: ["rbac.authorization.k8s.io"]
-              resources:
-                ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+              resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
               verbs: ["get", "list", "watch"]
             - apiGroups: ["metrics.k8s.io"]
               resources: ["nodes", "pods"]
               verbs: ["get", "list", "watch"]
-            - apiGroups: ["kustomize.toolkit.fluxcd.io"]
-              resources: ["kustomizations"]
-              verbs: ["get", "list", "watch"]
-            - apiGroups: ["helm.toolkit.fluxcd.io"]
-              resources: ["helmreleases"]
-              verbs: ["get", "list", "watch"]
-        clawdbot-write-restricted:
+        openclaw-write-restricted:
           type: Role
           rules:
             - apiGroups: [""]
@@ -214,19 +147,32 @@ spec:
               resources: ["deployments"]
               verbs: ["patch", "update"]
       bindings:
-        clawdbot-read-all:
+        openclaw-read-all:
           type: ClusterRoleBinding
           roleRef:
-            identifier: clawdbot-read-all
+            identifier: openclaw-read-all
           subjects:
-            - identifier: clawdbot
-              serviceAccount: clawdbot
-        clawdbot-write-restricted:
+            - identifier: openclaw
+              serviceAccount: openclaw
+        openclaw-write-restricted:
           type: RoleBinding
           roleRef:
-            identifier: clawdbot-write-restricted
+            identifier: openclaw-write-restricted
           subjects:
-            - identifier: clawdbot
-              serviceAccount: clawdbot
+            - identifier: openclaw
+              serviceAccount: openclaw
     serviceAccount:
-      clawdbot: {}
+      openclaw: {}
+    persistence:
+      config:
+        existingClaim: "clawdbot"
+        globalMounts:
+          - path: *homepath
+      openclaw-config:
+        type: secret
+        name: openclaw
+        advancedMounts:
+          openclaw:
+            install-tools:
+              - path: /tmp/openclaw-config
+                readOnly: true
