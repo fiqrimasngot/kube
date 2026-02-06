@@ -92,3 +92,9 @@ spec:
         path: /immich
         globalMounts:
           - path: /usr/src/app/upload
+      external:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /immich
+        globalMounts:
+          - path: /externaltest
