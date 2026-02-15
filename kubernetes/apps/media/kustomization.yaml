@@ -16,7 +16,7 @@ resources:
   - ./jellyseerr/ks.yaml
   - ./prowlarr/ks.yaml
   - ./sabnzbd/ks.yaml
-  # - ./tdarr/ks.yaml
+  - ./tdarr/ks.yaml
   - ./lidarr/ks.yaml
   - ./radarr/ks.yaml
   - ./sonarr/ks.yaml
