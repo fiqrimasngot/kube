@@ -45,16 +45,16 @@ spec:
             port: &port 3000
 
     route:
-      paperless-ai:
+      app:
         hostnames: ["paperless-ai.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        # rules:
-        #   - backendRefs:
-        #       - identifier: *app
-        #         port: *port
+        rules:
+          - backendRefs:
+              - identifier: *app
+                port: *port
     persistence:
       data:
         existingClaim: paperless-ai
