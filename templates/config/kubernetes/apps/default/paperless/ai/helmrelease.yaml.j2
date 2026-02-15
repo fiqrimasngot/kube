@@ -36,6 +36,13 @@ spec:
             image:
               repository: clusterzx/paperless-ai
               tag: 3.0.9
+            env:
+              TZ: ${TIMEZONE}
+              PROCESS_PREDEFINED_DOCUMENTS: true
+              AI_PROVIDER: ollama
+              OLLAMA_MODEL: qwen3:8b
+              SCAN_INTERVAL: "*/30 * * * *"
+              TAGS: AI
 
     service:
       app:
