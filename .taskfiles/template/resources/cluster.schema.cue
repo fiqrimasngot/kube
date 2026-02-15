@@ -46,6 +46,7 @@ import (
 	authentik_secret_key: string & !=""
 	authentik_email_host: string & !=""
 	authentik_email_username: string & !=""
+	discord_bot_token: string & !=""
 	mailgun_authentik_smtp_password: string & !=""
 	authentik_email_from: string & !=""
 	authentik_POSTGRES_USER: string & !=""
