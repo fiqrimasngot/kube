@@ -53,6 +53,7 @@ import (
 	authentik_redis_password: string & !=""
 	paperless_admin_user: string & !=""
 	paperless_admin_password: string & !=""
+	paperless_api_token: string & !=""
 	mealie_secret: string & !=""
 	paperless_secret_key: string & !=""
 	paperless_client_id: string & !=""

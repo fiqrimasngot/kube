@@ -1,56 +1,74 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app paperless-ai
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
-  maxHistory: 2
-  install:
-    createNamespace: true
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: uninstall
-      retries: 3
-  uninstall:
-    keepHistory: false
+  dependsOn: []
+  interval: 15m
   values:
-    defaultPodOptions:
-      securityContext:
-        fsGroup: 65539
-        fsGroupChangePolicy: OnRootMismatch
-
     controllers:
       paperless-ai:
         annotations:
           reloader.stakater.com/auto: "true"
-
         containers:
           app:
             image:
-              repository: clusterzx/paperless-ai
-              tag: 3.0.9
+              repository: docker.io/clusterzx/paperless-ai
+              tag: 3.0.9@sha256:2b65888163fd59716f1c8285b31c5bd0b30c9c3c192c42b516688e3887d4ba60
             env:
-              TZ: ${TIMEZONE}
-              PROCESS_PREDEFINED_DOCUMENTS: true
+              PAPERLESS_API_URL: http://paperless.media.svc.cluster.local:8000/api
+              #PAPERLESS_API_URL: https://dms.${SECRET_MAIN_DOMAIN_NAME}/api
               AI_PROVIDER: ollama
-              OLLAMA_MODEL: qwen3:8b
               SCAN_INTERVAL: "*/30 * * * *"
+              PROCESS_PREDEFINED_DOCUMENTS: yes
+              ADD_AI_PROCESSED_TAG: yes
+              AI_PROCESSED_TAG_NAME: ai-processed
+              USE_PROMPT_TAGS: yes
               TAGS: AI
-
+              USE_EXISTING_DATA: yes
+              OLLAMA_API_URL: http://ollama.media.svc.cluster.local:11434
+              # llama3.2 or phi4
+              OLLAMA_MODEL: phi4-mini:3.8b
+              RESTRICT_TO_EXISTING_TAGS: yes
+              RESTRICT_TO_EXISTING_DOCUMENT_TYPES: yes
+            envFrom:
+              - secretRef:
+                  name: *app
+            resources:
+              requests:
+                cpu: 500m
+                memory: 512Mi
+              limits:
+                cpu: 700m
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        fsGroup: ${APP_GID:=1000}
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: ${APP_GID:=1000}
+        runAsNonRoot: true
+        runAsUser: ${APP_UID:=1000}
+        seccompProfile: { type: RuntimeDefault }
+      affinity:
+        # Image not yet built for arm64
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
     service:
       app:
-        controller: *app
         ports:
           http:
-            port: &port 3000
-
+            port: 3000
     route:
       app:
         hostnames: ["paperless-ai.${SECRET_DOMAIN}"]
@@ -58,13 +76,27 @@ spec:
           - name: envoy-internal
             namespace: network
             sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: *app
-                port: *port
     persistence:
       data:
-        existingClaim: paperless-ai
+        enabled: true
+        existingClaim: *app
         globalMounts:
-          - subPath: data
-            path: /app/data
+          - path: /app/data
+      tmpfs:
+        advancedMounts:
+          paperless-ai:
+            app:
+              - path: /app/logs
+                subPath: logs
+              - path: /app/OPENAPI
+                subPath: openai
+              - path: /app/public/images
+                subPath: cache
+              - path: /home/node/.pm2
+                subPath: home
+              - path: /home/node/nltk_data
+                subPath: nltk_data
+              - path: /tmp
+                subPath: tmp
+        enabled: true
+        type: emptyDir
