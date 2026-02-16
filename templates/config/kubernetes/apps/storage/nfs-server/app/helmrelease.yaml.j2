@@ -66,10 +66,10 @@ spec:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: "${SECRET_NFS_SVC}"
-          coredns.io/hostname: nfs.${SECRET_DOMAIN}
-        ports:
-          nfs:
-            port: 2049
+        #   coredns.io/hostname: nfs.${SECRET_DOMAIN}
+        # ports:
+        #   nfs:
+        #     port: 2049
     persistence:
       exports:
         type: configMap
