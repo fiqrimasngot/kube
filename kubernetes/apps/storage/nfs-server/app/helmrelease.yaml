@@ -21,9 +21,9 @@ spec:
   values:
     controllers:
       nfs-server:
+        strategy: RollingUpdate
         pod:
-          priorityClassName: system-node-critical
-          hostNetwork: true
+          priorityClassName: nfs-critical
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -55,6 +55,11 @@ spec:
                 enabled: true
                 type: TCP
                 port: 2049
+                spec:
+                  periodSeconds: 3
+                  timeoutSeconds: 1
+                  failureThreshold: 2
+                  successThreshold: 1
               liveness: *probes
             securityContext:
               allowPrivilegeEscalation: true
