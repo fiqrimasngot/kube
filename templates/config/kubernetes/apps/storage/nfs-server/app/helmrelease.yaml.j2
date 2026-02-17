@@ -62,7 +62,7 @@ spec:
               privileged: true
     service:
       nfs-server:
-        controller: nfs-server
+        controller: main
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: "${SECRET_NFS_SVC}"
