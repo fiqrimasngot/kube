@@ -1,14 +1,13 @@
-# ⛵ Cluster Template
+# ⛵ Talos Kubernetes Homelab
 
-Welcome to my template designed for deploying a single Kubernetes cluster. Whether you're setting up a cluster at home on bare-metal or virtual machines (VMs), this project aims to simplify the process and make Kubernetes more accessible. This template is inspired by my personal [home-ops](https://github.com/onedr0p/home-ops) repository, providing a practical starting point for anyone interested in managing their own Kubernetes environment.
+This repository is the GitOps source of truth for a **Talos-based Kubernetes cluster**. It contains everything required to bootstrap, operate, and continuously reconcile the environment:
 
-At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—such as [cluster.yaml](./cluster.sample.yaml) and [nodes.yaml](./nodes.sample.yaml)—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
+- Talos machine configuration and patching
+- Flux-based GitOps lifecycle management
+- Kubernetes platform components (networking, ingress, certs, observability, storage)
+- Workload applications grouped by function (media, automation, database, security, etc.)
 
-- Easy configuration through YAML files.
-- Compatibility with home setups, whether on physical hardware or VMs.
-- A modular and extensible approach to cluster deployment and management.
-
-With this approach, you'll gain a solid foundation to build and manage your Kubernetes cluster efficiently.
+The repository is rendered and managed through [makejinja](https://github.com/mirkolenz/makejinja) and task automation via `task`, so infrastructure and app configuration remain declarative and reproducible.
 
 ## ✨ Features
 
@@ -24,7 +23,74 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - Dependency automation w/ [Renovate](https://www.mend.io/renovate)
 - Flux `HelmRelease` and `Kustomization` diffs w/ [flux-local](https://github.com/allenporter/flux-local)
 
-Does this sound cool to you? If so, continue to read on! 👇
+## 🧩 What is currently deployed
+
+The cluster currently manages the following major components.
+
+### Core platform
+
+- **GitOps:** Flux Operator + Flux instance (`flux-system`)
+- **Networking:** Cilium, CoreDNS, Envoy Gateway, cloudflared tunnel, external-dns (`cloudflare-dns`), Pi-hole, tailscale operator
+- **Certificates & secrets:** cert-manager, SOPS-managed encrypted manifests
+- **Reliability ops:** reloader, metrics-server, node-feature-discovery
+
+### Storage & data services
+
+- **Storage backends:** Rook Ceph, OpenEBS, NFS server, CSI NFS driver
+- **Object/file services:** MinIO, Samba
+- **Data protection:** VolSync + Snapshot controller
+- **Data health:** Scrutiny (disk/NAS visibility)
+
+### Observability
+
+- kube-prometheus-stack
+- Loki + Promtail
+- Uptime Kuma
+- blackbox-exporter, smartctl-exporter, speedtest-exporter, dcgm-exporter
+- goldilocks
+
+### Application workloads
+
+- **Databases & middleware:** CloudNativePG, Dragonfly, CouchDB, pgAdmin
+- **Security:** Authentik
+- **Automation / DevOps:** GitHub runner scale-set + controller, Kafka, Ollama, OpenClawd
+- **Productivity / self-hosted apps:** Nextcloud, Paperless, Home Assistant, Homepage, Mealie, n8n, Wallabag, SearXNG, Shlink, Homebox, Actual, Kiwix, ByteStash, CyberChef
+- **Media stack:** Jellyfin, Jellyseerr, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, SABnzbd, Tdarr, Immich, and supporting services
+
+## 🏗️ Repository / system structure
+
+```text
+.
+├── bootstrap/                 # Bootstrap logic for Talos and Flux/app bring-up
+├── talos/                     # Talos cluster config, env files, secrets, machine patches
+│   ├── talconfig.yaml
+│   ├── talenv.yaml
+│   └── patches/
+├── kubernetes/
+│   ├── flux/                  # Flux cluster bootstrap and reconciliation entrypoints
+│   ├── components/            # Shared reusable kustomize components
+│   └── apps/                  # All deployed workloads by domain
+│       ├── kube-system/
+│       ├── network/
+│       ├── storage/
+│       ├── observability/
+│       ├── database/
+│       ├── media/
+│       ├── security/
+│       ├── devops/
+│       └── default/
+├── templates/                 # makejinja templates used to render cluster config
+├── scripts/                   # Helper scripts used by task/bootstrap operations
+└── Taskfile.yaml              # Primary automation entrypoint
+```
+
+### Talos-first workflow
+
+1. Configure cluster/node definitions (`cluster.yaml`, `nodes.yaml`)
+2. Render manifests and Talos configuration (`task configure`)
+3. Bootstrap Talos (`task bootstrap:talos`)
+4. Bootstrap CNI + Flux + platform apps (`task bootstrap:apps`)
+5. Let Flux continuously reconcile all workloads from this repo
 
 ## 🚀 Let's Go!
 
