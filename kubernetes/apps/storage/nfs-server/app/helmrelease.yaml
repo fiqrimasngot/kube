@@ -60,16 +60,16 @@ spec:
               allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
               privileged: true
-    service:
-      nfs-server:
-        controller: nfs-server
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: "${SECRET_NFS_SVC}"
-          coredns.io/hostname: nfs.${SECRET_DOMAIN}
-        ports:
-          nfs:
-            port: 2049
+    # service:
+    #   nfs-server:
+    #     controller: nfs-server
+    #     type: LoadBalancer
+    #     annotations:
+    #       lbipam.cilium.io/ips: "${SECRET_NFS_SVC}"
+    #       coredns.io/hostname: nfs.${SECRET_DOMAIN}
+    #     ports:
+    #       nfs:
+    #         port: 2049
     persistence:
       exports:
         type: configMap
