@@ -21,9 +21,9 @@ spec:
   values:
     controllers:
       nfs-server:
-        strategy: RollingUpdate
         pod:
-          # priorityClassName: nfs-critical
+          priorityClassName: system-node-critical
+          hostNetwork: true
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -32,7 +32,7 @@ spec:
             runAsNonRoot: false
             seccompProfile: { type: Unconfined }
         containers:
-          nfs-server:
+          main:
             image:
               # Only latest tag is published and digest is overwritten each update so don't pin digest
               # e.g. node boots after update, latest@sha no longer exists, new update not merged == no nfs
@@ -55,27 +55,11 @@ spec:
                 enabled: true
                 type: TCP
                 port: 2049
-                spec:
-                  periodSeconds: 3
-                  timeoutSeconds: 1
-                  failureThreshold: 2
-                  successThreshold: 1
               liveness: *probes
             securityContext:
               allowPrivilegeEscalation: true
               readOnlyRootFilesystem: false
               privileged: true
-    service:
-      nfs-server:
-        controller: nfs-server
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: "10.32.1.19"
-          # lbipam.cilium.io/ips: "${SECRET_NFS_SVC}"
-          coredns.io/hostname: nfs.${SECRET_DOMAIN}
-        ports:
-          nfs:
-            port: 2049
     persistence:
       exports:
         type: configMap
