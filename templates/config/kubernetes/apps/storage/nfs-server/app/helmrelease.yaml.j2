@@ -23,7 +23,7 @@ spec:
       nfs-server:
         strategy: RollingUpdate
         pod:
-          priorityClassName: nfs-critical
+          # priorityClassName: nfs-critical
           securityContext:
             runAsUser: 0
             runAsGroup: 0
