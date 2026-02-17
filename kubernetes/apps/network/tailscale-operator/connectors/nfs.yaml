@@ -2,10 +2,10 @@
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: ts-dns-cidrs
+  name: ts-nfs
 spec:
-  hostname: ts-dns-cidrs
+  hostname: ts-nfs
   exitNode: true
   subnetRouter:
     advertiseRoutes:
-      - "${SECRET_PIHOLE_SVC}/32"
+      - "${SECRET_NFS_SVC}/32"
