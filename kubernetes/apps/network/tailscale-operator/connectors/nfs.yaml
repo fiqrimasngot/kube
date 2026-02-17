@@ -2,9 +2,9 @@
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
-  name: ts-nfs
+  name: ts-nfs-svc
 spec:
-  hostname: ts-nfs
+  hostname: ts-nfs-svc
   exitNode: true
   subnetRouter:
     advertiseRoutes:
