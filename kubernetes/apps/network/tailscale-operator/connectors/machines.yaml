@@ -5,6 +5,7 @@ metadata:
   name: ts-pod-cidrs
 spec:
   hostname: ts-pod-cidrs
+  proxyClass: tun-access
   exitNode: false
   subnetRouter:
     advertiseRoutes:
