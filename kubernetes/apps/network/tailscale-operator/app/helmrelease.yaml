@@ -24,9 +24,13 @@ spec:
         name: tailscale
   values:
     operatorConfig:
-      image:
-        repository: ghcr.io/tailscale/k8s-operator
-      hostname: "tailscale-operator-k3s"
+      hostname: tailscale-operator
+      defaultTags:
+        - tag:k8s
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
     apiServerProxyConfig:
       mode: "true"
   valuesFrom:
