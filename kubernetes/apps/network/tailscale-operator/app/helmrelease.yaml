@@ -28,9 +28,7 @@ spec:
         repository: ghcr.io/tailscale/k8s-operator
       hostname: "tailscale-operator-k3s"
     apiServerProxyConfig:
-      mode: "false"
-    proxyClass:
-      defaultProxyClass: "tun-access"
+      mode: "true"
   valuesFrom:
     - kind: Secret
       name: operator-oauth
