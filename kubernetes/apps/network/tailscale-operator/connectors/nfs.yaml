@@ -6,6 +6,7 @@ metadata:
 spec:
   hostname: ts-nfs-svc
   exitNode: true
+  proxyClass: homelab-default
   subnetRouter:
     advertiseRoutes:
       - "${SECRET_NFS_SVC}/32"

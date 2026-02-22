@@ -1,18 +1,14 @@
 apiVersion: tailscale.com/v1alpha1
 kind: ProxyClass
 metadata:
-  name: tun-access
+  name: homelab-default
 spec:
   statefulSet:
     pod:
       tailscaleContainer:
         resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
           limits:
-            kernel.org/tun: "1"
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-            add:
-              - NET_ADMIN
+            memory: 256Mi
