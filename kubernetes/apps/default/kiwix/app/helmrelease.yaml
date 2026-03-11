@@ -71,3 +71,20 @@ spec:
     persistence:
       config:
         existingClaim: *app
+      data:
+        existingClaim: kiwix-library
+        globalMounts:
+          - subPath: data
+            path: /data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kiwix-library
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 700Gi
