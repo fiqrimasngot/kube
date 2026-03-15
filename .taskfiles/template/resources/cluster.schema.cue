@@ -114,6 +114,7 @@ import (
 	secret_sunshine_svc: net.IPv4 & !=""
 	alert_manager_discord_webhook: string & !=""
 	alert_manager_slack_webhook: string & !=""
+	ts_authkey: string & !=""
 }
 
 #Config
