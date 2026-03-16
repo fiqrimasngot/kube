@@ -141,12 +141,6 @@ spec:
         # path: ${SECRET_NFS_MNT}/minio
         globalMounts:
           - path: /data
-      library:
-        type: nfs
-        server: ${SECRET_NFS_SVC}
-        path: /immich
-        globalMounts:
-          - path: /usr/src/app/upload
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
