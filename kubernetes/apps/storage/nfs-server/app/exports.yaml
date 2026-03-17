@@ -4,6 +4,6 @@ metadata:
   name: nfs-exports
 data:
   exports: |-
-    /export/doc 10.42.0.0/16(rw,sync,no_subtree_check) 10.43.0.0/16(rw,sync,no_subtree_check)
-    /export/immich 10.42.0.0/16(rw,sync,no_subtree_check) 10.43.0.0/16(rw,sync,no_subtree_check)
-    /export/media 100.78.134.82(rw,sync,no_subtree_check) 100.108.194.87(rw,sync,no_subtree_check) 10.42.0.0/16(rw,sync,no_subtree_check) 10.43.0.0/16(rw,sync,no_subtree_check)
+    /export/doc 10.42.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check) 10.43.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check)
+    /export/immich 10.42.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check) 10.43.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check)
+    /export/media 100.78.134.82(rw,sync,no_subtree_check) 100.108.194.87(rw,sync,no_subtree_check) 10.42.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check) 10.43.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check)
