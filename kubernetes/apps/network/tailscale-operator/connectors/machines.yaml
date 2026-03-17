@@ -5,8 +5,6 @@ metadata:
   name: ts-pod-cidrs
 spec:
   hostname: ts-pod-cidrs
-  exitNode: false
-  proxyClass: homelab-default
   subnetRouter:
     advertiseRoutes:
       - '10.32.0.0/16'
