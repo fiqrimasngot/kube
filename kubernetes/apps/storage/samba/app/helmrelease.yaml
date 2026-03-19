@@ -101,6 +101,10 @@ spec:
               # Allow use of LB IP
               - "host msdfs = no"
 
+              - "server min protocol = NT1"
+              - "server max protocol = SMB3"
+              - "client min protocol = NT1"
+
             share:
               - name: camera
                 path: /samba/camera
