@@ -68,7 +68,7 @@ spec:
       camera:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /doc
+        path: /doc/camera
         globalMounts:
           - path: /samba/camera
     configMaps:
