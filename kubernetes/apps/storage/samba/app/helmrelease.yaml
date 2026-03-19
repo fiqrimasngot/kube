@@ -104,6 +104,8 @@ spec:
               - "server min protocol = NT1"
               - "server max protocol = SMB3"
               - "client min protocol = NT1"
+              - "ntlm auth = yes"
+              - "disable netbios = no"
 
             share:
               - name: camera
