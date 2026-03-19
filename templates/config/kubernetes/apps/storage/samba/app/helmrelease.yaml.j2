@@ -65,6 +65,12 @@ spec:
         path: /doc/TimeMachine
         globalMounts:
           - path: /samba/time-machine
+      camera:
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: /doc
+        globalMounts:
+          - path: /samba/camera
     configMaps:
       config:
         data:
@@ -96,6 +102,14 @@ spec:
               - "host msdfs = no"
 
             share:
+              - name: camera
+                path: /samba/camera
+                browsable: yes
+                readonly: no
+                guestok: no
+                validusers: time_machine_users
+                writelist: time_machine_users
+
               - name: time_machine
                 path: /samba/time-machine
                 browsable: yes
