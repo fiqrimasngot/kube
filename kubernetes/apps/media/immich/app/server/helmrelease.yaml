@@ -80,14 +80,6 @@ spec:
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: Immich
           gethomepage.dev/icon: sh-immich
-          # gethomepage.dev/widget.url: "http://immich-server.media.svc.cluster.local:2283"
-          # gethomepage.dev/widget.type: immich
-          # gethomepage.dev/widget.key: "${IMMICH_API}"
-          # gethomepage.dev/widget.version: "2"
-          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-          nginx.ingress.kubernetes.io/proxy-body-size: "1g"
-          nginx.ingress.kubernetes.io/upstream-hash-by: "$client_ip"
-          # external-dns.alpha.kubernetes.io/cloudflare-custom-hostname: &host photos.${SECRET_DOMAIN}
     persistence:
       # data:
       #   existingClaim: backups
