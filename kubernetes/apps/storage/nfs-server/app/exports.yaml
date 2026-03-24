@@ -8,7 +8,7 @@ data:
     /export *(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check)
 
     /export/doc    10.42.0.0/16(rw,sync,no_subtree_check) 10.32.0.0/16(rw,sync,no_subtree_check)
-    /export/immich 10.42.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check) 10.32.0.0/16(rw,fsid=0,crossmnt,no_root_squash,insecure,no_subtree_check)
+    /export/immich 10.42.0.0/16(rw,crossmnt,no_root_squash,insecure,no_subtree_check) 10.32.0.0/16(rw,crossmnt,no_root_squash,insecure,no_subtree_check)
 
     /export/media  10.42.0.0/16(rw,sync,no_subtree_check) \
                    10.32.0.0/16(rw,sync,no_subtree_check) \
