@@ -68,7 +68,7 @@ spec:
       camera:
         type: nfs
         server: ${SECRET_NFS_SVC}
-        path: /doc
+        path: /doc/camera
         globalMounts:
           - path: /samba/camera
     configMaps:
@@ -101,15 +101,20 @@ spec:
               # Allow use of LB IP
               - "host msdfs = no"
 
+              - "server min protocol = NT1"
+              - "server max protocol = SMB3"
+              - "client min protocol = NT1"
+              - "ntlm auth = yes"
+              - "disable netbios = no"
+
             share:
               - name: camera
-                path: /samba/time-machine
+                path: /samba/camera
                 browsable: yes
                 readonly: no
                 guestok: no
                 validusers: time_machine_users
                 writelist: time_machine_users
-
               - name: time_machine
                 path: /samba/time-machine
                 browsable: yes
