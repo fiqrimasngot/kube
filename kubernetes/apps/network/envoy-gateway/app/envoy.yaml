@@ -110,7 +110,7 @@ spec:
     - type: Brotli
     - type: Gzip
   connection:
-    bufferLimit: 8Mi
+    bufferLimit: 0
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
