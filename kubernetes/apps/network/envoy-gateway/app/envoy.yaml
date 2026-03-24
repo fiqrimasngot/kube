@@ -101,16 +101,24 @@ spec:
           - kind: Secret
             name: ${SECRET_DOMAIN/./-}-production-tls
 ---
+# yaml-language-server: $schema=https://schemas.budimanjojo.com/gateway.envoyproxy.io/backendtrafficpolicy_v1alpha1.json
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
   name: envoy
 spec:
-  compression:
+  compressor:
+    - type: Zstd
+      zstd: {}
     - type: Brotli
+      brotli: {}
     - type: Gzip
-  connection:
-    bufferLimit: 0
+      gzip: {}
+  retry:
+    numRetries: 2
+    retryOn:
+      triggers:
+        - reset
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
@@ -128,8 +136,6 @@ spec:
     xForwardedFor:
       trustedCIDRs:
         - "10.42.0.0/16"
-  connection:
-    bufferLimit: 0
   http2:
     onInvalidMessage: TerminateStream
   http3: {}
@@ -137,9 +143,6 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
   tcpKeepalive: {}
-  timeout:
-    http:
-      requestReceivedTimeout: 0s
   tls:
     minVersion: "1.2"
     alpnProtocols:
