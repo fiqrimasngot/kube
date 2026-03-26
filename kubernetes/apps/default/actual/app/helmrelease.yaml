@@ -47,7 +47,7 @@ spec:
       main:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
             sectionName: https
         annotations:
@@ -56,7 +56,7 @@ spec:
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: sh-actual-budget
-          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"main\" \"ports\" \"http\" \"port\" }}"
+          gethomepage.dev/siteMonitor: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "main" "ports" "http" "port" }}'
     persistence:
       data:
         enabled: true
