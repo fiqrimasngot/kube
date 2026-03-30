@@ -125,9 +125,8 @@ spec:
   timeout:
     http:
       requestTimeout: 0s
-      idleTimeout: 300s
   requestBuffer:
-    limit: 500Mi # Increase this if you upload large 4K videos
+    limit: 1Gi # Increase this if you upload large 4K videos
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: ClientTrafficPolicy
