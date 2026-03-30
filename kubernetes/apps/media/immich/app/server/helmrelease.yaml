@@ -69,7 +69,7 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-            # sectionName: https
+            sectionName: https
         rules:
           - backendRefs:
               - identifier: immich-server
