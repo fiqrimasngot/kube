@@ -74,6 +74,8 @@ spec:
           - backendRefs:
               - identifier: immich-server
                 port: *port
+            timeouts:
+              request: 0s
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Photo storage
