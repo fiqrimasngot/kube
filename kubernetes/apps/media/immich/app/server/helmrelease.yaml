@@ -67,9 +67,9 @@ spec:
       immich-server:
         hostnames: ["photos.${SECRET_DOMAIN}"]
         parentRefs:
-          - name: envoy-external
+          - name: envoy-internal
             namespace: network
-            sectionName: https
+            # sectionName: https
         rules:
           - backendRefs:
               - identifier: immich-server
