@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: docker.io/ollama/ollama
-              tag: 0.15.4
+              tag: 0.5.11
             env:
               TZ: ${TIMEZONE}
               NVIDIA_VISIBLE_DEVICES: all
@@ -48,8 +48,6 @@ spec:
                 memory: 25Gi
                 nvidia.com/gpu: 1
                 # cpu: 500m
-
-
 
         pod:
           runtimeClassName: nvidia
