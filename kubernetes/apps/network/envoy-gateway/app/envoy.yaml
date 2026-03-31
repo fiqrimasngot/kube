@@ -125,8 +125,6 @@ spec:
   timeout:
     http:
       requestTimeout: 0s
-      idleTimeout: 300s        # Fixes the ~65s disconnect
-  # Ensure the connection to the Immich pod stays alive
   tcpKeepalive:
     idleTime: 60s
     interval: 20s
