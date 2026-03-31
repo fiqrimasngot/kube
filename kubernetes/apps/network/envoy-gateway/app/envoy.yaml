@@ -140,8 +140,6 @@ spec:
   connection:
     bufferLimit: 4Mi
     maxAcceptPerSocketEvent: 0
-  http:
-    maxBodySize: 0 # UNLIMITED upload size for 4K videos
   http2:
     initialStreamWindowSize: 512Ki
     initialConnectionWindowSize: 8Mi
