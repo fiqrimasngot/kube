@@ -125,8 +125,12 @@ spec:
   timeout:
     http:
       requestTimeout: 0s
-  requestBuffer:
-    limit: 1Gi # Increase this if you upload large 4K videos
+      idleTimeout: 300s        # Fixes the ~65s disconnect
+  # Ensure the connection to the Immich pod stays alive
+  tcpKeepalive:
+    idleTime: 60s
+    interval: 20s
+    probes: 3
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: ClientTrafficPolicy
@@ -139,6 +143,8 @@ spec:
   connection:
     bufferLimit: 4Mi
     maxAcceptPerSocketEvent: 0
+  http:
+    maxBodySize: 0             # UNLIMITED upload size for 4K videos
   http2:
     initialStreamWindowSize: 512Ki
     initialConnectionWindowSize: 8Mi
