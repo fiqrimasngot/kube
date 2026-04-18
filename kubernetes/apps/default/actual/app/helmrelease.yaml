@@ -28,7 +28,7 @@ spec:
           main:
             image:
               repository: ghcr.io/actualbudget/actual-server
-              tag: 26.2.0
+              tag: 26.4.0@sha256:b0e732e2c41b3dc468a71548e88ef76d3f0c157fc43d15fa05d14ec1c5747e1e
             # resources:
             #   requests:
             #     cpu: 12m
