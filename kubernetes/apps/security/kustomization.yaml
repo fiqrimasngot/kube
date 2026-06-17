@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: security
 
 components:
+  - ../../components/repos
   - ../../components/sops
 
 resources:
