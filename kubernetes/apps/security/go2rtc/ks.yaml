@@ -13,14 +13,14 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
-    # substitute:
-    #   APP: *app
-    #   VOLSYNC_CAPACITY: 2Gi
-    #   APP_UID: "1001"
-    #   APP_GID: "1001"
+    substitute:
+      APP: *app
+      VOLSYNC_CAPACITY: 2Gi
+      APP_UID: "65534"
+      APP_GID: "65534"
   path: ./kubernetes/apps/security/go2rtc/app
-  # components:
-  #   - ../../../../components/volsync
+  components:
+    - ../../../../components/volsync
   prune: true
   sourceRef:
     kind: GitRepository
