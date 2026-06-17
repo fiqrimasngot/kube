@@ -9,3 +9,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./authentik/ks.yaml
+  - ./go2rtc/ks.yaml

@@ -1,0 +1,32 @@
+---
+log:
+  streams: error # UniFi Protect based setups spam the logs with WARN messages
+api:
+  listen: :80
+rtsp:
+  listen: :554
+webrtc:
+  listen: :8555
+  candidates:
+    - 10.44.0.24:8555
+    - stun:8555
+  ice_servers:
+    - urls:
+        - stun:stun.cloudflare.com:3478
+streams:
+  entrance_lq:
+    - rtspx://10.0.1.2:7441/aR7s7R2TTtXyxYU6
+  entrance_hq:
+    - rtspx://10.0.1.2:7441/tRQBbVxBgt53Kiq0
+  dining_room_lq:
+    - rtspx://10.0.1.2:7441/UArYysQ9DZfj6vPU
+  dining_room_hq:
+    - rtspx://10.0.1.2:7441/UkGlOo8qDsabuGNC
+  living_room_lq:
+    - rtspx://10.0.1.2:7441/7LvLL0WaeL1vFdfO
+  living_room_hq:
+    - rtspx://10.0.1.2:7441/6vCB9HnOkFjSMOfW
+  office_lq:
+    - rtspx://10.0.1.2:7441/zsEl9fSROKT3KBVu
+  office_hq:
+    - rtspx://10.0.1.2:7441/d5SYyhFVj4pLIJiF
