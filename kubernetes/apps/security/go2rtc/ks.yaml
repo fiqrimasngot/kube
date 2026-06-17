@@ -19,8 +19,8 @@ spec:
     #   APP_UID: "1001"
     #   APP_GID: "1001"
   path: ./kubernetes/apps/security/go2rtc/app
-  components:
-    - ../../../../components/volsync
+  # components:
+  #   - ../../../../components/volsync
   prune: true
   sourceRef:
     kind: GitRepository
