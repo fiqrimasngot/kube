@@ -1,0 +1,69 @@
+---
+auth:
+  enabled: false
+# mqtt:
+#   host: mqtt.${DOMAIN}
+database:
+  path: /data/frigate.db
+# detectors:
+#   coral:
+#     type: edgetpu
+#     device: pci
+# ffmpeg:
+#   output_args:
+#     record: preset-record-ubiquiti
+birdseye:
+  enabled: true
+  mode: continuous
+record:
+  enabled: true
+  motion:
+    days: 7
+  alerts:
+    retain:
+      days: 30
+      mode: motion
+  detections:
+    retain:
+      days: 30
+      mode: motion
+snapshots:
+  enabled: true
+  retain:
+    default: 5
+    objects:
+      person: 30
+review:
+  alerts:
+    labels:
+      - car
+      - person
+      - speech
+  detections:
+    labels:
+      - bark
+      - dog
+objects:
+  track:
+    - person
+    - dog
+    - cat
+cameras:
+  balcony:
+    ffmpeg:
+      inputs:
+        - path: rtsp://go2rtc.security.svc.cluster.local:554/balcony
+          roles:
+            - detect
+        - path: rtsp://go2rtc.security.svc.cluster.local:554/balcony
+          roles:
+            - record
+  living_room:
+    ffmpeg:
+      inputs:
+        - path: rtsp://go2rtc.security.svc.cluster.local:554/livingroom
+          roles:
+            - detect
+        - path: rtsp://go2rtc.security.svc.cluster.local:554/livingroom
+          roles:
+            - record
