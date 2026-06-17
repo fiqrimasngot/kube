@@ -40,8 +40,6 @@ spec:
               requests:
                 cpu: 500m
                 memory: 1Gi
-              limits:
-                memory: 4Gi
     service:
       app:
         ports:
