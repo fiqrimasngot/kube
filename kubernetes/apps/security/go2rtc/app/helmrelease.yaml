@@ -72,14 +72,13 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-    persistence:
-      config:
-        type: configMap
-        name: go2rtc-config
-        globalMounts:
-          - path: /config/go2rtc.yaml
-            subPath: go2rtc.yaml
-            readOnly: true
     # persistence:
     #   config:
-    #     existingClaim: *app
+    #     type: configMap
+    #     name: go2rtc-config
+    #     globalMounts:
+    #       - path: /config/go2rtc.yaml
+    #         subPath: go2rtc.yaml
+    persistence:
+      config:
+        existingClaim: *app
