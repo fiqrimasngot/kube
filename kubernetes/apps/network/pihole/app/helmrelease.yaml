@@ -3,7 +3,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name:  pihole
+  name: pihole
 spec:
   interval: 2h
   timeout: 3m
@@ -137,6 +137,7 @@ spec:
         - server=/${SECRET_DOMAIN}/${SECRET_GATEWAY_VIP}
       customDnsEntries:
         - address=/k8s.${SECRET_DOMAIN}/10.32.1.10
+        - address=/photos.${SECRET_DOMAIN}/10.32.1.23
     dualStack:
       enabled: false
     extraEnvVars:
@@ -277,4 +278,3 @@ spec:
     webHttps: "443"
     whitelist:
       - translate.google.com
-
