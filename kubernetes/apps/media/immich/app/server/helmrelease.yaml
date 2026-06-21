@@ -59,6 +59,8 @@ spec:
         fsGroup: 1000
     service:
       immich-server:
+        annotations:
+          lbipam.cilium.io/ips: "10.32.1.23"
         controller: main
         ports:
           http:
