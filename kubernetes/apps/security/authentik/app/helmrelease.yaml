@@ -28,7 +28,7 @@ spec:
     spec:
       # renovate: registryUrl=https://charts.goauthentik.io
       chart: authentik
-      version: 2026.5.3
+      version: 2025.10.3
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -67,8 +67,8 @@ spec:
     redis:
       enabled: false
     #   architecture: standalone
-    # global:
-    #   storageClass: longhorn-strict-local-no-replication
+      # global:
+      #   storageClass: longhorn-strict-local-no-replication
     authentik:
       #secret_key: #in cret
       #log_level: debug
@@ -90,12 +90,12 @@ spec:
       addPrometheusAnnotations: true
     # Enable Database Backups to S3
     backup:
-      accessKey:
-        name: cloudnative-pg
-        key: aws-access-key-id
-      secretKey:
-        name: cloudnative-pg
-        key: aws-secret-access-key
-      bucket: authentik-db
-      # region: eu-central-1
-      host: http://minio.storage.svc.cluster.local:9000
+        accessKey:
+          name: cloudnative-pg
+          key: aws-access-key-id
+        secretKey:
+          name: cloudnative-pg
+          key: aws-secret-access-key
+        bucket: authentik-db
+        # region: eu-central-1
+        host: http://minio.storage.svc.cluster.local:9000
