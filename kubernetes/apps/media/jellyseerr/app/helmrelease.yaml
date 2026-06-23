@@ -23,7 +23,7 @@ spec:
           app:
             image:
               repository: fallenbagel/jellyseerr
-              tag: 3.3.0
+              tag: 2.7.3
             env:
               TZ: ${TIMEZOME}
               LOG_LEVEL: "info"
