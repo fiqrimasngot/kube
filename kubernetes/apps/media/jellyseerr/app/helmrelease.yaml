@@ -23,7 +23,7 @@ spec:
           app:
             image:
               repository: fallenbagel/jellyseerr
-              tag: 2.7.3
+              tag: 3.3.0
             env:
               TZ: ${TIMEZOME}
               LOG_LEVEL: "info"
@@ -79,13 +79,13 @@ spec:
               - identifier: app
                 port: *port
         annotations:
-          nginx.ingress.kubernetes.io/custom-http-errors: "400,404,500,502,503,504"  # Using a smaller set than the default to fix javascript issues with overseer
+          nginx.ingress.kubernetes.io/custom-http-errors: "400,404,500,502,503,504" # Using a smaller set than the default to fix javascript issues with overseer
           gethomepage.dev/enabled: "true"
           gethomepage.dev/description: Media Request
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: "{{ .Release.Name }}"
-          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "app" "ports" "http" "port" }}'
           gethomepage.dev/widget.type: jellyseerr
           gethomepage.dev/widget.key: "${JELLYSEERR_API}"
 
