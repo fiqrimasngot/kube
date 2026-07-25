@@ -20,7 +20,7 @@ spec:
       APP_UID: "33"
       APP_GID: "33"
       VOLSYNC_CAPACITY: 5Gi
-      VOLSYNC_CACHE_CAPACITY: 10Gi
+      VOLSYNC_CACHE_CAPACITY: 20Gi
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
