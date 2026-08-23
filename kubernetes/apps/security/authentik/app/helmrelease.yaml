@@ -80,9 +80,9 @@ spec:
       initContainers:
         - name: init-db
           image: ghcr.io/home-operations/postgres-init:18.4@sha256:ebd9d30add17acdf935d73eb004758c7dfd9388aaa605fda70ad74378ab92aec
-          envFrom:
-            - secretRef:
-                name: *secret-postgres
+          # envFrom:
+          #   - secretRef:
+          #       name: *secret-postgres
       metrics:
         enabled: true
         serviceMonitor:
