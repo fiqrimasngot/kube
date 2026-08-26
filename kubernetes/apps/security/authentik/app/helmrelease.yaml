@@ -64,7 +64,7 @@ spec:
           # annotations:
           # external-dns.alpha.kubernetes.io/target: sso.${SECRET_DOMAIN}
           parentRefs:
-            - name: envoy-external
+            - name: external
               namespace: network
               sectionName: https
         annotations:
@@ -83,9 +83,9 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 150
-      volumeMounts:
-        - mountPath: /media
-          name: authentik-media
+      # volumeMounts:
+      #   - mountPath: /media
+      #     name: authentik-media
       initContainers:
         - name: init-db
           image: ghcr.io/home-operations/postgres-init:18.4@sha256:ebd9d30add17acdf935d73eb004758c7dfd9388aaa605fda70ad74378ab92aec
@@ -98,15 +98,11 @@ spec:
           enabled: true
       ingress:
         enabled: true
-        ingressClassName: internal
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        ingressClassName: external
+        # annotations:
+        #   external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         hosts:
-          - &host sso.${SECRET_DOMAIN}
-        tls:
-          - secretName: ${SECRET_DOMAIN/./-}-tls
-            hosts:
-              - *host
+          - &host auth.${SECRET_DOMAIN}
 
     worker:
       replicas: 1
