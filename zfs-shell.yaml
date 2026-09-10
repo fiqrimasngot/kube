@@ -11,4 +11,5 @@ spec:
     - name: shell
       image: debian
       command: ["sleep", "infinity"]
-      securityContext: privileged: true
+      securityContext:
+        privileged: true
