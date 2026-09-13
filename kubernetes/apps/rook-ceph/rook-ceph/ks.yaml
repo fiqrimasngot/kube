@@ -8,6 +8,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/rook-ceph/rook-ceph/app
   prune: true
+  dependsOn:
+    - name: snapshot-controller
+      namespace: volsync-system
   sourceRef:
     kind: GitRepository
     name: flux-system
