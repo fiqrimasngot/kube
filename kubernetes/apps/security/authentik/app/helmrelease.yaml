@@ -86,12 +86,12 @@ spec:
       # volumeMounts:
       #   - mountPath: /media
       #     name: authentik-media
-      initContainers:
-        - name: init-db
-          image: ghcr.io/home-operations/postgres-init:18.4@sha256:ebd9d30add17acdf935d73eb004758c7dfd9388aaa605fda70ad74378ab92aec
-          # envFrom:
-          #   - secretRef:
-          #       name: *secret-postgres
+      # initContainers:
+      #   - name: init-db
+      #     image: ghcr.io/home-operations/postgres-init:18.4@sha256:ebd9d30add17acdf935d73eb004758c7dfd9388aaa605fda70ad74378ab92aec
+      #     envFrom:
+      #       - secretRef:
+      #           name: *secret-postgres
       metrics:
         enabled: true
         serviceMonitor:
@@ -130,7 +130,12 @@ spec:
           cpu: 750m
           memory: 1Gi
     postgresql:
-      enabled: false
+      enabled: true
+      primary:
+        persistence:
+          existingClaim: authentik-db
+      auth:
+        password: ${SECRET_AUTHENTIK_DB_PASSWORD}
     redis:
       enabled: false
     prometheus:
