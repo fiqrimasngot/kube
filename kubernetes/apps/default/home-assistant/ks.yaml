@@ -6,6 +6,9 @@ metadata:
 spec:
   interval: 1h
   path: ./kubernetes/apps/default/home-assistant/app
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   components:
     - ../../../../components/volsync
   postBuild:
