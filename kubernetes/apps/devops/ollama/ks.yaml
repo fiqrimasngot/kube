@@ -5,6 +5,9 @@ metadata:
   name: &app ollama-backend
 spec:
   targetNamespace: devops
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   path: ./kubernetes/apps/devops/ollama/backend
   prune: true
   postBuild:
@@ -26,6 +29,9 @@ metadata:
   name: &app ollama-ui
 spec:
   targetNamespace: devops
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
