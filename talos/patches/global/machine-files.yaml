@@ -22,6 +22,7 @@ machine:
       - name: nvme_tcp
       - name: vfio_pci
       - name: uinput
+      - name: nfsd
   # disks:
   #     - device: /dev/sdb
   #       partitions:
