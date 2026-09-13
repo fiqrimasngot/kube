@@ -1,6 +1,8 @@
 machine:
-  network:
-    disableSearchDomain: true
-    nameservers:
-      - 1.1.1.1
-      - 1.0.0.1
+  files:
+    - content: |
+        TS_AUTHKEY=tskey-auth-kuBDEp9ud921CNTRL-mrriMntGAAFcBmWAFjo9AFBbfAS1vw9B
+        TS_EXTRA_ARGS=--advertise-exit-node # Optional: delete if not needed
+      permissions: 0o600
+      path: /var/etc/tailscale/auth.env
+      op: create

@@ -9,6 +9,8 @@ spec:
   dependsOn:
     - name: minio
       namespace: storage
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   postBuild:
     substituteFrom:
       - name: cluster-secrets
