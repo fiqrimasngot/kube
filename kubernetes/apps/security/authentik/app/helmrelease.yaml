@@ -64,9 +64,8 @@ spec:
           # annotations:
           # external-dns.alpha.kubernetes.io/target: sso.${SECRET_DOMAIN}
           parentRefs:
-            - name: external
+            - name: envoy-external
               namespace: network
-              sectionName: https
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
