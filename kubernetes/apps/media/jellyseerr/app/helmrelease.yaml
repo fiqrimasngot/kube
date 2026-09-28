@@ -25,7 +25,7 @@ spec:
               repository: fallenbagel/jellyseerr
               tag: 2.7.3
             env:
-              TZ: ${TIMEZOME}
+              TZ: ${TIMEZONE}
               LOG_LEVEL: "info"
             probes:
               liveness: &probes
