@@ -1,0 +1,1393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "AlertManager": {
+      "additionalProperties": false,
+      "properties": {
+        "discord_webhook": {
+          "default": "",
+          "title": "Discord Webhook",
+          "type": "string"
+        },
+        "slack_webhook": {
+          "default": "",
+          "title": "Slack Webhook",
+          "type": "string"
+        }
+      },
+      "title": "AlertManager",
+      "type": "object"
+    },
+    "Api": {
+      "additionalProperties": false,
+      "properties": {
+        "addr": {
+          "format": "ipv4",
+          "title": "Addr",
+          "type": "string"
+        },
+        "tls_sans": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Fqdn"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tls Sans"
+        }
+      },
+      "required": [
+        "addr"
+      ],
+      "title": "Api",
+      "type": "object"
+    },
+    "Asn": {
+      "type": "string"
+    },
+    "Authentik": {
+      "additionalProperties": false,
+      "properties": {
+        "secret_key": {
+          "default": "",
+          "title": "Secret Key",
+          "type": "string"
+        },
+        "postgres_password": {
+          "default": "",
+          "title": "Postgres Password",
+          "type": "string"
+        },
+        "email_host": {
+          "default": "",
+          "title": "Email Host",
+          "type": "string"
+        },
+        "email_username": {
+          "default": "",
+          "title": "Email Username",
+          "type": "string"
+        },
+        "email_password": {
+          "default": "",
+          "title": "Email Password",
+          "type": "string"
+        },
+        "email_from": {
+          "default": "",
+          "title": "Email From",
+          "type": "string"
+        },
+        "postgres_user": {
+          "default": "",
+          "title": "Postgres User",
+          "type": "string"
+        },
+        "redis_password": {
+          "default": "",
+          "title": "Redis Password",
+          "type": "string"
+        }
+      },
+      "title": "Authentik",
+      "type": "object"
+    },
+    "Bazarr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Bazarr",
+      "type": "object"
+    },
+    "Bgp": {
+      "additionalProperties": false,
+      "properties": {
+        "router_addr": {
+          "anyOf": [
+            {
+              "format": "ipv4",
+              "type": "string"
+            },
+            {
+              "const": "",
+              "type": "string"
+            }
+          ],
+          "default": "",
+          "title": "Router Addr"
+        },
+        "router_asn": {
+          "$ref": "#/$defs/Asn",
+          "default": ""
+        },
+        "node_asn": {
+          "$ref": "#/$defs/Asn",
+          "default": ""
+        }
+      },
+      "title": "Bgp",
+      "type": "object"
+    },
+    "Cidr": {
+      "format": "ipv4network",
+      "type": "string"
+    },
+    "Cilium": {
+      "additionalProperties": false,
+      "properties": {
+        "loadbalancer_mode": {
+          "default": "dsr",
+          "enum": [
+            "dsr",
+            "snat"
+          ],
+          "title": "Loadbalancer Mode",
+          "type": "string"
+        },
+        "bgp": {
+          "$ref": "#/$defs/Bgp",
+          "default": {
+            "router_addr": "",
+            "router_asn": "",
+            "node_asn": ""
+          }
+        }
+      },
+      "title": "Cilium",
+      "type": "object"
+    },
+    "Cloudnative": {
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "default": "",
+          "title": "Username",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        },
+        "email": {
+          "default": "",
+          "title": "Email",
+          "type": "string"
+        },
+        "internal": {
+          "default": "",
+          "title": "Internal",
+          "type": "string"
+        }
+      },
+      "title": "Cloudnative",
+      "type": "object"
+    },
+    "Couchdb": {
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "default": "",
+          "title": "User",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "title": "Couchdb",
+      "type": "object"
+    },
+    "Discord": {
+      "additionalProperties": false,
+      "properties": {
+        "bot_token": {
+          "default": "",
+          "title": "Bot Token",
+          "type": "string"
+        }
+      },
+      "title": "Discord",
+      "type": "object"
+    },
+    "Dns": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "default": "cloudflare",
+          "enum": [
+            "cloudflare",
+            "none"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "token": {
+          "default": "",
+          "title": "Token",
+          "type": "string"
+        }
+      },
+      "title": "Dns",
+      "type": "object"
+    },
+    "Domain": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Fqdn"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Domain",
+      "type": "object"
+    },
+    "Fqdn": {
+      "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}$",
+      "type": "string"
+    },
+    "Gateways": {
+      "additionalProperties": false,
+      "properties": {
+        "internal": {
+          "format": "ipv4",
+          "title": "Internal",
+          "type": "string"
+        },
+        "dns": {
+          "format": "ipv4",
+          "title": "Dns",
+          "type": "string"
+        },
+        "external": {
+          "anyOf": [
+            {
+              "format": "ipv4",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "External"
+        }
+      },
+      "required": [
+        "internal",
+        "dns"
+      ],
+      "title": "Gateways",
+      "type": "object"
+    },
+    "GithubRunner": {
+      "additionalProperties": false,
+      "properties": {
+        "app_id": {
+          "default": "",
+          "title": "App Id",
+          "type": "string"
+        },
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "installation_id": {
+          "default": "",
+          "title": "Installation Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        },
+        "runner_token": {
+          "default": "",
+          "title": "Runner Token",
+          "type": "string"
+        },
+        "webhook_secret_token": {
+          "default": "",
+          "title": "Webhook Secret Token",
+          "type": "string"
+        },
+        "private_key": {
+          "default": "",
+          "title": "Private Key",
+          "type": "string"
+        }
+      },
+      "title": "GithubRunner",
+      "type": "object"
+    },
+    "Grafana": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        }
+      },
+      "title": "Grafana",
+      "type": "object"
+    },
+    "Homeassistant": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Homeassistant",
+      "type": "object"
+    },
+    "Immich": {
+      "additionalProperties": false,
+      "properties": {
+        "jwt_secret": {
+          "default": "",
+          "title": "Jwt Secret",
+          "type": "string"
+        },
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Immich",
+      "type": "object"
+    },
+    "Ingress": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "cloudflare-tunnel",
+          "enum": [
+            "cloudflare-tunnel",
+            "direct",
+            "none"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "Ingress",
+      "type": "object"
+    },
+    "Jellyfin": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Jellyfin",
+      "type": "object"
+    },
+    "Jellyseerr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Jellyseerr",
+      "type": "object"
+    },
+    "Jwt": {
+      "additionalProperties": false,
+      "properties": {
+        "secret_key": {
+          "default": "",
+          "title": "Secret Key",
+          "type": "string"
+        }
+      },
+      "title": "Jwt",
+      "type": "object"
+    },
+    "Kubernetes": {
+      "additionalProperties": false,
+      "properties": {
+        "pod_cidr": {
+          "$ref": "#/$defs/Cidr",
+          "default": "10.42.0.0/16"
+        },
+        "svc_cidr": {
+          "$ref": "#/$defs/Cidr",
+          "default": "10.43.0.0/16"
+        },
+        "coredns_addr": {
+          "format": "ipv4",
+          "title": "Coredns Addr",
+          "type": "string"
+        },
+        "api": {
+          "$ref": "#/$defs/Api"
+        }
+      },
+      "required": [
+        "api"
+      ],
+      "title": "Kubernetes",
+      "type": "object"
+    },
+    "Lidarr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Lidarr",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "default": "",
+          "title": "Latitude",
+          "type": "string"
+        },
+        "longitude": {
+          "default": "",
+          "title": "Longitude",
+          "type": "string"
+        }
+      },
+      "title": "Location",
+      "type": "object"
+    },
+    "Mealie": {
+      "additionalProperties": false,
+      "properties": {
+        "secret": {
+          "default": "",
+          "title": "Secret",
+          "type": "string"
+        },
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Mealie",
+      "type": "object"
+    },
+    "Minio": {
+      "additionalProperties": false,
+      "properties": {
+        "root_user": {
+          "default": "",
+          "title": "Root User",
+          "type": "string"
+        },
+        "root_password": {
+          "default": "",
+          "title": "Root Password",
+          "type": "string"
+        },
+        "openid_config_url": {
+          "default": "",
+          "title": "Openid Config Url",
+          "type": "string"
+        },
+        "openid_config_client_id": {
+          "default": "",
+          "title": "Openid Config Client Id",
+          "type": "string"
+        },
+        "openid_config_client_secret": {
+          "default": "",
+          "title": "Openid Config Client Secret",
+          "type": "string"
+        },
+        "openid_config_callback_uri": {
+          "default": "",
+          "title": "Openid Config Callback Uri",
+          "type": "string"
+        }
+      },
+      "title": "Minio",
+      "type": "object"
+    },
+    "N8n": {
+      "additionalProperties": false,
+      "properties": {
+        "encryption_key": {
+          "default": "",
+          "title": "Encryption Key",
+          "type": "string"
+        }
+      },
+      "title": "N8n",
+      "type": "object"
+    },
+    "Network": {
+      "additionalProperties": false,
+      "properties": {
+        "node_cidr": {
+          "$ref": "#/$defs/Cidr"
+        },
+        "dns_servers": {
+          "default": [
+            "1.1.1.1",
+            "1.0.0.1"
+          ],
+          "items": {
+            "format": "ipv4",
+            "type": "string"
+          },
+          "title": "Dns Servers",
+          "type": "array"
+        },
+        "ntp_servers": {
+          "default": [
+            "162.159.200.1",
+            "162.159.200.123"
+          ],
+          "items": {
+            "format": "ipv4",
+            "type": "string"
+          },
+          "title": "Ntp Servers",
+          "type": "array"
+        },
+        "default_gateway": {
+          "format": "ipv4",
+          "title": "Default Gateway",
+          "type": "string"
+        },
+        "vlan_tag": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vlan Tag"
+        }
+      },
+      "required": [
+        "node_cidr"
+      ],
+      "title": "Network",
+      "type": "object"
+    },
+    "Nextcloud": {
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "default": "",
+          "title": "User",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        },
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        },
+        "redis_password": {
+          "default": "",
+          "title": "Redis Password",
+          "type": "string"
+        },
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        },
+        "db_user": {
+          "default": "",
+          "title": "Db User",
+          "type": "string"
+        },
+        "db_password": {
+          "default": "",
+          "title": "Db Password",
+          "type": "string"
+        }
+      },
+      "title": "Nextcloud",
+      "type": "object"
+    },
+    "Node": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z0-9][a-z0-9\\-]{0,61}[a-z0-9]$|^[a-z0-9]$",
+          "title": "Name",
+          "type": "string"
+        },
+        "address": {
+          "format": "ipv4",
+          "title": "Address",
+          "type": "string"
+        },
+        "controller": {
+          "title": "Controller",
+          "type": "boolean"
+        },
+        "disk": {
+          "title": "Disk",
+          "type": "string"
+        },
+        "mac_addr": {
+          "pattern": "^([0-9a-f]{2}:){5}[0-9a-f]{2}$",
+          "title": "Mac Addr",
+          "type": "string"
+        },
+        "schematic_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schematic Id"
+        },
+        "mtu": {
+          "default": 1500,
+          "maximum": 9000,
+          "minimum": 1450,
+          "title": "Mtu",
+          "type": "integer"
+        },
+        "secureboot": {
+          "default": false,
+          "title": "Secureboot",
+          "type": "boolean"
+        },
+        "encrypt_disk": {
+          "default": false,
+          "title": "Encrypt Disk",
+          "type": "boolean"
+        },
+        "kernel_modules": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Kernel Modules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "address",
+        "controller",
+        "disk",
+        "mac_addr"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "OpenWebui": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        },
+        "redirect": {
+          "default": "",
+          "title": "Redirect",
+          "type": "string"
+        }
+      },
+      "title": "OpenWebui",
+      "type": "object"
+    },
+    "Paperless": {
+      "additionalProperties": false,
+      "properties": {
+        "admin_user": {
+          "default": "",
+          "title": "Admin User",
+          "type": "string"
+        },
+        "api_token": {
+          "default": "",
+          "title": "Api Token",
+          "type": "string"
+        },
+        "admin_password": {
+          "default": "",
+          "title": "Admin Password",
+          "type": "string"
+        },
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        },
+        "secret_key": {
+          "default": "",
+          "title": "Secret Key",
+          "type": "string"
+        },
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Paperless",
+      "type": "object"
+    },
+    "Pihole": {
+      "additionalProperties": false,
+      "properties": {
+        "internal": {
+          "default": "",
+          "title": "Internal",
+          "type": "string"
+        },
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "title": "Pihole",
+      "type": "object"
+    },
+    "Prowlarr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Prowlarr",
+      "type": "object"
+    },
+    "Radarr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Radarr",
+      "type": "object"
+    },
+    "Repository": {
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "pattern": "^(https?://|ssh://git@)[^/]+/.+$",
+          "title": "Url",
+          "type": "string"
+        },
+        "branch": {
+          "default": "main",
+          "minLength": 1,
+          "title": "Branch",
+          "type": "string"
+        },
+        "webhook_provider": {
+          "default": "github",
+          "enum": [
+            "github",
+            "gitlab",
+            "generic-hmac",
+            "none"
+          ],
+          "title": "Webhook Provider",
+          "type": "string"
+        },
+        "known_hosts": {
+          "default": "",
+          "title": "Known Hosts",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "Repository",
+      "type": "object"
+    },
+    "S3": {
+      "additionalProperties": false,
+      "properties": {
+        "aws_access_id": {
+          "default": "",
+          "title": "Aws Access Id",
+          "type": "string"
+        },
+        "aws_secret_access_key": {
+          "default": "",
+          "title": "Aws Secret Access Key",
+          "type": "string"
+        }
+      },
+      "title": "S3",
+      "type": "object"
+    },
+    "Sabnzbd": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Sabnzbd",
+      "type": "object"
+    },
+    "Samba": {
+      "additionalProperties": false,
+      "properties": {
+        "loadbalance": {
+          "default": "",
+          "title": "Loadbalance",
+          "type": "string"
+        },
+        "internal": {
+          "default": "",
+          "title": "Internal",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "title": "Samba",
+      "type": "object"
+    },
+    "Searxng": {
+      "additionalProperties": false,
+      "properties": {
+        "secret": {
+          "default": "",
+          "title": "Secret",
+          "type": "string"
+        }
+      },
+      "title": "Searxng",
+      "type": "object"
+    },
+    "Shlink": {
+      "additionalProperties": false,
+      "properties": {
+        "geolite_license_key": {
+          "default": "",
+          "title": "Geolite License Key",
+          "type": "string"
+        },
+        "api_key": {
+          "default": "",
+          "title": "Api Key",
+          "type": "string"
+        }
+      },
+      "title": "Shlink",
+      "type": "object"
+    },
+    "Smtp": {
+      "additionalProperties": false,
+      "properties": {
+        "internal": {
+          "default": "",
+          "title": "Internal",
+          "type": "string"
+        },
+        "server": {
+          "default": "",
+          "title": "Server",
+          "type": "string"
+        },
+        "username": {
+          "default": "",
+          "title": "Username",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "title": "Smtp",
+      "type": "object"
+    },
+    "Sonarr": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "title": "Sonarr",
+      "type": "object"
+    },
+    "Spegel": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        }
+      },
+      "title": "Spegel",
+      "type": "object"
+    },
+    "Sunshine": {
+      "additionalProperties": false,
+      "properties": {
+        "internal": {
+          "default": "",
+          "title": "Internal",
+          "type": "string"
+        }
+      },
+      "title": "Sunshine",
+      "type": "object"
+    },
+    "Tailscale": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_secret": {
+          "default": "",
+          "title": "Client Secret",
+          "type": "string"
+        },
+        "client_authkey": {
+          "default": "",
+          "title": "Client Authkey",
+          "type": "string"
+        }
+      },
+      "title": "Tailscale",
+      "type": "object"
+    },
+    "Talos": {
+      "additionalProperties": false,
+      "properties": {
+        "schematic_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schematic Id"
+        }
+      },
+      "title": "Talos",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "network": {
+      "$ref": "#/$defs/Network"
+    },
+    "kubernetes": {
+      "$ref": "#/$defs/Kubernetes"
+    },
+    "gateways": {
+      "$ref": "#/$defs/Gateways"
+    },
+    "repository": {
+      "$ref": "#/$defs/Repository"
+    },
+    "domain": {
+      "$ref": "#/$defs/Domain"
+    },
+    "dns": {
+      "$ref": "#/$defs/Dns"
+    },
+    "ingress": {
+      "$ref": "#/$defs/Ingress"
+    },
+    "cilium": {
+      "$ref": "#/$defs/Cilium",
+      "default": {
+        "loadbalancer_mode": "dsr",
+        "bgp": {
+          "node_asn": "",
+          "router_addr": "",
+          "router_asn": ""
+        }
+      }
+    },
+    "couchdb": {
+      "$ref": "#/$defs/Couchdb",
+      "default": {
+        "user": "",
+        "password": ""
+      }
+    },
+    "s3": {
+      "$ref": "#/$defs/S3",
+      "default": {
+        "aws_access_id": "",
+        "aws_secret_access_key": ""
+      }
+    },
+    "cloudnative": {
+      "$ref": "#/$defs/Cloudnative",
+      "default": {
+        "username": "",
+        "password": "",
+        "email": "",
+        "internal": ""
+      }
+    },
+    "talos": {
+      "$ref": "#/$defs/Talos",
+      "default": {
+        "schematic_id": null
+      }
+    },
+    "spegel": {
+      "$ref": "#/$defs/Spegel",
+      "default": {
+        "enabled": null
+      }
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/Node"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "jwt": {
+      "$ref": "#/$defs/Jwt",
+      "default": {
+        "secret_key": ""
+      }
+    },
+    "paperless": {
+      "$ref": "#/$defs/Paperless",
+      "default": {
+        "admin_user": "",
+        "api_token": "",
+        "admin_password": "",
+        "client_id": "",
+        "client_secret": "",
+        "secret_key": "",
+        "api": ""
+      }
+    },
+    "minio": {
+      "$ref": "#/$defs/Minio",
+      "default": {
+        "root_user": "",
+        "root_password": "",
+        "openid_config_url": "",
+        "openid_config_client_id": "",
+        "openid_config_client_secret": "",
+        "openid_config_callback_uri": ""
+      }
+    },
+    "tailscale": {
+      "$ref": "#/$defs/Tailscale",
+      "default": {
+        "client_id": "",
+        "client_secret": "",
+        "client_authkey": ""
+      }
+    },
+    "pihole": {
+      "$ref": "#/$defs/Pihole",
+      "default": {
+        "internal": "",
+        "api": "",
+        "password": ""
+      }
+    },
+    "samba": {
+      "$ref": "#/$defs/Samba",
+      "default": {
+        "loadbalance": "",
+        "internal": "",
+        "password": ""
+      }
+    },
+    "smtp": {
+      "$ref": "#/$defs/Smtp",
+      "default": {
+        "internal": "",
+        "server": "",
+        "username": "",
+        "password": ""
+      }
+    },
+    "authentik": {
+      "$ref": "#/$defs/Authentik",
+      "default": {
+        "secret_key": "",
+        "postgres_password": "",
+        "email_host": "",
+        "email_username": "",
+        "email_password": "",
+        "email_from": "",
+        "postgres_user": "",
+        "redis_password": ""
+      }
+    },
+    "sunshine": {
+      "$ref": "#/$defs/Sunshine",
+      "default": {
+        "internal": ""
+      }
+    },
+    "discord": {
+      "$ref": "#/$defs/Discord",
+      "default": {
+        "bot_token": ""
+      }
+    },
+    "mealie": {
+      "$ref": "#/$defs/Mealie",
+      "default": {
+        "secret": "",
+        "api": ""
+      }
+    },
+    "homeassistant": {
+      "$ref": "#/$defs/Homeassistant",
+      "default": {
+        "api": ""
+      }
+    },
+    "n8n": {
+      "$ref": "#/$defs/N8n",
+      "default": {
+        "encryption_key": ""
+      }
+    },
+    "nextcloud": {
+      "$ref": "#/$defs/Nextcloud",
+      "default": {
+        "user": "",
+        "password": "",
+        "client_id": "",
+        "client_secret": "",
+        "redis_password": "",
+        "api": "",
+        "db_user": "",
+        "db_password": ""
+      }
+    },
+    "immich": {
+      "$ref": "#/$defs/Immich",
+      "default": {
+        "jwt_secret": "",
+        "api": ""
+      }
+    },
+    "grafana": {
+      "$ref": "#/$defs/Grafana",
+      "default": {
+        "client_id": "",
+        "client_secret": ""
+      }
+    },
+    "location": {
+      "$ref": "#/$defs/Location",
+      "default": {
+        "latitude": "",
+        "longitude": ""
+      }
+    },
+    "searxng": {
+      "$ref": "#/$defs/Searxng",
+      "default": {
+        "secret": ""
+      }
+    },
+    "github_runner": {
+      "$ref": "#/$defs/GithubRunner",
+      "default": {
+        "app_id": "",
+        "client_id": "",
+        "installation_id": "",
+        "client_secret": "",
+        "runner_token": "",
+        "webhook_secret_token": "",
+        "private_key": ""
+      }
+    },
+    "open_webui": {
+      "$ref": "#/$defs/OpenWebui",
+      "default": {
+        "client_id": "",
+        "client_secret": "",
+        "redirect": ""
+      }
+    },
+    "shlink": {
+      "$ref": "#/$defs/Shlink",
+      "default": {
+        "geolite_license_key": "",
+        "api_key": ""
+      }
+    },
+    "sonarr": {
+      "$ref": "#/$defs/Sonarr",
+      "default": {
+        "api": ""
+      }
+    },
+    "radarr": {
+      "$ref": "#/$defs/Radarr",
+      "default": {
+        "api": ""
+      }
+    },
+    "bazarr": {
+      "$ref": "#/$defs/Bazarr",
+      "default": {
+        "api": ""
+      }
+    },
+    "jellyfin": {
+      "$ref": "#/$defs/Jellyfin",
+      "default": {
+        "api": ""
+      }
+    },
+    "jellyseerr": {
+      "$ref": "#/$defs/Jellyseerr",
+      "default": {
+        "api": ""
+      }
+    },
+    "lidarr": {
+      "$ref": "#/$defs/Lidarr",
+      "default": {
+        "api": ""
+      }
+    },
+    "sabnzbd": {
+      "$ref": "#/$defs/Sabnzbd",
+      "default": {
+        "api": ""
+      }
+    },
+    "prowlarr": {
+      "$ref": "#/$defs/Prowlarr",
+      "default": {
+        "api": ""
+      }
+    },
+    "alert_manager": {
+      "$ref": "#/$defs/AlertManager",
+      "default": {
+        "discord_webhook": "",
+        "slack_webhook": ""
+      }
+    }
+  },
+  "required": [
+    "network",
+    "kubernetes",
+    "gateways",
+    "repository",
+    "domain",
+    "dns",
+    "nodes"
+  ],
+  "title": "cluster.toml",
+  "type": "object"
+}

@@ -1,0 +1,15 @@
+machine:
+  udev:
+    # List of udev rules to apply to the udev system
+    rules:
+      - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+      - KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+  certSANs:
+    #% for item in cert_sans %#
+    - "#{ item }#"
+    #% endfor %#
+---
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+podSubnets: ["#{ kubernetes.pod_cidr }#"]
+serviceSubnets: ["#{ kubernetes.svc_cidr }#"]

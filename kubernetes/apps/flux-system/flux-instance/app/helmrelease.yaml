@@ -9,10 +9,9 @@ spec:
     name: flux-instance
   interval: 1h
   values:
+    commonAnnotations:
+      fluxcd.controlplane.io/reconcileArtifactEvery: 1h
     instance:
-      distribution:
-        artifact: oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests:v0.38.1
-        version: 2.x
       cluster:
         networkPolicy: false
       components:
@@ -23,7 +22,7 @@ spec:
       sync:
         kind: GitRepository
         url: "ssh://git@github.com/fiqrimasngot/kube.git"
-        pullSecret: github-deploy-key
+        pullSecret: deploy-key
         ref: "refs/heads/main"
         path: kubernetes/flux/cluster
       commonMetadata:

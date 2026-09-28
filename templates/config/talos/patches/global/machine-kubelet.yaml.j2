@@ -1,8 +1,0 @@
-machine:
-  kubelet:
-    extraConfig:
-      serializeImagePulls: false
-      maxPods: 250
-    nodeIP:
-      validSubnets:
-        - #{ node_cidr }#

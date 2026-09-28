@@ -1,0 +1,15 @@
+machine:
+  udev:
+    # List of udev rules to apply to the udev system
+    rules:
+      - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+      - KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+  certSANs:
+    - "127.0.0.1"
+    - "10.32.1.10"
+    - "k8s.fiqriha.kim"
+---
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+podSubnets: ["10.42.0.0/16"]
+serviceSubnets: ["10.43.0.0/16"]
