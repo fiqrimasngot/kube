@@ -11,8 +11,6 @@ spec:
     namespace: rook-ceph
   path: ./kubernetes/apps/devops/hermes/app
   prune: true
-  decryption:
-    provider: sops
   postBuild:
     substituteFrom:
     - name: cluster-secrets
