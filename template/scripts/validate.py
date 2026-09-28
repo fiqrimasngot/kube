@@ -367,6 +367,12 @@ class AlertManager(Model):
     slack_webhook: str = ""
 
 
+class Hermes(Model):
+    api: str = ""
+    username: str = ""
+    password: str = ""
+    secret: str = ""
+
 class Node(Model):
     name: str = Field(pattern=r"^[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]$|^[a-z0-9]$")
     address: IPv4Address
@@ -439,6 +445,7 @@ class Config(Model):
     sabnzbd: Sabnzbd = Sabnzbd()
     prowlarr: Prowlarr = Prowlarr()
     alert_manager: AlertManager = AlertManager()
+    hermes: Hermes = Hermes()
     nodes: list[Node]
 
     @computed_field
