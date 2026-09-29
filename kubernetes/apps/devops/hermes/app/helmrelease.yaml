@@ -14,7 +14,7 @@ spec:
     controllers:
       hermes:
         annotations:
-          reloader.stakater.com/auto: 'true'
+          reloader.stakater.com/auto: "true"
         strategy: Recreate
         pod:
           automountServiceAccountToken: true
@@ -26,11 +26,11 @@ spec:
               repository: nousresearch/hermes-agent
               tag: v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
             command:
-            - hermes
-            - gateway
-            - run
+              - hermes
+              - gateway
+              - run
             env:
-              API_SERVER_ENABLED: 'true'
+              API_SERVER_ENABLED: "true"
               API_SERVER_HOST: 0.0.0.0
               API_SERVER_PORT: 8642
               HERMES_HOME: /opt/data
@@ -39,8 +39,8 @@ spec:
               TZ: ${TIMEZONE}
               API_SERVER_MODEL_NAME: hermes-agent
             envFrom:
-            - secretRef:
-                name: '{{ .Release.Name }}-secret'
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &id001
                 enabled: true
@@ -72,7 +72,7 @@ spec:
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
-                - ALL
+                  - ALL
           dashboard:
             image: *id002
             env:
@@ -82,8 +82,8 @@ spec:
               HERMES_HOME: /opt/data
               PATH: /opt/hermes/.venv/bin:/opt/data/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
             envFrom:
-            - secretRef:
-                name: '{{ .Release.Name }}-secret'
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             resources:
               requests:
                 cpu: 50m
@@ -94,15 +94,15 @@ spec:
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
-                - ALL
+                  - ALL
             command:
-            - hermes
-            - dashboard
-            - --host
-            - 0.0.0.0
-            - --port
-            - '9119'
-            - --no-open
+              - hermes
+              - dashboard
+              - --host
+              - 0.0.0.0
+              - --port
+              - "9119"
+              - --no-open
             probes:
               readiness:
                 enabled: true
@@ -126,17 +126,17 @@ spec:
               repository: nousresearch/hermes-agent
               tag: v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
             command:
-            - python
-            - -c
-            - from pathlib import Path; import shutil; home=Path('/opt/data'); home.mkdir(parents=True,
-              exist_ok=True); (home/'workspace').mkdir(exist_ok=True); target=home/'config.yaml';
-              shutil.copyfile('/bootstrap/config.yaml', target) if not target.exists()
-              else None
+              - python
+              - -c
+              - from pathlib import Path; import shutil; home=Path('/opt/data'); home.mkdir(parents=True,
+                exist_ok=True); (home/'workspace').mkdir(exist_ok=True); target=home/'config.yaml';
+                shutil.copyfile('/bootstrap/config.yaml', target) if not target.exists()
+                else None
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
-                - ALL
+                  - ALL
     defaultPodOptions:
       securityContext:
         runAsUser: 10000
@@ -151,130 +151,130 @@ spec:
         hermes-cluster:
           type: ClusterRole
           rules:
-          - apiGroups:
-            - ''
-            resources:
-            - pods
-            - pods/log
-            - nodes
-            - services
-            - namespaces
-            - configmaps
-            - persistentvolumes
-            - persistentvolumeclaims
-            - endpoints
-            - serviceaccounts
-            - events
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - apps
-            resources:
-            - deployments
-            - daemonsets
-            - statefulsets
-            - replicasets
-            - controllerrevisions
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - batch
-            resources:
-            - jobs
-            - cronjobs
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - networking.k8s.io
-            resources:
-            - ingresses
-            - ingressclasses
-            - networkpolicies
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - storage.k8s.io
-            resources:
-            - storageclasses
-            - csinodes
-            - csidrivers
-            - volumeattachments
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - autoscaling
-            resources:
-            - horizontalpodautoscalers
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - policy
-            resources:
-            - poddisruptionbudgets
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - rbac.authorization.k8s.io
-            resources:
-            - roles
-            - rolebindings
-            - clusterroles
-            - clusterrolebindings
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - metrics.k8s.io
-            resources:
-            - nodes
-            - pods
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - helm.toolkit.fluxcd.io
-            resources:
-            - helmreleases
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - kustomize.toolkit.fluxcd.io
-            resources:
-            - kustomizations
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - source.toolkit.fluxcd.io
-            resources:
-            - gitrepositories
-            - helmrepositories
-            - ocirepositories
-            - buckets
-            - helmcharts
-            verbs:
-            - get
-            - list
-            - watch
+            - apiGroups:
+                - ""
+              resources:
+                - pods
+                - pods/log
+                - nodes
+                - services
+                - namespaces
+                - configmaps
+                - persistentvolumes
+                - persistentvolumeclaims
+                - endpoints
+                - serviceaccounts
+                - events
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - apps
+              resources:
+                - deployments
+                - daemonsets
+                - statefulsets
+                - replicasets
+                - controllerrevisions
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - batch
+              resources:
+                - jobs
+                - cronjobs
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - networking.k8s.io
+              resources:
+                - ingresses
+                - ingressclasses
+                - networkpolicies
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - storage.k8s.io
+              resources:
+                - storageclasses
+                - csinodes
+                - csidrivers
+                - volumeattachments
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - autoscaling
+              resources:
+                - horizontalpodautoscalers
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - policy
+              resources:
+                - poddisruptionbudgets
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - rbac.authorization.k8s.io
+              resources:
+                - roles
+                - rolebindings
+                - clusterroles
+                - clusterrolebindings
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - metrics.k8s.io
+              resources:
+                - nodes
+                - pods
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - helm.toolkit.fluxcd.io
+              resources:
+                - helmreleases
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - kustomize.toolkit.fluxcd.io
+              resources:
+                - kustomizations
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - source.toolkit.fluxcd.io
+              resources:
+                - gitrepositories
+                - helmrepositories
+                - ocirepositories
+                - buckets
+                - helmcharts
+              verbs:
+                - get
+                - list
+                - watch
       bindings:
         hermes-cluster:
           type: ClusterRoleBinding
@@ -282,8 +282,8 @@ spec:
             kind: ClusterRole
             identifier: hermes-cluster
           subjects:
-          - kind: ServiceAccount
-            identifier: hermes
+            - kind: ServiceAccount
+              identifier: hermes
     service:
       app:
         controller: hermes
@@ -295,40 +295,42 @@ spec:
     route:
       app:
         hostnames:
-        - hermes.${SECRET_DOMAIN}
+          - hermes.${SECRET_DOMAIN}
         parentRefs:
-        - name: envoy-external
-          namespace: network
+          - name: envoy-external
+            namespace: network
+            sectionName: https
         rules:
-        - backendRefs:
-          - identifier: app
-            port: 9119
+          - backendRefs:
+              - identifier: app
+                port: 9119
         annotations:
-          gethomepage.dev/enabled: 'true'
+          gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Hermes
           gethomepage.dev/group: AI
           gethomepage.dev/description: AI agent and chat dashboard
     persistence:
       data:
-        existingClaim: '{{ .Release.Name }}'
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
-        - path: /opt/data
+          - path: /opt/data
       tmp:
         type: emptyDir
         globalMounts:
-        - path: /tmp
+          - path: /tmp
       bootstrap:
         type: configMap
         identifier: bootstrap
         advancedMounts:
           hermes:
             seed-config:
-            - path: /bootstrap
-              readOnly: true
+              - path: /bootstrap
+                readOnly: true
     configMaps:
       bootstrap:
         data:
-          config.yaml: "terminal:\n  backend: local\n  cwd: /opt/data/workspace\n\
+          config.yaml:
+            "terminal:\n  backend: local\n  cwd: /opt/data/workspace\n\
             dashboard:\n  public_url: https://hermes.${SECRET_DOMAIN}\n"
   timeout: 10m
   install:
