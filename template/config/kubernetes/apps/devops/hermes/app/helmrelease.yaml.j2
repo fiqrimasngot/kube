@@ -1,10 +1,9 @@
-# Adapted from blackjid/home-ops: kubernetes/apps/ai/hermes/app/helmrelease.yaml
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: hermes
-  namespace: devops
+  name: &app hermes
 spec:
   chartRef:
     kind: OCIRepository
@@ -13,329 +12,361 @@ spec:
   values:
     controllers:
       hermes:
-        annotations:
-          reloader.stakater.com/auto: 'true'
         strategy: Recreate
-        pod:
-          automountServiceAccountToken: true
-        serviceAccount:
-          name: hermes
-        containers:
-          app:
-            image: &id002
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # Populate the persistent /opt/data/.local tree with extra CLI tooling
+        # (gh, Go, Homebrew) the agent and the code-server terminal can use. The
+        # file-existence guards mean the downloads only run on first start, since
+        # /opt/data is the data PVC and survives restarts.
+        initContainers:
+          copy-config:
+            image:
+              repository: docker.io/library/alpine
+              tag: "3.24"
+            command:
+              - sh
+              - -c
+              - |
+                set -euo pipefail
+                mkdir -p /opt/data
+                cp /run/config/config.yaml /opt/data/config.yaml
+                chown 10000:10000 /opt/data/config.yaml
+          install-tools:
+            image: &image
               repository: nousresearch/hermes-agent
               tag: v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
             command:
-            - hermes
-            - gateway
-            - run
+              - /bin/sh
+              - -c
+              - |
+                set -e
+                mkdir -p /opt/data/.local/bin /opt/data/.local/go
+
+                rm -f /opt/data/.local/bin/hermes /opt/data/.local/bin/docker
+
+                if [ ! -f /opt/data/.local/bin/gh ]; then
+                  cd /tmp
+                  curl -fsSL https://github.com/cli/cli/releases/download/v2.61.0/gh_2.61.0_linux_amd64.tar.gz -o gh.tar.gz
+                  tar xzf gh.tar.gz
+                  cp gh_2.61.0_linux_amd64/bin/gh /opt/data/.local/bin/
+                  rm -rf gh.tar.gz gh_2.61.0_linux_amd64
+                fi
+
+                if [ ! -f /opt/data/.local/go/bin/go ]; then
+                  cd /tmp
+                  curl -fsSL https://go.dev/dl/go1.23.5.linux-amd64.tar.gz -o go.tar.gz
+                  tar xzf go.tar.gz
+                  mv go /opt/data/.local/
+                  rm -rf go.tar.gz
+                fi
+
+                if [ ! -f /opt/data/.local/homebrew/bin/brew ]; then
+                  export HOMEBREW_PREFIX=/opt/data/.local/homebrew
+                  mkdir -p $HOMEBREW_PREFIX
+                  git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
+                fi
+
+                # Ensure brew's lock dir exists — brew creates it on first run but
+                # only if the parent tree is writable. Without this, brew fails on
+                # a fresh PVC before the first `brew install`.
+                mkdir -p /opt/data/.local/homebrew/var/homebrew/locks
+        containers:
+          app:
+            image: *image
+            args:
+              - gateway
+              - run
             env:
-              API_SERVER_ENABLED: 'true'
+              TZ: &tz ${TIMEZONE}
+              API_SERVER_ENABLED: true
               API_SERVER_HOST: 0.0.0.0
-              API_SERVER_PORT: 8642
-              HERMES_HOME: /opt/data
+              API_SERVER_PORT: &port 8642
               HOME: /opt/data
-              PATH: /opt/hermes/.venv/bin:/opt/data/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-              TZ: ${TIMEZONE}
-              API_SERVER_MODEL_NAME: hermes-agent
+              HERMES_HOME: /opt/data
+              # Run the dashboard under s6 in THIS container (not a sidecar): the
+              # dashboard manages the gateway via s6-svc on the local /run/service
+              # tree, so it must share the gateway's container to see/restart it.
+              # HOST/PORT default to 0.0.0.0:9119. INSECURE opts out of the OAuth
+              # gate (trusted LAN behind Envoy); TUI exposes the in-browser Chat tab.
+              HERMES_DASHBOARD: "1"
+              HERMES_DASHBOARD_INSECURE: "1"
+              HERMES_DASHBOARD_TUI: "1"
+              # Make the tools staged by the install-tools initContainer usable by
+              # the agent's shell-outs. This is the image's own default PATH (which
+              # already carries /opt/hermes/bin, the venv, and /opt/data/.local/bin)
+              # with the Go and Homebrew bin dirs spliced in — keeping the default
+              # intact so the dashboard's s6-svc gateway control is unaffected.
+              GOPATH: /opt/data/go
+              HOMEBREW_PREFIX: /opt/data/.local/homebrew
+              HOMEBREW_CELLAR: /opt/data/.local/homebrew/Cellar
+              HOMEBREW_REPOSITORY: /opt/data/.local/homebrew
+              PATH: /opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              PIP_BREAK_SYSTEM_PACKAGES: "1"
+              # Talos Linux disables unprivileged user namespaces at the kernel
+              # level (no AppArmor userns file, just a kernel-level restriction).
+              # Hermes auto-detects the Ubuntu/AppArmor variant via
+              # /proc/sys/kernel/apparmor_restrict_unprivileged_userns, but that
+              # file doesn't exist on Talos — so auto-detection falls through and
+              # Chrome exits with "No usable sandbox!". Setting AGENT_BROWSER_ARGS
+              # directly bypasses auto-detection and forces --no-sandbox for every
+              # browser launch.
+              AGENT_BROWSER_ARGS: "--no-sandbox,--disable-dev-shm-usage"
             envFrom:
-            - secretRef:
-                name: '{{ .Release.Name }}-secret'
+              - secretRef:
+                  name: hermes-secret
             probes:
-              liveness: &id001
+              liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
-                    port: 8642
+                  httpGet:
+                    path: /health
+                    port: *port
                   initialDelaySeconds: 30
-                  periodSeconds: 30
+                  periodSeconds: 15
                   timeoutSeconds: 5
-                  failureThreshold: 5
-              readiness: *id001
+                  failureThreshold: 3
+              readiness: *probes
               startup:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 8642
-                  initialDelaySeconds: 10
-                  periodSeconds: 10
-                  failureThreshold: 30
+                enabled: false
+            securityContext:
+              # Don't drop capabilities: s6-overlay init runs as root and needs
+              # CAP_CHOWN (fix /opt/data ownership) plus CAP_SETUID/CAP_SETGID to
+              # drop privileges to the image's hermes user (10000). Dropping ALL
+              # breaks both ("chown failed", "unable to set supplementary group list").
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
             resources:
               requests:
                 cpu: 100m
-                memory: 512Mi
+                memory: 1Gi
               limits:
-                memory: 2Gi
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                - ALL
-          dashboard:
-            image: *id002
+                memory: 3Gi
+      codeserver:
+        strategy: Recreate
+        # hermes owns its home (/opt/data) as uid 10000, mode 0700, and resets it on
+        # start, so the default coder user (1000) can't enter even via the fsGroup.
+        # Run code-server as the hermes user so it owns the workspace it edits.
+        # (coder image isn't s6-based, so forcing the uid is safe.)
+        pod:
+          securityContext:
+            runAsUser: 10000
+            runAsGroup: 10000
+          # codeserver shares hermes's RWO "hermes" PVC (/opt/data), so it must run
+          # on the same node as the hermes controller — otherwise the volume can't
+          # multi-attach and codeserver is stuck Pending.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: hermes
+                      app.kubernetes.io/controller: hermes
+                  topologyKey: kubernetes.io/hostname
+        containers:
+          codeserver:
+            image:
+              repository: ghcr.io/coder/code-server
+              tag: 4.139.1@sha256:0c067c3cf09ed1830ce282387826be8feefef8a5828f462791c2df3f1007ee17
             env:
-              GATEWAY_HEALTH_URL: http://localhost:8642
-              TZ: ${TIMEZONE}
+              TZ: *tz
               HOME: /opt/data
-              HERMES_HOME: /opt/data
-              PATH: /opt/hermes/.venv/bin:/opt/data/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-            envFrom:
-            - secretRef:
-                name: '{{ .Release.Name }}-secret'
+              # Expose the install-tools binaries (gh, go, brew) in the code-server
+              # terminal. This is the coder image's standard PATH with the persisted
+              # /opt/data/.local bins prepended (no /opt/hermes here — different image).
+              GOPATH: /opt/data/go
+              HOMEBREW_PREFIX: /opt/data/.local/homebrew
+              HOMEBREW_CELLAR: /opt/data/.local/homebrew/Cellar
+              HOMEBREW_REPOSITORY: /opt/data/.local/homebrew
+              PATH: /opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+            args:
+              [
+                "--auth",
+                "none",
+                "--user-data-dir",
+                "/opt/data/.vscode",
+                "--extensions-dir",
+                "/opt/data/.vscode",
+                "--port",
+                "12321",
+                "/opt/data",
+              ]
             resources:
               requests:
-                cpu: 50m
-                memory: 128Mi
+                cpu: 10m
               limits:
                 memory: 1Gi
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                - ALL
-            command:
-            - hermes
-            - dashboard
-            - --host
-            - 0.0.0.0
-            - --port
-            - '9119'
-            - --no-open
-            probes:
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 9119
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 9119
-                  periodSeconds: 10
-                  failureThreshold: 30
-        initContainers:
-          seed-config:
-            image:
-              repository: nousresearch/hermes-agent
-              tag: v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
-            command:
-            - python
-            - -c
-            - from pathlib import Path; import shutil; home=Path('/opt/data'); home.mkdir(parents=True,
-              exist_ok=True); (home/'workspace').mkdir(exist_ok=True); target=home/'config.yaml';
-              shutil.copyfile('/bootstrap/config.yaml', target) if not target.exists()
-              else None
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                - ALL
+
     defaultPodOptions:
+      automountServiceAccountToken: true
       securityContext:
-        runAsUser: 10000
-        runAsGroup: 10000
+        # hermes-agent uses s6-overlay: its entrypoint must start as root to fix
+        # /run permissions, then drops to the image's internal hermes user (uid 10000).
+        # Forcing runAsUser breaks s6 preinit ("/run belongs to uid 0 ... lacking
+        # privileges to fix it"), so only set fsGroup to match the image user.
         fsGroup: 10000
         fsGroupChangePolicy: OnRootMismatch
-        runAsNonRoot: true
-    serviceAccount:
-      hermes: {}
-    rbac:
-      roles:
-        hermes-cluster:
-          type: ClusterRole
-          rules:
-          - apiGroups:
-            - ''
-            resources:
-            - pods
-            - pods/log
-            - nodes
-            - services
-            - namespaces
-            - configmaps
-            - persistentvolumes
-            - persistentvolumeclaims
-            - endpoints
-            - serviceaccounts
-            - events
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - apps
-            resources:
-            - deployments
-            - daemonsets
-            - statefulsets
-            - replicasets
-            - controllerrevisions
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - batch
-            resources:
-            - jobs
-            - cronjobs
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - networking.k8s.io
-            resources:
-            - ingresses
-            - ingressclasses
-            - networkpolicies
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - storage.k8s.io
-            resources:
-            - storageclasses
-            - csinodes
-            - csidrivers
-            - volumeattachments
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - autoscaling
-            resources:
-            - horizontalpodautoscalers
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - policy
-            resources:
-            - poddisruptionbudgets
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - rbac.authorization.k8s.io
-            resources:
-            - roles
-            - rolebindings
-            - clusterroles
-            - clusterrolebindings
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - metrics.k8s.io
-            resources:
-            - nodes
-            - pods
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - helm.toolkit.fluxcd.io
-            resources:
-            - helmreleases
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - kustomize.toolkit.fluxcd.io
-            resources:
-            - kustomizations
-            verbs:
-            - get
-            - list
-            - watch
-          - apiGroups:
-            - source.toolkit.fluxcd.io
-            resources:
-            - gitrepositories
-            - helmrepositories
-            - ocirepositories
-            - buckets
-            - helmcharts
-            verbs:
-            - get
-            - list
-            - watch
-      bindings:
-        hermes-cluster:
-          type: ClusterRoleBinding
-          roleRef:
-            kind: ClusterRole
-            identifier: hermes-cluster
-          subjects:
-          - kind: ServiceAccount
-            identifier: hermes
+        seccompProfile: { type: RuntimeDefault }
+
     service:
-      app:
+      hermes:
         controller: hermes
         ports:
           dashboard:
             port: 9119
-          gateway:
-            port: 8642
+          agent:
+            port: *port
+      codeserver:
+        controller: codeserver
+        ports:
+          http:
+            port: 12321
+
     route:
-      app:
-        hostnames:
-        - hermes.${SECRET_DOMAIN}
+      hermes:
         parentRefs:
-        - name: envoy-external
-          namespace: network
-          sectionName: https
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        hostnames:
+          - hermes.${SECRET_DOMAIN}
         rules:
-        - backendRefs:
-          - identifier: app
-            port: 9119
-        annotations:
-          gethomepage.dev/enabled: 'true'
-          gethomepage.dev/name: Hermes
-          gethomepage.dev/group: AI
-          gethomepage.dev/description: AI agent and chat dashboard
+          # The dashboard hardcodes its CORS/origin allow-list to localhost only, so
+          # the WebSocket handshake (Origin: https://hermes.mcgrath.nz) is rejected
+          # with 403. Rewrite Origin to an allowed value; the browser doesn't enforce
+          # CORS on the WS upgrade, so this only satisfies the server-side check.
+          - filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set:
+                    - name: Origin
+                      value: http://localhost:9119
+            backendRefs:
+              - identifier: hermes
+                port: dashboard
+      codeserver:
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        hostnames:
+          - hermesconf.${SECRET_DOMAIN}
+        rules:
+          - backendRefs:
+              - identifier: codeserver
+                port: http
+
     persistence:
       data:
-        existingClaim: '{{ .Release.Name }}'
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
-        - path: /opt/data
+          - path: /opt/data
       tmp:
         type: emptyDir
-        globalMounts:
-        - path: /tmp
-      bootstrap:
+
+      config:
         type: configMap
-        identifier: bootstrap
+        name: hermes-configmap
+        defaultMode: 0o755
         advancedMounts:
           hermes:
-            seed-config:
-            - path: /bootstrap
-              readOnly: true
-    configMaps:
-      bootstrap:
-        data:
-          config.yaml: "terminal:\n  backend: local\n  cwd: /opt/data/workspace\n\
-            dashboard:\n  public_url: https://hermes.${SECRET_DOMAIN}\n"
-  timeout: 10m
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
+            copy-config:
+              - path: /run/config/config.yaml
+                subPath: config.yaml
+
+    rbac:
+      roles:
+        hermes-read-all:
+          type: ClusterRole
+          rules:
+            - apiGroups: [""]
+              resources: ["pods", "nodes", "services", "namespaces", "configmaps", "persistentvolumes", "persistentvolumeclaims", "endpoints", "resourcequotas", "limitranges", "serviceaccounts", "events"]  # Added events
+              verbs: ["get", "list", "watch"]
+            - apiGroups: [""]
+              resources: ["pods/log"]
+              verbs: ["get", "list"]
+            - apiGroups: ["apps"]
+              resources: ["deployments", "daemonsets", "statefulsets", "replicasets"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["batch"]
+              resources: ["jobs", "cronjobs"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["networking.k8s.io"]
+              resources: ["ingresses", "networkpolicies"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["storage.k8s.io"]
+              resources: ["storageclasses"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["rbac.authorization.k8s.io"]
+              resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["metrics.k8s.io"]
+              resources: ["nodes", "pods"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["helm.toolkit.fluxcd.io"]
+              resources: ["helmreleases"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+              resources: ["kustomizations"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["external-secrets.io"]
+              resources: ["externalsecrets"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["volsync.backube"]
+              resources: ["replicationsources", "replicationdestinations"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["postgresql.cnpg.io"]
+              resources: ["clusters", "backups", "scheduledbackups"]
+              verbs: ["get", "list", "watch"]
+            - apiGroups: ["autoscaling.k8s.io"]
+              resources: ["verticalpodautoscalers"]
+              verbs: ["get", "list", "watch"]
+        hermes-cluster-ops:
+          type: ClusterRole
+          rules:
+            - apiGroups: ["helm.toolkit.fluxcd.io"]
+              resources: ["helmreleases"]
+              verbs: ["patch", "update"]
+            - apiGroups: [""]
+              resources: ["persistentvolumes"]
+              verbs: ["delete", "patch"]
+        hermes-write-restricted:
+          type: Role
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["delete"]
+            - apiGroups: ["batch"]
+              resources: ["jobs"]
+              verbs: ["delete"]
+            - apiGroups: [""]
+              resources: ["pods/exec"]
+              verbs: ["create"]
+            - apiGroups: ["apps"]
+              resources: ["deployments"]
+              verbs: ["patch", "update"]
+      bindings:
+        hermes-read-all:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: hermes-read-all
+          subjects:
+            - identifier: hermes
+              serviceAccount: hermes
+        hermes-cluster-ops:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: hermes-cluster-ops
+          subjects:
+            - identifier: hermes
+              serviceAccount: hermes
+        hermes-write-restricted:
+          type: RoleBinding
+          roleRef:
+            identifier: hermes-write-restricted
+          subjects:
+            - identifier: hermes
+              serviceAccount: hermes
+    serviceAccount:
+      hermes: {}
