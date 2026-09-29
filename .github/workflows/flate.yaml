@@ -17,7 +17,7 @@ permissions:
 jobs:
   filter:
     name: Flate - Filter
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     outputs:
       changed-files: ${{ steps.changed-files.outputs.changed_files }}
     steps:
@@ -31,7 +31,7 @@ jobs:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
     needs: filter
     name: Flate
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,7 +50,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs: flate
     name: Flate - Success
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     steps:
       - name: Any jobs failed?
         if: ${{ contains(needs.*.result, 'failure') }}

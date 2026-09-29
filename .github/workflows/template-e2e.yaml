@@ -21,7 +21,7 @@ jobs:
   validate-invalid:
     if: ${{ github.repository == 'onedr0p/cluster-template' }}
     name: reject-invalid (${{ matrix.fixture }})
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     permissions:
       contents: read
     strategy:
@@ -73,7 +73,7 @@ jobs:
   validator-tests:
     if: ${{ github.repository == 'onedr0p/cluster-template' }}
     name: validator-tests
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     permissions:
       contents: read
     steps:
@@ -93,7 +93,7 @@ jobs:
   validate-valid:
     if: ${{ github.repository == 'onedr0p/cluster-template' }}
     name: accept-valid (${{ matrix.fixture }})
-    runs-on: ubuntu-latest
+    runs-on: gha-kube
     permissions:
       contents: read
     strategy:
