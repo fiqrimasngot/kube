@@ -23,8 +23,8 @@ spec:
             env:
               NO_AUTOUPDATE: true
               TUNNEL_METRICS: 0.0.0.0:8080
-              TUNNEL_POST_QUANTUM: true # disable when using http2
-              TUNNEL_TRANSPORT_PROTOCOL: quic # or http2
+              TUNNEL_POST_QUANTUM: false
+              TUNNEL_TRANSPORT_PROTOCOL: http2
             envFrom:
               - secretRef:
                   name: cloudflare-tunnel-secret
@@ -70,6 +70,11 @@ spec:
         data:
           config.yaml: |-
             ingress:
+              - hostname: "${SECRET_DOMAIN}"
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.${SECRET_DOMAIN}
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
               - hostname: "*.${SECRET_DOMAIN}"
                 originRequest:
                   http2Origin: true
