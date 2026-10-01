@@ -11,11 +11,11 @@ spec:
     kind: OCIRepository
     name: app-template
   install:
-    timeout: 2m
+    timeout: 15m
     remediation:
       retries: 1
   upgrade:
-    timeout: 2m
+    timeout: 15m
     remediation:
       retries: 1
   values:
