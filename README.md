@@ -340,7 +340,7 @@ The node should join the cluster automatically and workloads will be scheduled o
 
 To enable Renovate on GitHub, click the 'Configure' button over at their [Github app page](https://github.com/apps/renovate) and select your repository. On other Git providers you can [self-host Renovate](https://docs.renovatebot.com/getting-started/running/#self-hosting-renovate); note that fetching the shared preset in `.renovaterc.json5` requires a `GITHUB_COM_TOKEN`. Renovate creates a "Dependency Dashboard" as an issue in your repository, giving an overview of the status of all updates. The dashboard has interactive checkboxes that let you do things like advance scheduling or reattempt update PRs you closed without merging.
 
-The base Renovate configuration in your repository can be viewed at [.renovaterc.json5](.renovaterc.json5). By default it is scheduled to be active with PRs every weekend, but you can [change the schedule to anything you want](https://docs.renovatebot.com/presets-schedule), or remove it if you want Renovate to open PRs immediately.
+The base Renovate configuration in your repository can be viewed at [.renovaterc.json5](.renovaterc.json5). By default it is scheduled to be active with PRs daily before 5am in the configured timezone, but you can [change the schedule to anything you want](https://docs.renovatebot.com/presets-schedule), or remove it if you want Renovate to open PRs immediately.
 
 ## 🐛 Debugging
 
