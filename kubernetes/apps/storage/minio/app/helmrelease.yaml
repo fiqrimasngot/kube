@@ -26,8 +26,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/jumpserver/minio
-              tag: RELEASE.2024-06-29T01-20-47Z@sha256:5b817eb1fa8c65990b70bce66570b65e93323e73714e8cfce560f5302765804d
+              repository: quay.io/minio/minio
+              tag: RELEASE.2025-04-22T22-12-26Z
             env:
               MINIO_API_CORS_ALLOW_ORIGIN: https://minio.${SECRET_DOMAIN},https://s3.${SECRET_DOMAIN}
               MINIO_BROWSER_REDIRECT_URL: https://minio.${SECRET_DOMAIN}

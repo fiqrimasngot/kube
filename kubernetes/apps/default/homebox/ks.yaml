@@ -4,9 +4,6 @@ kind: Kustomization
 metadata:
   name: &app homebox
 spec:
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   interval: 1h
   path: ./kubernetes/apps/default/homebox/app
   components:

@@ -16,13 +16,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: storage
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      name: minio
-      namespace: storage
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: minio
-      namespace: storage
   wait: false

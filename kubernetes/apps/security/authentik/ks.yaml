@@ -7,8 +7,6 @@ metadata:
 spec:
   targetNamespace: security
   dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
     - name: minio
       namespace: storage
   postBuild:

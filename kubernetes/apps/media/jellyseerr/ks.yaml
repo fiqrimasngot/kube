@@ -4,9 +4,6 @@ kind: Kustomization
 metadata:
   name: &app jellyseerr
 spec:
-  dependsOn:
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
   targetNamespace: media
   path: ./kubernetes/apps/media/jellyseerr/app
   prune: true
