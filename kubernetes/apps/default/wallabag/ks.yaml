@@ -6,6 +6,8 @@ metadata:
 spec:
   targetNamespace: default
   dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
     - name: cloudnative-pg-cluster
       namespace: database
   path: ./kubernetes/apps/default/wallabag/app

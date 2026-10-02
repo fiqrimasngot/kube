@@ -4,6 +4,9 @@ kind: Kustomization
 metadata:
   name: &app kiwix
 spec:
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   targetNamespace: default
   path: ./kubernetes/apps/default/kiwix/app
   prune: true

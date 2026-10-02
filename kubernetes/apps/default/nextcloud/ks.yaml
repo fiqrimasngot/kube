@@ -4,6 +4,9 @@ kind: Kustomization
 metadata:
   name: &app nextcloud
 spec:
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   targetNamespace: default
   path: ./kubernetes/apps/default/nextcloud/app
   prune: true

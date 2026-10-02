@@ -32,6 +32,8 @@ metadata:
 spec:
   targetNamespace: database
   dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
     - name: minio
       namespace: storage
     - name: cloudnative-pg

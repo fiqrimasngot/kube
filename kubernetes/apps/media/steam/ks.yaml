@@ -4,6 +4,9 @@ kind: Kustomization
 metadata:
   name: &app steam
 spec:
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   targetNamespace: media
   path: ./kubernetes/apps/media/steam/app
   prune: true
