@@ -50,7 +50,7 @@ spec:
                   name: open-webui
             image:
               repository: ghcr.io/open-webui/open-webui
-              tag: v0.11.4@sha256:9591b13f13843c7721c2b8eaf7382846c81b3ffe126526d1888d1fed50c6a33f
+              tag: 0.7.2@sha256:16d9a3615b45f14a0c89f7ad7a3bf151f923ed32c2e68f9204eb17d1ce40774b
             resources:
               limits:
                 memory: 2Gi
@@ -62,7 +62,7 @@ spec:
             envFrom: *envFrom
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: 18.6.0@sha256:b6d3af974df781c673d37e49bdddfa14a6f5be28b18d2cb7713f0449bea4057b
+              tag: 18.1.0@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
         pod:
           annotations:
             reloader.stakater.com/auto: "true"

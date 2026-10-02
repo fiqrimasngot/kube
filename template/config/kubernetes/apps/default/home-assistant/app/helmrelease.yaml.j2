@@ -33,7 +33,7 @@ spec:
           main:
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: "2026.9.4@sha256:cd5ffc0a3bc873b35f20189ef22ee7ee9e8875fe666928dfee263cd464cc053d"
+              tag: "2026.6.3@sha256:82db7a297c96a0288559c5f2849878168c14a06557edc114084d874268c92a9a"
             env:
               TZ: "${TIMEZONE}"
             securityContext:
@@ -42,7 +42,7 @@ spec:
             dependsOn: main
             image:
               repository: ghcr.io/coder/code-server
-              tag: 4.140.0
+              tag: 4.139.1
             args:
               - --auth
               - "none"

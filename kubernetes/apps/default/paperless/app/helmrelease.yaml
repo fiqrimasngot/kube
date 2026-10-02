@@ -81,14 +81,14 @@ spec:
           tika:
             image:
               repository: docker.io/apache/tika
-              tag: 3.3.1.0-full
+              tag: 3.2.3.0-full
               pullPolicy: IfNotPresent
             ports:
               - containerPort: 9998
           gotenberg:
             image:
               repository: gotenberg/gotenberg
-              tag: 8.37.0
+              tag: 8.25.1
               pullPolicy: IfNotPresent
             ports:
               - containerPort: 3000

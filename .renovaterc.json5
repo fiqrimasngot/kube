@@ -10,7 +10,7 @@
     additionalBranchPrefix: "{{manager}}-",
   },
   mise: {
-    fileMatch: ["^\\.mise/conf\\.d/[^/]+\\.toml$"],
+    managerFilePatterns: ["/^\\.mise/conf\\.d/[^/]+\\.toml$/"],
   },
   packageRules: [
     {
@@ -32,6 +32,7 @@
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
+      minimumGroupSize: 2,
     },
     {
       description: "Flux Operator Group",
@@ -41,6 +42,7 @@
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
+      minimumGroupSize: 2,
     },
     {
       matchUpdateTypes: ["major"],
