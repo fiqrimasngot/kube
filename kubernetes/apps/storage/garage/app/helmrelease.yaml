@@ -69,7 +69,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: s3
+                port: 3900
     persistence:
       config:
         enabled: true
