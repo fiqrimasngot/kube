@@ -29,8 +29,15 @@ spec:
               repository: quay.io/minio/aistor/minio
               tag: RELEASE.2026-09-19T17-05-25Z@sha256:107cf2014a9583c74c11e3cdbd6903d89c2244355886b89ce532f4ecae9c23f3
             env:
-              MINIO_API_CORS_ALLOW_ORIGIN: https://minio.${SECRET_DOMAIN},https://s3.${SECRET_DOMAIN}
+              MINIO_ROOT_USER_FILE: /root-creds/username
+              MINIO_ROOT_PASSWORD_FILE: /root-creds/password
+              MINIO_SITE_NAME: my-kl-1
+              MINIO_DOMAIN: https://minio.${SECRET_DOMAIN}
+              MINIO_BROWSER_REDIRECT: "false"
               MINIO_BROWSER_REDIRECT_URL: https://minio.${SECRET_DOMAIN}
+              MINIO_API_ROOT_ACCESS: "off"
+              MINIO_SCANNER_SPEED: slowest
+              MINIO_API_CORS_ALLOW_ORIGIN: https://minio.${SECRET_DOMAIN},https://s3.${SECRET_DOMAIN}
               MINIO_IDENTITY_OPENID_CLAIM_NAME: "groups"
               MINIO_PROMETHEUS_JOB_ID: minio
               MINIO_PROMETHEUS_URL: https://prometheus.${SECRET_DOMAIN}
