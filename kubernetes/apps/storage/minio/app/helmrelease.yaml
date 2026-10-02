@@ -26,11 +26,9 @@ spec:
         containers:
           app:
             image:
-              repository: quay.io/minio/aistor/minio
-              tag: RELEASE.2026-09-19T17-05-25Z@sha256:107cf2014a9583c74c11e3cdbd6903d89c2244355886b89ce532f4ecae9c23f3
+              repository: quay.io/minio/minio
+              tag: RELEASE.2025-02-28T09-55-16Z
             env:
-              MINIO_ROOT_USER_FILE: /root-creds/username
-              MINIO_ROOT_PASSWORD_FILE: /root-creds/password
               MINIO_SITE_NAME: my-kl-1
               MINIO_DOMAIN: https://minio.${SECRET_DOMAIN}
               MINIO_BROWSER_REDIRECT: "false"
