@@ -373,6 +373,11 @@ class Hermes(Model):
     password: str = ""
     secret: str = ""
 
+class Garage(Model):
+    rpc_secret: str = ""
+    admin_token: str = ""
+    metrics_token: str = ""
+
 class Node(Model):
     name: str = Field(pattern=r"^[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]$|^[a-z0-9]$")
     address: IPv4Address
@@ -446,6 +451,7 @@ class Config(Model):
     prowlarr: Prowlarr = Prowlarr()
     alert_manager: AlertManager = AlertManager()
     hermes: Hermes = Hermes()
+    garage: Garage = Garage()
     nodes: list[Node]
 
     @computed_field
