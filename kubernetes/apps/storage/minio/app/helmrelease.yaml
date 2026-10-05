@@ -26,8 +26,8 @@ spec:
         containers:
           app:
             image:
-              repository: quay.io/minio/aistor/minio
-              tag: RELEASE.2026-09-19T17-05-25Z@sha256:107cf2014a9583c74c11e3cdbd6903d89c2244355886b89ce532f4ecae9c23f3
+              repository: docker.io/pgsty/silo
+              tag: RELEASE.2025-12-03T12-00-00Z
             env:
               MINIO_ROOT_USER_FILE: /root-creds/username
               MINIO_ROOT_PASSWORD_FILE: /root-creds/password
@@ -149,3 +149,47 @@ spec:
         # path: ${SECRET_NFS_MNT}/minio
         globalMounts:
           - path: /data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backups
+spec:
+  storageClassName: zfs-k8s-0-library
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Ti
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backups-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: "2199023255552"
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: backups
+    namespace: storage
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeAttributes:
+      openebs.io/poolname: k8s-0-library
+    volumeHandle: backups
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-0
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-k8s-0-library
+  volumeMode: Filesystem
