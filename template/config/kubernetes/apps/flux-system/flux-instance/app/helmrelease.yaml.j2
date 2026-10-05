@@ -43,6 +43,14 @@ spec:
             target:
               kind: Deployment
               name: (kustomize-controller|helm-controller|source-controller)
+          - # Allow storage releases to proceed during bulk installs
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --concurrent=20
+            target:
+              kind: Deployment
+              name: helm-controller
           - # Increase the memory limits
             patch: |
               apiVersion: apps/v1

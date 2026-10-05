@@ -4,6 +4,11 @@ kind: Kustomization
 metadata:
   name: openebs
 spec:
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: openebs
+      namespace: openebs-system
   interval: 1h
   path: ./kubernetes/apps/openebs-system/openebs/app
   postBuild:
@@ -23,6 +28,8 @@ kind: Kustomization
 metadata:
   name: zfs-volumes
 spec:
+  dependsOn:
+    - name: openebs
   interval: 1h
   path: ./kubernetes/apps/openebs-system/openebs/zfs-volumes
   postBuild:
