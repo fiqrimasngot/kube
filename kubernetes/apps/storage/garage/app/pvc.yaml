@@ -4,7 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: garage-data
 spec:
-  storageClassName: zfs-k8s-0-library
+  storageClassName: ceph-block
   accessModes:
     - ReadWriteOnce
   resources:
