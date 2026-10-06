@@ -94,11 +94,11 @@ spec:
           - path: /etc/garage/secrets
             readOnly: true
       data:
-        type: nfs
-        server: ${SECRET_NFS_SVC}
-        path: /doc/garage
+        enabled: true
+        existingClaim: backups
         globalMounts:
           - path: /var/lib/garage
+            subPath: garage
     configMaps:
       config:
         data:
