@@ -35,6 +35,7 @@ spec:
               - --single-node
             env:
               GARAGE_CONFIG_FILE: /etc/garage/garage.toml
+              GARAGE_ALLOW_WORLD_READABLE_SECRETS: "true"
             probes:
               liveness: &probes
                 enabled: true
