@@ -87,11 +87,16 @@ spec:
               # Run the dashboard under s6 in THIS container (not a sidecar): the
               # dashboard manages the gateway via s6-svc on the local /run/service
               # tree, so it must share the gateway's container to see/restart it.
-              # HOST/PORT default to 0.0.0.0:9119. INSECURE opts out of the OAuth
-              # gate (trusted LAN behind Envoy); TUI exposes the in-browser Chat tab.
+              # HOST/PORT default to 0.0.0.0:9119. Dashboard auth is handled by
+              # Authentik through Hermes' self-hosted OIDC provider. Explicitly
+              # blank the old basic-auth env keys from hermes-secret so OAuth is
+              # the only interactive login option.
               HERMES_DASHBOARD: "1"
-              HERMES_DASHBOARD_INSECURE: "1"
               HERMES_DASHBOARD_TUI: "1"
+              HERMES_DASHBOARD_BASIC_AUTH_USERNAME: ""
+              HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ""
+              HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH: ""
+              HERMES_DASHBOARD_BASIC_AUTH_SECRET: ""
               # Make the tools staged by the install-tools initContainer usable by
               # the agent's shell-outs. This is the image's own default PATH (which
               # already carries /opt/hermes/bin, the venv, and /opt/data/.local/bin)

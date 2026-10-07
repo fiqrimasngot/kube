@@ -1,5 +1,10 @@
 dashboard:
   public_url: https://hermes.${SECRET_DOMAIN}
+  oauth:
+    self_hosted:
+      issuer: https://auth.${SECRET_DOMAIN}/application/o/hermes/
+      client_id: O03jOEniqUJo7RXWc6HOGqcxyOp9NyJuFrdzKLd9
+      scopes: openid profile email
 model:
   provider: openai-codex
   base_url: https://chatgpt.com/backend-api/codex
