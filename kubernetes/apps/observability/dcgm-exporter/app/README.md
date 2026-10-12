@@ -1,37 +1,36 @@
-# Dcgm Exporter
+# dcgm-exporter deployment
 
-GitOps deployment notes for `dcgm-exporter` in the `observability` namespace.
+GitOps deployment README for `kubernetes/apps/observability/dcgm-exporter/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/observability/dcgm-exporter/app`
-- HelmRelease: `kubernetes/apps/observability/dcgm-exporter/app/helmrelease.yaml`
+## Summary
+- Namespace: `observability`
+- HelmRelease: `dcgm-exporter`
+- Path: `kubernetes/apps/observability/dcgm-exporter/app`
 - Kustomization: `kubernetes/apps/observability/dcgm-exporter/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `1h`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/observability/dcgm-exporter/ks.yaml`
+- Chart: chart `dcgm-exporter` from `HelmRepository/dcgm-exporter` version `4.7.1`
+- Reconcile interval: `15m`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `nvcr.io/nvidia/k8s/dcgm-exporter` (`3.3.8-3.6.0-ubuntu22.04`)
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `alerts.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./alerts.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/observability/dcgm-exporter/app
-kubectl -n observability get helmrelease dcgm-exporter
-kubectl -n observability get pods -l app.kubernetes.io/instance=dcgm-exporter
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/observability/dcgm-exporter/app >/tmp/dcgm-exporter-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n observability reconcile helmrelease dcgm-exporter
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability annotate helmrelease dcgm-exporter reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get helmrelease dcgm-exporter -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get pods -l app.kubernetes.io/instance=dcgm-exporter -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

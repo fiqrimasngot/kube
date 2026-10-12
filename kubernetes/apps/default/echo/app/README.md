@@ -1,36 +1,36 @@
-# Echo
+# echo deployment
 
-GitOps deployment notes for `echo` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/echo/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/echo/app`
-- HelmRelease: `kubernetes/apps/default/echo/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `echo`
+- Path: `kubernetes/apps/default/echo/app`
 - Kustomization: `kubernetes/apps/default/echo/app/kustomization.yaml`
-- Chart/reference: `echo`
+- Flux app Kustomization: `kubernetes/apps/default/echo/ks.yaml`
+- Chart: chartRef `OCIRepository/echo`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: yes
+## Supporting manifests
+- `ocirepository.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./ocirepository.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/echo/app
-kubectl -n default get helmrelease echo
-kubectl -n default get pods -l app.kubernetes.io/instance=echo
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/echo/app >/tmp/echo-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease echo
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease echo reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease echo -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=echo -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

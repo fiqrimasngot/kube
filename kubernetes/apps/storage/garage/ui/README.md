@@ -1,37 +1,46 @@
-# Garage — UI
+# garage-webui deployment
 
-GitOps deployment notes for `garage-webui` in the `storage` namespace.
+GitOps deployment README for `kubernetes/apps/storage/garage/ui/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/storage/garage/ui`
-- HelmRelease: `kubernetes/apps/storage/garage/ui/helmrelease.yaml`
+## Summary
+- Namespace: `storage`
+- HelmRelease: `garage-webui`
+- Path: `kubernetes/apps/storage/garage/ui`
 - Kustomization: `kubernetes/apps/storage/garage/ui/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/storage/garage/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
-- Controllers: `garage-webui`, `app`, `config`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `docker.io/khairul169/garage-webui` (`1.1.0@sha256:17c793551873155065bf9a022dabcde874de808a1f26e648d4b82e168806439c`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `garage-webui`: type `Deployment`
+  - container `app` image `docker.io/khairul169/garage-webui:1.1.0@sha256:17c793551873155065bf9a022dabcde874de808a1f26e648d4b82e168806439c`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:3909
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/storage/garage/ui
-kubectl -n storage get helmrelease garage-webui
-kubectl -n storage get pods -l app.kubernetes.io/instance=garage-webui
+## Routes
+- `app`: hosts `garage.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: type=`secret`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/storage/garage/ui >/tmp/garage-webui-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n storage reconcile helmrelease garage-webui
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage annotate helmrelease garage-webui reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage get helmrelease garage-webui -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage get pods -l app.kubernetes.io/instance=garage-webui -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

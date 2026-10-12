@@ -1,36 +1,33 @@
-# Authentik
+# authentik deployment
 
-GitOps deployment notes for `authentik` in the `security` namespace.
+GitOps deployment README for `kubernetes/apps/security/authentik/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/security/authentik/app`
-- HelmRelease: `kubernetes/apps/security/authentik/app/helmrelease.yaml`
+## Summary
+- Namespace: `security`
+- HelmRelease: `authentik`
+- Path: `kubernetes/apps/security/authentik/app`
 - Kustomization: `kubernetes/apps/security/authentik/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `2h`
-- Timeout: `not specified`
-- Controllers: `deploymentStrategy`
+- Flux app Kustomization: `kubernetes/apps/security/authentik/ks.yaml`
+- Chart: chart `authentik` from `HelmRepository/authentik` version `2026.5.3`
+- Reconcile interval: `30m`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: yes
-
-## Files
-- `./helmrelease.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/security/authentik/app
-kubectl -n security get helmrelease authentik
-kubectl -n security get pods -l app.kubernetes.io/instance=authentik
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/security/authentik/app >/tmp/authentik-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n security reconcile helmrelease authentik
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n security annotate helmrelease authentik reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n security get helmrelease authentik -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n security get pods -l app.kubernetes.io/instance=authentik -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

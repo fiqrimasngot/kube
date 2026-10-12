@@ -1,37 +1,49 @@
-# Tdarr — Node Cpu
+# tdarr-node-cpu deployment
 
-GitOps deployment notes for `tdarr-node-cpu` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/tdarr/node-cpu/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/tdarr/node-cpu`
-- HelmRelease: `kubernetes/apps/media/tdarr/node-cpu/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `tdarr-node-cpu`
+- Path: `kubernetes/apps/media/tdarr/node-cpu`
 - Kustomization: `kubernetes/apps/media/tdarr/node-cpu/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/tdarr/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `tdarr-node-cpu`, `movies`, `tv`, `music`, `transcode`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/haveagitgat/tdarr_node` (`2.58.02@sha256:62e14509bc19dea9b6f5dc85d0942163b6fa240d780a53eb590d894d46c9e1f2`)
-- Service declared: yes
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `hpa.yaml`
 
-## Files
-- `helmrelease.yaml`
+## Controllers and images
+- `tdarr-node-cpu`: type `Deployment`
+  - container `app` image `ghcr.io/haveagitgat/tdarr_node:2.58.02@sha256:62e14509bc19dea9b6f5dc85d0942163b6fa240d780a53eb590d894d46c9e1f2`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/tdarr/node-cpu
-kubectl -n media get helmrelease tdarr-node-cpu
-kubectl -n media get pods -l app.kubernetes.io/instance=tdarr-node-cpu
+## Services
+- `app`: server:8266
+
+## Persistence
+- `movies`: type=`nfs`, path=`/media/movies`
+- `tv`: type=`nfs`, path=`/media/tv`
+- `music`: type=`nfs`, path=`/media/music`
+- `transcode`: type=`nfs`, path=`/media/temp`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/tdarr/node-cpu >/tmp/tdarr-node-cpu-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease tdarr-node-cpu
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease tdarr-node-cpu reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease tdarr-node-cpu -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=tdarr-node-cpu -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

@@ -1,36 +1,47 @@
-# Ollama — Backend
+# ollama deployment
 
-GitOps deployment notes for `ollama` in the `devops` namespace.
+GitOps deployment README for `kubernetes/apps/devops/ollama/backend/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/devops/ollama/backend`
-- HelmRelease: `kubernetes/apps/devops/ollama/backend/helmrelease.yaml`
+## Summary
+- Namespace: `devops`
+- HelmRelease: `ollama`
+- Path: `kubernetes/apps/devops/ollama/backend`
 - Kustomization: `kubernetes/apps/devops/ollama/backend/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/devops/ollama/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `docker.io/ollama/ollama` (`0.19.0`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `ollama`: type `Deployment`, replicas `1`
+  - container `app` image `docker.io/ollama/ollama:0.19.0`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:11434
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/devops/ollama/backend
-kubectl -n devops get helmrelease ollama
-kubectl -n devops get pods -l app.kubernetes.io/instance=ollama
+## Routes
+- `app`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: existingClaim=`ollama`
+- `models`: existingClaim=`ollama-model`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/devops/ollama/backend >/tmp/ollama-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n devops reconcile helmrelease ollama
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops annotate helmrelease ollama reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops get helmrelease ollama -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops get pods -l app.kubernetes.io/instance=ollama -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

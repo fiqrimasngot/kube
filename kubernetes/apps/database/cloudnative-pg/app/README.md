@@ -1,37 +1,37 @@
-# Cloudnative Pg
+# cloudnative-pg deployment
 
-GitOps deployment notes for `cloudnative-pg` in the `database` namespace.
+GitOps deployment README for `kubernetes/apps/database/cloudnative-pg/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/database/cloudnative-pg/app`
-- HelmRelease: `kubernetes/apps/database/cloudnative-pg/app/helmrelease.yaml`
+## Summary
+- Namespace: `database`
+- HelmRelease: `cloudnative-pg`
+- Path: `kubernetes/apps/database/cloudnative-pg/app`
 - Kustomization: `kubernetes/apps/database/cloudnative-pg/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `2h`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/database/cloudnative-pg/ks.yaml`
+- Chart: chart `cloudnative-pg` from `HelmRepository/cloudnative-pg` version `0.27.0`
+- Reconcile interval: `30m`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/database/cloudnative-pg/app
-kubectl -n database get helmrelease cloudnative-pg
-kubectl -n database get pods -l app.kubernetes.io/instance=cloudnative-pg
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/database/cloudnative-pg/app >/tmp/cloudnative-pg-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n database reconcile helmrelease cloudnative-pg
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database annotate helmrelease cloudnative-pg reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get helmrelease cloudnative-pg -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get pods -l app.kubernetes.io/instance=cloudnative-pg -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

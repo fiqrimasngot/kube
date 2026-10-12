@@ -1,37 +1,43 @@
-# Cyberchef
+# cyberchef deployment
 
-GitOps deployment notes for `cyberchef` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/cyberchef/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/cyberchef/app`
-- HelmRelease: `kubernetes/apps/default/cyberchef/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `cyberchef`
+- Path: `kubernetes/apps/default/cyberchef/app`
 - Kustomization: `kubernetes/apps/default/cyberchef/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/default/cyberchef/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `15m`
-- Timeout: `not specified`
-- Controllers: `main`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `docker.io/mpepping/cyberchef` (`v10.19.4`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `cyberchef`: type `Deployment`, replicas `1`
+  - container `app` image `docker.io/mpepping/cyberchef:v10.19.4`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:8000
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/cyberchef/app
-kubectl -n default get helmrelease cyberchef
-kubectl -n default get pods -l app.kubernetes.io/instance=cyberchef
+## Routes
+- `main`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-external`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/cyberchef/app >/tmp/cyberchef-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease cyberchef
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease cyberchef reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease cyberchef -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=cyberchef -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

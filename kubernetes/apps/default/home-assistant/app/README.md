@@ -1,40 +1,52 @@
-# Home Assistant
+# home-assistant deployment
 
-GitOps deployment notes for `home-assistant` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/home-assistant/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/home-assistant/app`
-- HelmRelease: `kubernetes/apps/default/home-assistant/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `home-assistant`
+- Path: `kubernetes/apps/default/home-assistant/app`
 - Kustomization: `kubernetes/apps/default/home-assistant/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/default/home-assistant/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `15m`
-- Timeout: `not specified`
-- Controllers: `main`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/home-operations/home-assistant` (`2026.6.3@sha256:82db7a297c96a0288559c5f2849878168c14a06557edc114084d874268c92a9a`)
-  - `ghcr.io/coder/code-server` (`4.139.1`)
-- Service declared: yes
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
+## Controllers and images
+- `main`: type `Deployment`
+  - container `main` image `ghcr.io/home-operations/home-assistant:2026.6.3@sha256:82db7a297c96a0288559c5f2849878168c14a06557edc114084d874268c92a9a`
+  - container `code` image `ghcr.io/coder/code-server:4.139.1`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/home-assistant/app
-kubectl -n default get helmrelease home-assistant
-kubectl -n default get pods -l app.kubernetes.io/instance=home-assistant
+## Services
+- `main`: http:8123
+
+## Routes
+- `main`: hosts `ha.${SECRET_DOMAIN}`, gateways `envoy-external`
+
+## Persistence
+- `config`: enabled=`True`, existingClaim=`home-assistant-pvc`
+- `usb`: enabled=`True`, type=`hostPath`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/home-assistant/app >/tmp/home-assistant-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease home-assistant
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease home-assistant reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease home-assistant -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=home-assistant -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

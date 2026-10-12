@@ -1,37 +1,37 @@
-# Gha Runner Scale Set Controller
+# actions-runner-controller deployment
 
-GitOps deployment notes for `actions-runner-controller` in the `devops` namespace.
+GitOps deployment README for `kubernetes/apps/devops/gha-runner-scale-set-controller/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/devops/gha-runner-scale-set-controller/app`
-- HelmRelease: `kubernetes/apps/devops/gha-runner-scale-set-controller/app/helmrelease.yaml`
+## Summary
+- Namespace: `devops`
+- HelmRelease: `actions-runner-controller`
+- Path: `kubernetes/apps/devops/gha-runner-scale-set-controller/app`
 - Kustomization: `kubernetes/apps/devops/gha-runner-scale-set-controller/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `5m`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/devops/gha-runner-scale-set-controller/ks.yaml`
+- Chart: chart `gha-runner-scale-set-controller` from `HelmRepository/actions-runner-controller` version `0.13.0`
+- Reconcile interval: `30m`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./secrets.sops.yaml`
-- `./helmrelease.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/devops/gha-runner-scale-set-controller/app
-kubectl -n devops get helmrelease actions-runner-controller
-kubectl -n devops get pods -l app.kubernetes.io/instance=actions-runner-controller
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/devops/gha-runner-scale-set-controller/app >/tmp/actions-runner-controller-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n devops reconcile helmrelease actions-runner-controller
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops annotate helmrelease actions-runner-controller reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops get helmrelease actions-runner-controller -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n devops get pods -l app.kubernetes.io/instance=actions-runner-controller -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

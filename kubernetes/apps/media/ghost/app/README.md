@@ -1,37 +1,46 @@
-# Ghost
+# ghost deployment
 
-GitOps deployment notes for `ghost` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/ghost/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/ghost/app`
-- HelmRelease: `kubernetes/apps/media/ghost/app/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `ghost`
+- Path: `kubernetes/apps/media/ghost/app`
 - Kustomization: `kubernetes/apps/media/ghost/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/ghost/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `5m`
 - Timeout: `15m`
-- Controllers: `ghost`
 
-## Runtime
-- Images:
-  - `docker.io/library/ghost` (`6.10.3`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `ghost`: type `deployment`, replicas `1`
+  - container `app` image `docker.io/library/ghost:6.10.3`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:2368
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/ghost/app
-kubectl -n media get helmrelease ghost
-kubectl -n media get pods -l app.kubernetes.io/instance=ghost
+## Routes
+- `app`: hosts `${SECRET_DOMAIN}`, gateways `envoy-external`
+
+## Persistence
+- `content`: existingClaim=`ghost`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/ghost/app >/tmp/ghost-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease ghost
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease ghost reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease ghost -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=ghost -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

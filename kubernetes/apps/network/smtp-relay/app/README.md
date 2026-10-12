@@ -1,42 +1,54 @@
-# SMTP Relay
+# smtp-relay deployment
 
-GitOps deployment notes for `smtp-relay` in the `network` namespace.
+GitOps deployment README for `kubernetes/apps/network/smtp-relay/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/network/smtp-relay/app`
-- HelmRelease: `kubernetes/apps/network/smtp-relay/app/helmrelease.yaml`
+## Summary
+- Namespace: `network`
+- HelmRelease: `smtp-relay`
+- Path: `kubernetes/apps/network/smtp-relay/app`
 - Kustomization: `kubernetes/apps/network/smtp-relay/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/network/smtp-relay/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
-- Controllers: `config`, `cache`, `tls`, `state`, `runtime`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/foxcpp/maddy` (`0.8.2@sha256:eeb5813fc4d101ec5d8f7b08b7255fd76ced2a06884ea94450c8a9a22fd6a08d`)
-- Service declared: yes
-- Route/ingress declared: not declared in helmrelease.yaml
-- Encrypted secret manifests: `secret.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secret.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./certificate.yaml`
-- `./secret.sops.yaml`
-- `name: smtp-relay-configmap`
-- `maddy.conf=./resources/maddy.conf`
+## Supporting manifests
+- `certificate.yaml`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/network/smtp-relay/app
-kubectl -n network get helmrelease smtp-relay
-kubectl -n network get pods -l app.kubernetes.io/instance=smtp-relay
+## Controllers and images
+- `smtp-relay`: type `Deployment`
+  - container `app` image `ghcr.io/foxcpp/maddy:0.8.2@sha256:eeb5813fc4d101ec5d8f7b08b7255fd76ced2a06884ea94450c8a9a22fd6a08d`
+
+## Services
+- `app`: http:8080, smtp:25
+
+## Persistence
+- `config`: type=`configMap`
+- `cache`: type=`emptyDir`
+- `tls`: type=`secret`
+- `state`: type=`emptyDir`
+- `runtime`: type=`emptyDir`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/network/smtp-relay/app >/tmp/smtp-relay-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n network reconcile helmrelease smtp-relay
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network annotate helmrelease smtp-relay reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get helmrelease smtp-relay -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get pods -l app.kubernetes.io/instance=smtp-relay -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

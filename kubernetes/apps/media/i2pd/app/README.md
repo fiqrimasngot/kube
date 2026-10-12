@@ -1,39 +1,47 @@
-# I2pd
+# i2pd deployment
 
-GitOps deployment notes for `i2pd` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/i2pd/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/i2pd/app`
-- HelmRelease: `kubernetes/apps/media/i2pd/app/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `i2pd`
+- Path: `kubernetes/apps/media/i2pd/app`
 - Kustomization: `kubernetes/apps/media/i2pd/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/i2pd/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `i2pd`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `registry.skysolutions.fi/docker.io/purplei2p/i2pd` (`release-2.50.0`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `i2pd`: type `Deployment`
+  - container `app` image `registry.skysolutions.fi/docker.io/purplei2p/i2pd:release-2.50.0`
 
-## Files
-- `./helmrelease.yaml`
-- `name: i2pd`
-- `config/i2pd-docker.conf`
+## Services
+- `app`: http:7070, httpproxy:4444, socksproxy:4447
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/i2pd/app
-kubectl -n media get helmrelease i2pd
-kubectl -n media get pods -l app.kubernetes.io/instance=i2pd
+## Routes
+- `app`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `home`: enabled=`True`, type=`emptyDir`
+- `configfile`: enabled=`True`, type=`configMap`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/i2pd/app >/tmp/i2pd-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease i2pd
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease i2pd reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease i2pd -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=i2pd -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

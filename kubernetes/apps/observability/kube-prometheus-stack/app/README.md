@@ -1,39 +1,37 @@
-# Kube Prometheus Stack
+# kube-prometheus-stack deployment
 
-GitOps deployment notes for `kube-prometheus-stack` in the `observability` namespace.
+GitOps deployment README for `kubernetes/apps/observability/kube-prometheus-stack/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/observability/kube-prometheus-stack/app`
-- HelmRelease: `kubernetes/apps/observability/kube-prometheus-stack/app/helmrelease.yaml`
+## Summary
+- Namespace: `observability`
+- HelmRelease: `kube-prometheus-stack`
+- Path: `kubernetes/apps/observability/kube-prometheus-stack/app`
 - Kustomization: `kubernetes/apps/observability/kube-prometheus-stack/app/kustomization.yaml`
-- Chart/reference: `spec:`
+- Flux app Kustomization: `kubernetes/apps/observability/kube-prometheus-stack/ks.yaml`
+- Chart: chart `kube-prometheus-stack` from `HelmRepository/prometheus-community` version `80.14.4`
 - Reconcile interval: `30m`
-- Timeout: `60`
-- Controllers: `deploymentStrategy`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: yes
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
-- `./grafana-dashboard`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/observability/kube-prometheus-stack/app
-kubectl -n observability get helmrelease kube-prometheus-stack
-kubectl -n observability get pods -l app.kubernetes.io/instance=kube-prometheus-stack
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/observability/kube-prometheus-stack/app >/tmp/kube-prometheus-stack-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n observability reconcile helmrelease kube-prometheus-stack
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability annotate helmrelease kube-prometheus-stack reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get helmrelease kube-prometheus-stack -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get pods -l app.kubernetes.io/instance=kube-prometheus-stack -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

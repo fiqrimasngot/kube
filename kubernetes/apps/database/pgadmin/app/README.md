@@ -1,41 +1,50 @@
-# Pgadmin
+# pgadmin deployment
 
-GitOps deployment notes for `pgadmin` in the `database` namespace.
+GitOps deployment README for `kubernetes/apps/database/pgadmin/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/database/pgadmin/app`
-- HelmRelease: `kubernetes/apps/database/pgadmin/app/helmrelease.yaml`
+## Summary
+- Namespace: `database`
+- HelmRelease: `pgadmin`
+- Path: `kubernetes/apps/database/pgadmin/app`
 - Kustomization: `kubernetes/apps/database/pgadmin/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/database/pgadmin/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `pgadmin`, `app`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `dpage/pgadmin4` (`'9.11'`)
-- Service declared: yes
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./secrets.sops.yaml`
-- `./helmrelease.yaml`
-- `name: servers-json`
-- `config/servers.json`
+## Controllers and images
+- `pgadmin`: type `statefulset`
+  - container `app` image `dpage/pgadmin4:9.11`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/database/pgadmin/app
-kubectl -n database get helmrelease pgadmin
-kubectl -n database get pods -l app.kubernetes.io/instance=pgadmin
+## Services
+- `app`: http:80
+
+## Routes
+- `app`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `server-json`: enabled=`True`, type=`configMap`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/database/pgadmin/app >/tmp/pgadmin-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n database reconcile helmrelease pgadmin
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database annotate helmrelease pgadmin reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get helmrelease pgadmin -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get pods -l app.kubernetes.io/instance=pgadmin -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

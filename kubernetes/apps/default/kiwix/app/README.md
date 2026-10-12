@@ -1,37 +1,47 @@
-# Kiwix
+# kiwix deployment
 
-GitOps deployment notes for `kiwix` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/kiwix/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/kiwix/app`
-- HelmRelease: `kubernetes/apps/default/kiwix/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `kiwix`
+- Path: `kubernetes/apps/default/kiwix/app`
 - Kustomization: `kubernetes/apps/default/kiwix/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/default/kiwix/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `main`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/kiwix/kiwix-serve` (`latest`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `main`: type `Deployment`
+  - container `app` image `ghcr.io/kiwix/kiwix-serve:latest`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:8080
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/kiwix/app
-kubectl -n default get helmrelease kiwix
-kubectl -n default get pods -l app.kubernetes.io/instance=kiwix
+## Routes
+- `main`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: existingClaim=`kiwix`
+- `data`: existingClaim=`kiwix-library`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/kiwix/app >/tmp/kiwix-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease kiwix
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease kiwix reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease kiwix -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=kiwix -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

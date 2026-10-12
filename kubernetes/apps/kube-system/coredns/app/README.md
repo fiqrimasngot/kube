@@ -1,37 +1,40 @@
-# Coredns
+# coredns deployment
 
-GitOps deployment notes for `coredns` in the `kube-system` namespace.
+GitOps deployment README for `kubernetes/apps/kube-system/coredns/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/kube-system/coredns/app`
-- HelmRelease: `kubernetes/apps/kube-system/coredns/app/helmrelease.yaml`
+## Summary
+- Namespace: `kube-system`
+- HelmRelease: `coredns`
+- Path: `kubernetes/apps/kube-system/coredns/app`
 - Kustomization: `kubernetes/apps/kube-system/coredns/app/kustomization.yaml`
-- Chart/reference: `coredns`
+- Flux app Kustomization: `kubernetes/apps/kube-system/coredns/ks.yaml`
+- Chart: chartRef `OCIRepository/coredns`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `mirror.gcr.io/coredns/coredns`
-- Service declared: yes
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `ocirepository.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./ocirepository.yaml`
+## Services
+- `name`
+- `clusterIP`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/kube-system/coredns/app
-kubectl -n kube-system get helmrelease coredns
-kubectl -n kube-system get pods -l app.kubernetes.io/instance=coredns
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/kube-system/coredns/app >/tmp/coredns-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n kube-system reconcile helmrelease coredns
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system annotate helmrelease coredns reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get helmrelease coredns -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get pods -l app.kubernetes.io/instance=coredns -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

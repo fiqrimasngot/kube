@@ -1,42 +1,51 @@
-# Obsidian Couchdb
+# obsidian-couchdb deployment
 
-GitOps deployment notes for `obsidian-couchdb` in the `database` namespace.
+GitOps deployment README for `kubernetes/apps/database/obsidian-couchdb/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/database/obsidian-couchdb/app`
-- HelmRelease: `kubernetes/apps/database/obsidian-couchdb/app/helmrelease.yaml`
+## Summary
+- Namespace: `database`
+- HelmRelease: `obsidian-couchdb`
+- Path: `kubernetes/apps/database/obsidian-couchdb/app`
 - Kustomization: `kubernetes/apps/database/obsidian-couchdb/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/database/obsidian-couchdb/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `main`, `config`, `config-storage`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `public.ecr.aws/docker/library/busybox` (`latest`)
-  - `public.ecr.aws/docker/library/couchdb` (`3.5.1`)
-- Service declared: yes
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
-- `name: obsidian-couchdb-configmap`
-- `config/config.ini`
+## Controllers and images
+- `main`: type `statefulset`
+  - container `main` image `public.ecr.aws/docker/library/couchdb:3.5.1`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/database/obsidian-couchdb/app
-kubectl -n database get helmrelease obsidian-couchdb
-kubectl -n database get pods -l app.kubernetes.io/instance=obsidian-couchdb
+## Services
+- `main`: http:5984
+
+## Routes
+- `main`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-external`
+
+## Persistence
+- `config`: type=`configMap`
+- `config-storage`: type=`emptyDir`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/database/obsidian-couchdb/app >/tmp/obsidian-couchdb-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n database reconcile helmrelease obsidian-couchdb
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database annotate helmrelease obsidian-couchdb reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get helmrelease obsidian-couchdb -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n database get pods -l app.kubernetes.io/instance=obsidian-couchdb -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

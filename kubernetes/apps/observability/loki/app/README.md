@@ -1,42 +1,37 @@
-# Loki
+# loki deployment
 
-GitOps deployment notes for `grafana` in the `observability` namespace.
+GitOps deployment README for `kubernetes/apps/observability/loki/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/observability/loki/app`
-- HelmRelease: `kubernetes/apps/observability/loki/app/helmrelease.yaml`
+## Summary
+- Namespace: `observability`
+- HelmRelease: `loki`
+- Path: `kubernetes/apps/observability/loki/app`
 - Kustomization: `kubernetes/apps/observability/loki/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `2h`
+- Flux app Kustomization: `kubernetes/apps/observability/loki/ks.yaml`
+- Chart: chart `loki` from `HelmRepository/grafana` version `6.49.0`
+- Reconcile interval: `30m`
 - Timeout: `15m`
-- Controllers: `storage`, `deploymentStrategy`, `dashboards`
 
-## Runtime
-- Images:
-  - `nginxinc/nginx-unprivileged` (`1.27.4-alpine`)
-  - `ghcr.io/kiwigrid/k8s-sidecar`
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
-- `name: loki-rules`
-- `SyslogErrorRate.yaml=./alerts/syslog-errors.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/observability/loki/app
-kubectl -n observability get helmrelease grafana
-kubectl -n observability get pods -l app.kubernetes.io/instance=grafana
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/observability/loki/app >/tmp/loki-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n observability reconcile helmrelease grafana
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability annotate helmrelease loki reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get helmrelease loki -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get pods -l app.kubernetes.io/instance=loki -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

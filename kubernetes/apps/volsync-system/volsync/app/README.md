@@ -1,36 +1,36 @@
-# Volsync
+# volsync deployment
 
-GitOps deployment notes for `volsync` in the `volsync-system` namespace.
+GitOps deployment README for `kubernetes/apps/volsync-system/volsync/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/volsync-system/volsync/app`
-- HelmRelease: `kubernetes/apps/volsync-system/volsync/app/helmrelease.yaml`
+## Summary
+- Namespace: `volsync-system`
+- HelmRelease: `volsync`
+- Path: `kubernetes/apps/volsync-system/volsync/app`
 - Kustomization: `kubernetes/apps/volsync-system/volsync/app/kustomization.yaml`
-- Chart/reference: `volsync`
-- Reconcile interval: `15m`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/volsync-system/volsync/ks.yaml`
+- Chart: chartRef `OCIRepository/volsync`
+- Reconcile interval: `1h`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `prometheusrule.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./prometheusrule.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/volsync-system/volsync/app
-kubectl -n volsync-system get helmrelease volsync
-kubectl -n volsync-system get pods -l app.kubernetes.io/instance=volsync
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/volsync-system/volsync/app >/tmp/volsync-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n volsync-system reconcile helmrelease volsync
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n volsync-system annotate helmrelease volsync reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n volsync-system get helmrelease volsync -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n volsync-system get pods -l app.kubernetes.io/instance=volsync -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

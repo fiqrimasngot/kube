@@ -1,40 +1,37 @@
-# Pihole
+# pihole deployment
 
-GitOps deployment notes for `pihole` in the `network` namespace.
+GitOps deployment README for `kubernetes/apps/network/pihole/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/network/pihole/app`
-- HelmRelease: `kubernetes/apps/network/pihole/app/helmrelease.yaml`
+## Summary
+- Namespace: `network`
+- HelmRelease: `pihole`
+- Path: `kubernetes/apps/network/pihole/app`
 - Kustomization: `kubernetes/apps/network/pihole/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `2h`
-- Timeout: `3m`
+- Flux app Kustomization: `kubernetes/apps/network/pihole/ks.yaml`
+- Chart: chart `pihole` from `HelmRepository/pihole` version `2.38.0`
+- Reconcile interval: `15m`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `crazymax/cloudflared` (`latest@sha256:7e94afadbc1fca729d4187e566697319a8752e471085f4d86396300e21039508`)
-  - `pihole/pihole` (`2025.11.1`)
-  - `ekofr/pihole-exporter` (`v1.2.0`)
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secret.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secret.sops.yaml`
 
-## Files
-- `./secret.sops.yaml`
-- `./helmrelease.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/network/pihole/app
-kubectl -n network get helmrelease pihole
-kubectl -n network get pods -l app.kubernetes.io/instance=pihole
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/network/pihole/app >/tmp/pihole-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n network reconcile helmrelease pihole
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network annotate helmrelease pihole reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get helmrelease pihole -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get pods -l app.kubernetes.io/instance=pihole -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

@@ -1,36 +1,36 @@
-# Metrics Server
+# metrics-server deployment
 
-GitOps deployment notes for `metrics-server` in the `kube-system` namespace.
+GitOps deployment README for `kubernetes/apps/kube-system/metrics-server/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/kube-system/metrics-server/app`
-- HelmRelease: `kubernetes/apps/kube-system/metrics-server/app/helmrelease.yaml`
+## Summary
+- Namespace: `kube-system`
+- HelmRelease: `metrics-server`
+- Path: `kubernetes/apps/kube-system/metrics-server/app`
 - Kustomization: `kubernetes/apps/kube-system/metrics-server/app/kustomization.yaml`
-- Chart/reference: `metrics-server`
+- Flux app Kustomization: `kubernetes/apps/kube-system/metrics-server/ks.yaml`
+- Chart: chartRef `OCIRepository/metrics-server`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `ocirepository.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./ocirepository.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/kube-system/metrics-server/app
-kubectl -n kube-system get helmrelease metrics-server
-kubectl -n kube-system get pods -l app.kubernetes.io/instance=metrics-server
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/kube-system/metrics-server/app >/tmp/metrics-server-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n kube-system reconcile helmrelease metrics-server
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system annotate helmrelease metrics-server reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get helmrelease metrics-server -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get pods -l app.kubernetes.io/instance=metrics-server -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

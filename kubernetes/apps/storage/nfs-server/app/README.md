@@ -1,41 +1,49 @@
-# NFS Server
+# nfs-server deployment
 
-GitOps deployment notes for `nfs-server` in the `storage` namespace.
+GitOps deployment README for `kubernetes/apps/storage/nfs-server/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/storage/nfs-server/app`
-- HelmRelease: `kubernetes/apps/storage/nfs-server/app/helmrelease.yaml`
+## Summary
+- Namespace: `storage`
+- HelmRelease: `nfs-server`
+- Path: `kubernetes/apps/storage/nfs-server/app`
 - Kustomization: `kubernetes/apps/storage/nfs-server/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/storage/nfs-server/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `1h`
-- Timeout: `2m`
-- Controllers: `nfs-server`, `exports`, `fake-export`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `quay.io/aminvakil/alpine-nfs-server` (`latest`)
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
-- Local PVC manifests: `pvc.yaml`
+## Supporting manifests
+- `exports.yaml`
+- `pv.yaml`
+- `pvc.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./pv.yaml`
-- `./pvc.yaml`
-- `./exports.yaml`
+## Controllers and images
+- `nfs-server`: type `Deployment`
+  - container `nfs-server` image `quay.io/aminvakil/alpine-nfs-server:latest`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/storage/nfs-server/app
-kubectl -n storage get helmrelease nfs-server
-kubectl -n storage get pods -l app.kubernetes.io/instance=nfs-server
+## Persistence
+- `exports`: type=`configMap`
+- `fake-export`: type=`emptyDir`
+- `doc`: existingClaim=`doc`
+- `immich`: existingClaim=`photos`
+- `media`: existingClaim=`media`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/storage/nfs-server/app >/tmp/nfs-server-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n storage reconcile helmrelease nfs-server
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage annotate helmrelease nfs-server reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage get helmrelease nfs-server -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n storage get pods -l app.kubernetes.io/instance=nfs-server -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

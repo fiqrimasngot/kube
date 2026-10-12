@@ -1,43 +1,46 @@
-# Homepage
+# homepage deployment
 
-GitOps deployment notes for `homepage` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/homepage/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/homepage/app`
-- HelmRelease: `kubernetes/apps/default/homepage/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `homepage`
+- Path: `kubernetes/apps/default/homepage/app`
 - Kustomization: `kubernetes/apps/default/homepage/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/default/homepage/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `config`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/gethomepage/homepage` (`v1.8.0@sha256:7dc099d5c6ec7fc945d858218565925b01ff8a60bcbfda990fc680a8b5cd0b6e`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `homepage`: type `Deployment`, replicas `1`
+  - container `app` image `ghcr.io/gethomepage/homepage:v1.8.0@sha256:7dc099d5c6ec7fc945d858218565925b01ff8a60bcbfda990fc680a8b5cd0b6e`
 
-## Files
-- `./helmrelease.yaml`
-- `name: homepage-config`
-- `config/bookmarks.yaml`
-- `config/services.yaml`
-- `config/kubernetes.yaml`
-- `config/settings.yaml`
-- `config/widgets.yaml`
+## Services
+- `app`: http:3000
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/homepage/app
-kubectl -n default get helmrelease homepage
-kubectl -n default get pods -l app.kubernetes.io/instance=homepage
+## Routes
+- `app`: hosts `dash.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: type=`configMap`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/homepage/app >/tmp/homepage-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease homepage
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease homepage reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease homepage -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=homepage -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

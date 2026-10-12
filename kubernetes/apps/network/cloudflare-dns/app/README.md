@@ -1,38 +1,40 @@
-# Cloudflare DNS
+# cloudflare-dns deployment
 
-GitOps deployment notes for `cloudflare-dns` in the `network` namespace.
+GitOps deployment README for `kubernetes/apps/network/cloudflare-dns/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/network/cloudflare-dns/app`
-- HelmRelease: `kubernetes/apps/network/cloudflare-dns/app/helmrelease.yaml`
+## Summary
+- Namespace: `network`
+- HelmRelease: `cloudflare-dns`
+- Path: `kubernetes/apps/network/cloudflare-dns/app`
 - Kustomization: `kubernetes/apps/network/cloudflare-dns/app/kustomization.yaml`
-- Chart/reference: `cloudflare-dns`
+- Flux app Kustomization: `kubernetes/apps/network/cloudflare-dns/ks.yaml`
+- Chart: chartRef `OCIRepository/cloudflare-dns`
 - Reconcile interval: `1h`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secret.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secret.sops.yaml`
 
-## Files
-- `./secret.sops.yaml`
-- `./helmrelease.yaml`
-- `./ocirepository.yaml`
+## Supporting manifests
+- `ocirepository.yaml`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/network/cloudflare-dns/app
-kubectl -n network get helmrelease cloudflare-dns
-kubectl -n network get pods -l app.kubernetes.io/instance=cloudflare-dns
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/network/cloudflare-dns/app >/tmp/cloudflare-dns-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n network reconcile helmrelease cloudflare-dns
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network annotate helmrelease cloudflare-dns reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get helmrelease cloudflare-dns -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n network get pods -l app.kubernetes.io/instance=cloudflare-dns -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

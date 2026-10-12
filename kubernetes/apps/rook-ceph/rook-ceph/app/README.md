@@ -1,38 +1,40 @@
-# Rook Ceph
+# rook-ceph deployment
 
-GitOps deployment notes for `rook-ceph` in the `rook-ceph` namespace.
+GitOps deployment README for `kubernetes/apps/rook-ceph/rook-ceph/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/rook-ceph/rook-ceph/app`
-- HelmRelease: `kubernetes/apps/rook-ceph/rook-ceph/app/helmrelease.yaml`
+## Summary
+- Namespace: `rook-ceph`
+- HelmRelease: `rook-ceph`
+- Path: `kubernetes/apps/rook-ceph/rook-ceph/app`
 - Kustomization: `kubernetes/apps/rook-ceph/rook-ceph/app/kustomization.yaml`
-- Chart/reference: `rook-ceph`
-- Reconcile interval: `15m`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/rook-ceph/rook-ceph/ks.yaml`
+- Chart: chartRef `OCIRepository/rook-ceph`
+- Reconcile interval: `1h`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/rook/ceph` (`v1.18.8`)
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
-- Encrypted secret manifests: `secret.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secret.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secret.sops.yaml`
+## Supporting manifests
+- `grafanadashboard.yaml`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/rook-ceph/rook-ceph/app
-kubectl -n rook-ceph get helmrelease rook-ceph
-kubectl -n rook-ceph get pods -l app.kubernetes.io/instance=rook-ceph
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/rook-ceph/rook-ceph/app >/tmp/rook-ceph-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n rook-ceph reconcile helmrelease rook-ceph
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n rook-ceph annotate helmrelease rook-ceph reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n rook-ceph get helmrelease rook-ceph -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n rook-ceph get pods -l app.kubernetes.io/instance=rook-ceph -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

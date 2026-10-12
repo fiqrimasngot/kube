@@ -1,40 +1,52 @@
-# Mealie
+# mealie deployment
 
-GitOps deployment notes for `mealie` in the `default` namespace.
+GitOps deployment README for `kubernetes/apps/default/mealie/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/default/mealie/app`
-- HelmRelease: `kubernetes/apps/default/mealie/app/helmrelease.yaml`
+## Summary
+- Namespace: `default`
+- HelmRelease: `mealie`
+- Path: `kubernetes/apps/default/mealie/app`
 - Kustomization: `kubernetes/apps/default/mealie/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/default/mealie/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
 - Timeout: `15m`
-- Controllers: `mealie`, `app`, `tmp`, `nltk`
 
-## Runtime
-- Images:
-  - `ghcr.io/onedr0p/postgres-init` (`16`)
-  - `ghcr.io/mealie-recipes/mealie` (`v3.28.0`)
-- Service declared: yes
-- Route/ingress declared: yes
-- Encrypted secret manifests: `secrets.sops.yaml`
+## Secret manifests
+Secret manifest filenames only; do not put decrypted values in this README.
+- `secrets.sops.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./secrets.sops.yaml`
+## Controllers and images
+- `mealie`: type `Deployment`
+  - container `app` image `ghcr.io/mealie-recipes/mealie:v3.28.0`
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/default/mealie/app
-kubectl -n default get helmrelease mealie
-kubectl -n default get pods -l app.kubernetes.io/instance=mealie
+## Services
+- `app`: http:9000
+
+## Routes
+- `app`: hosts `recipes.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `data`: existingClaim=`mealie`
+- `tmp`: type=`emptyDir`
+- `nltk`: type=`emptyDir`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/default/mealie/app >/tmp/mealie-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n default reconcile helmrelease mealie
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default annotate helmrelease mealie reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get helmrelease mealie -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n default get pods -l app.kubernetes.io/instance=mealie -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

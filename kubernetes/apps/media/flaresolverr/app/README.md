@@ -1,37 +1,40 @@
-# Flaresolverr
+# flaresolverr deployment
 
-GitOps deployment notes for `flaresolverr` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/flaresolverr/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/flaresolverr/app`
-- HelmRelease: `kubernetes/apps/media/flaresolverr/app/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `flaresolverr`
+- Path: `kubernetes/apps/media/flaresolverr/app`
 - Kustomization: `kubernetes/apps/media/flaresolverr/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/flaresolverr/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `flaresolverr`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/flaresolverr/flaresolverr` (`v3.4.6@sha256:7962759d99d7e125e108e0f5e7f3cdbcd36161776d058d1d9b7153b92ef1af9e`)
-- Service declared: yes
-- Route/ingress declared: not declared in helmrelease.yaml
+## Controllers and images
+- `flaresolverr`: type `Deployment`
+  - container `app` image `ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:7962759d99d7e125e108e0f5e7f3cdbcd36161776d058d1d9b7153b92ef1af9e`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:8191
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/flaresolverr/app
-kubectl -n media get helmrelease flaresolverr
-kubectl -n media get pods -l app.kubernetes.io/instance=flaresolverr
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/flaresolverr/app >/tmp/flaresolverr-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease flaresolverr
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease flaresolverr reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease flaresolverr -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=flaresolverr -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

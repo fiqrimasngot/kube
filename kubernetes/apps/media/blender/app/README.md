@@ -1,36 +1,46 @@
-# Blender
+# blender deployment
 
-GitOps deployment notes for `blender` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/blender/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/blender/app`
-- HelmRelease: `kubernetes/apps/media/blender/app/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `blender`
+- Path: `kubernetes/apps/media/blender/app`
 - Kustomization: `kubernetes/apps/media/blender/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/blender/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `lscr.io/linuxserver/blender` (`latest`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `blender`: type `Deployment`, replicas `1`
+  - container `app` image `lscr.io/linuxserver/blender:latest`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: https:3000
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/blender/app
-kubectl -n media get helmrelease blender
-kubectl -n media get pods -l app.kubernetes.io/instance=blender
+## Routes
+- `app`: hosts `blender.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: existingClaim=`blender`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/blender/app >/tmp/blender-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease blender
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease blender reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease blender -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=blender -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

@@ -1,36 +1,36 @@
-# Smartctl Exporter
+# smartctl-exporter deployment
 
-GitOps deployment notes for `smartctl-exporter` in the `observability` namespace.
+GitOps deployment README for `kubernetes/apps/observability/smartctl-exporter/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/observability/smartctl-exporter/app`
-- HelmRelease: `kubernetes/apps/observability/smartctl-exporter/app/helmrelease.yaml`
+## Summary
+- Namespace: `observability`
+- HelmRelease: `smartctl-exporter`
+- Path: `kubernetes/apps/observability/smartctl-exporter/app`
 - Kustomization: `kubernetes/apps/observability/smartctl-exporter/app/kustomization.yaml`
-- Chart/reference: `smartctl-exporter`
-- Reconcile interval: `5m`
-- Timeout: `not specified`
+- Flux app Kustomization: `kubernetes/apps/observability/smartctl-exporter/ks.yaml`
+- Chart: chartRef `OCIRepository/smartctl-exporter`
+- Reconcile interval: `1h`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `prometheusrule.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./prometheusrule.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/observability/smartctl-exporter/app
-kubectl -n observability get helmrelease smartctl-exporter
-kubectl -n observability get pods -l app.kubernetes.io/instance=smartctl-exporter
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/observability/smartctl-exporter/app >/tmp/smartctl-exporter-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n observability reconcile helmrelease smartctl-exporter
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability annotate helmrelease smartctl-exporter reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get helmrelease smartctl-exporter -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n observability get pods -l app.kubernetes.io/instance=smartctl-exporter -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

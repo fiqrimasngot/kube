@@ -1,36 +1,36 @@
-# Nvidia Plugin
+# nvidia-device-plugin deployment
 
-GitOps deployment notes for `nvidia-dvp` in the `kube-system` namespace.
+GitOps deployment README for `kubernetes/apps/kube-system/nvidia-plugin/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/kube-system/nvidia-plugin/app`
-- HelmRelease: `kubernetes/apps/kube-system/nvidia-plugin/app/helmrelease.yaml`
+## Summary
+- Namespace: `kube-system`
+- HelmRelease: `nvidia-device-plugin`
+- Path: `kubernetes/apps/kube-system/nvidia-plugin/app`
 - Kustomization: `kubernetes/apps/kube-system/nvidia-plugin/app/kustomization.yaml`
-- Chart/reference: `spec:`
-- Reconcile interval: `30m`
-- Timeout: `3m`
+- Flux app Kustomization: `kubernetes/apps/kube-system/nvidia-plugin/ks.yaml`
+- Chart: chart `nvidia-device-plugin` from `HelmRepository/nvidia-dvp` version `0.18.0`
+- Reconcile interval: `15m`
+- Timeout: `not declared`
 
-## Runtime
-- Images: managed by the referenced chart or not pinned in this file.
-- Service declared: not declared in helmrelease.yaml
-- Route/ingress declared: not declared in helmrelease.yaml
+## Supporting manifests
+- `class.yaml`
 
-## Files
-- `./helmrelease.yaml`
-- `./class.yaml`
-
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/kube-system/nvidia-plugin/app
-kubectl -n kube-system get helmrelease nvidia-dvp
-kubectl -n kube-system get pods -l app.kubernetes.io/instance=nvidia-dvp
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/kube-system/nvidia-plugin/app >/tmp/nvidia-device-plugin-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n kube-system reconcile helmrelease nvidia-dvp
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system annotate helmrelease nvidia-device-plugin reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get helmrelease nvidia-device-plugin -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n kube-system get pods -l app.kubernetes.io/instance=nvidia-device-plugin -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.

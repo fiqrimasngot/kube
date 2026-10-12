@@ -1,37 +1,51 @@
-# Bazarr
+# bazarr deployment
 
-GitOps deployment notes for `bazarr` in the `media` namespace.
+GitOps deployment README for `kubernetes/apps/media/bazarr/app/helmrelease.yaml`.
 
-## Context
-- Deployment path: `kubernetes/apps/media/bazarr/app`
-- HelmRelease: `kubernetes/apps/media/bazarr/app/helmrelease.yaml`
+## Summary
+- Namespace: `media`
+- HelmRelease: `bazarr`
+- Path: `kubernetes/apps/media/bazarr/app`
 - Kustomization: `kubernetes/apps/media/bazarr/app/kustomization.yaml`
-- Chart/reference: `app-template`
+- Flux app Kustomization: `kubernetes/apps/media/bazarr/ks.yaml`
+- Chart: chartRef `OCIRepository/app-template`
 - Reconcile interval: `30m`
-- Timeout: `not specified`
-- Controllers: `bazarr`, `app`, `tmp`, `movies`, `tv`, `music`, `downloads`
+- Timeout: `not declared`
 
-## Runtime
-- Images:
-  - `ghcr.io/home-operations/bazarr` (`1.6.0@sha256:cd63bbd0986c93e238eb8b9442604d249f0d4080099b389f822abe2062044417`)
-- Service declared: yes
-- Route/ingress declared: yes
+## Controllers and images
+- `bazarr`: type `Deployment`
+  - container `app` image `ghcr.io/home-operations/bazarr:1.6.0@sha256:cd63bbd0986c93e238eb8b9442604d249f0d4080099b389f822abe2062044417`
 
-## Files
-- `./helmrelease.yaml`
+## Services
+- `app`: http:6767
 
-## Validate
-```sh
-kubectl kustomize kubernetes/apps/media/bazarr/app
-kubectl -n media get helmrelease bazarr
-kubectl -n media get pods -l app.kubernetes.io/instance=bazarr
+## Routes
+- `app`: hosts `{{ .Release.Name }}.${SECRET_DOMAIN}`, gateways `envoy-internal`
+
+## Persistence
+- `config`: existingClaim=`bazarr`
+- `tmp`: type=`emptyDir`
+- `movies`: type=`nfs`, path=`/media/movies`
+- `tv`: type=`nfs`, path=`/media/tv`
+- `music`: type=`nfs`, path=`/media/music`
+- `downloads`: type=`nfs`, path=`/media/downloads`
+
+## Validate changes
+```bash
+cd /opt/data/workspace/kube
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig kustomize kubernetes/apps/media/bazarr/app >/tmp/bazarr-render.yaml
+git diff --check
 ```
 
-## Reconcile
-```sh
-flux -n media reconcile helmrelease bazarr
+## Reconcile and inspect
+```bash
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media annotate helmrelease bazarr reconcile.fluxcd.io/requestedAt="$(date -u +%Y-%m-%dT%H:%M:%SZ)" --overwrite
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get helmrelease bazarr -o wide
+/opt/data/cache/scratch/kubectl --kubeconfig /opt/data/workspace/kube/kubeconfig -n media get pods -l app.kubernetes.io/instance=bazarr -o wide
 ```
 
-## Notes
-- Do not print decrypted Secret values while troubleshooting.
-- Persist runtime fixes in Git; live patches alone will drift on the next reconcile.
+## Troubleshooting notes
+- Check the Flux `Kustomization` before debugging pods if manifests are not applied.
+- Check `HelmRelease` conditions and events for chart/render/apply failures.
+- Check pod logs and service endpoints after the HelmRelease is `Ready=True`.
+- Keep Git and template mirrors in sync when this deployment also exists under `template/config/**`.
