@@ -1,0 +1,116 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app honcho
+spec:
+  interval: 30m
+  timeout: 15m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  maxHistory: 3
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      api:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18
+            envFrom: &envFrom
+              - secretRef:
+                  name: *app
+        containers:
+          app:
+            image: &image
+              repository: ghcr.io/plastic-labs/honcho
+              tag: latest@sha256:c8f99f1d78d5698c53c559cfff9c00aa1dd4ad8bd57b5ced1e1795eb6a17f16c
+            command:
+              - /bin/sh
+              - docker/entrypoint.sh
+            env: &env
+              LOG_LEVEL: INFO
+              PYTHON_DOTENV_DISABLED: "1"
+              CACHE_ENABLED: "true"
+              CACHE_URL: redis://dragonfly.database.svc.cluster.local:6379/11?suppress=true
+              AUTH_USE_AUTH: "false"
+              SENTRY_ENABLED: "false"
+              TELEMETRY_ENABLED: "false"
+              METRICS_ENABLED: "false"
+              EMBED_MESSAGES: "false"
+              VECTOR_STORE_TYPE: pgvector
+            envFrom: *envFrom
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 8000
+                  initialDelaySeconds: 30
+                  periodSeconds: 15
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+      deriver:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: *image
+            command:
+              - /bin/sh
+              - -c
+              - |
+                until python -c 'import urllib.request; urllib.request.urlopen("http://honcho.devops.svc.cluster.local:8000/health", timeout=2).read()'; do
+                  sleep 5
+                done
+                exec python -m src.deriver
+            env: *env
+            envFrom: *envFrom
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    service:
+      app:
+        controller: api
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/description: Self-hosted Honcho memory API
+          gethomepage.dev/group: "{{ title .Release.Namespace }}"
+          gethomepage.dev/name: "{{ title .Release.Name }}"
+          gethomepage.dev/icon: mdi-brain
+          gethomepage.dev/siteMonitor: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "app" "ports" "http" "port" }}'
