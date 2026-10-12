@@ -45,6 +45,8 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: *app
+              - secretRef:
+                  name: honcho-auth
             probes:
               liveness: &probes
                 enabled: true
