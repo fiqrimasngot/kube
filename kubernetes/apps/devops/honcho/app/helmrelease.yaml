@@ -23,14 +23,6 @@ spec:
       api:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/home-operations/postgres-init
-              tag: 18
-            envFrom: &envFrom
-              - secretRef:
-                  name: *app
         containers:
           app:
             image: &image
@@ -50,7 +42,9 @@ spec:
               METRICS_ENABLED: "false"
               EMBED_MESSAGES: "false"
               VECTOR_STORE_TYPE: pgvector
-            envFrom: *envFrom
+            envFrom: &envFrom
+              - secretRef:
+                  name: *app
             probes:
               liveness: &probes
                 enabled: true
