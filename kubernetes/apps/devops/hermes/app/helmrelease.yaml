@@ -97,6 +97,7 @@ spec:
               HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ""
               HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH: ""
               HERMES_DASHBOARD_BASIC_AUTH_SECRET: ""
+              SEARXNG_URL: http://searxng.default.svc.cluster.local:8080
               # Make the tools staged by the install-tools initContainer usable by
               # the agent's shell-outs. This is the image's own default PATH (which
               # already carries /opt/hermes/bin, the venv, and /opt/data/.local/bin)
