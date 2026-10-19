@@ -614,7 +614,7 @@ spec:
             cpu: 750m
             memory: 2Gi
         podMonitorSelector: &selector
-          matchLabels: null
+          matchLabels: {}
         probeSelector: *selector
         ruleSelector: *selector
         scrapeConfigSelector: *selector
@@ -682,6 +682,7 @@ spec:
                 {{ end }}
           - name: "dummy"
         route:
+          receiver: "dummy"
           group_by: ["..."]
           group_wait: 30s
           group_interval: 5m
