@@ -122,6 +122,19 @@ spec:
           memory: 1Gi
     postgresql:
       enabled: true
+      backup:
+        enabled: true
+        cronjob:
+          schedule: "0 3 * * *"
+          timeZone: Asia/Kuala_Lumpur
+          concurrencyPolicy: Forbid
+          failedJobsHistoryLimit: 3
+          successfulJobsHistoryLimit: 7
+          storage:
+            enabled: true
+            storageClass: ceph-block
+            size: 8Gi
+            resourcePolicy: keep
       primary:
         persistence:
           existingClaim: authentik-db
