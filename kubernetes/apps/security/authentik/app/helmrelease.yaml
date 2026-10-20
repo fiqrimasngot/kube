@@ -30,16 +30,6 @@ spec:
         reloader.stakater.com/auto: "true"
       deploymentStrategy:
         type: RollingUpdate
-    backup:
-      accessKey:
-        name: cloudnative-pg
-        key: aws-access-key-id
-      secretKey:
-        name: cloudnative-pg
-        key: aws-secret-access-key
-      bucket: authentik-db
-      # region: eu-central-1
-      host: http://minio.storage.svc.cluster.local:9000
     authentik:
       email:
         host: "smtp-relay.network.svc.cluster.local"
