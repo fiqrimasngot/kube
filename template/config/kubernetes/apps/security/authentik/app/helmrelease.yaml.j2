@@ -136,7 +136,7 @@ spec:
             - |
               export PGUSER=authentik
               export PGPASSWORD="$(cat /opt/authentik-secret/AUTHENTIK_POSTGRESQL__PASSWORD)"
-              pg_dump --clean --if-exists --no-owner --no-privileges --dbname=authentik --file="${PGDUMP_DIR}/authentik-$(date '+%Y-%m-%d-%H-%M').sql"
+              pg_dump --clean --if-exists --no-owner --no-privileges --dbname=authentik --file="$${PGDUMP_DIR}/authentik-$(date '+%Y-%m-%d-%H-%M').sql"
           extraVolumeMounts:
             - name: authentik-config
               mountPath: /opt/authentik-secret
