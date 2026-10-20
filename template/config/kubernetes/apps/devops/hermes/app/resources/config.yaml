@@ -8,7 +8,7 @@ dashboard:
 model:
   provider: openai-codex
   base_url: https://chatgpt.com/backend-api/codex
-  default: gpt-5.5
+  default: gpt-5.6-luna
   api_mode: codex_responses
 toolsets:
   - hermes-cli
@@ -63,6 +63,8 @@ platform_toolsets:
 platforms:
   whatsapp:
     enabled: true
+  telegram:
+    enabled: true
 agent:
   max_turns: 90
   gateway_timeout: 1800
@@ -71,3 +73,7 @@ agent:
   reasoning_effort: medium
   tool_use_enforcement: auto
 group_sessions_per_user: true
+_config_version: 46
+onboarding:
+  seen:
+    busy_input_prompt: true
