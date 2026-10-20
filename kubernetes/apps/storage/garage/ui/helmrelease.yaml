@@ -56,6 +56,11 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/enabled: "false"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: Garage WebUI
+          gethomepage.dev/icon: mdi-archive-cog
+          gethomepage.dev/description: Garage object storage admin
         hostnames:
           - "garage.${SECRET_DOMAIN}"
         parentRefs:
