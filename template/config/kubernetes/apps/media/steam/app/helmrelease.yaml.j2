@@ -116,6 +116,12 @@ spec:
             protocol: UDP
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Services
+          gethomepage.dev/name: Steam
+          gethomepage.dev/icon: sh-steam
+          gethomepage.dev/description: Game server
         hostnames: ["steam.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal

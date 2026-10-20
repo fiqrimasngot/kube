@@ -51,6 +51,16 @@ spec:
           enabled: true
           hostnames:
             - auth.${SECRET_DOMAIN}
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/group: Infrastructure
+            gethomepage.dev/name: Authentik
+            gethomepage.dev/icon: sh-authentik
+            gethomepage.dev/description: "SSO Admin"
+            gethomepage.dev/widget.url: "http://authentik-server.security.svc.cluster.local:80"
+            gethomepage.dev/widget.type: authentik
+            gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik
+            gethomepage.dev/widget.version: "2"
           # annotations:
           # external-dns.alpha.kubernetes.io/target: sso.${SECRET_DOMAIN}
           parentRefs:
@@ -58,17 +68,7 @@ spec:
               namespace: network
             - name: envoy-internal
               namespace: network
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/name: Authentik
-          gethomepage.dev/icon: sh-authentik
-          gethomepage.dev/description: "SSO Admin"
-          gethomepage.dev/widget.url: "http://authentik-server.security.svc.cluster.local:80"
-          gethomepage.dev/widget.type: authentik
-          gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik
-          # gethomepage.dev/widget.key: "${AUTHENTIK_API}"
-          gethomepage.dev/widget.version: "2"
+
       podSecurityContext:
         fsGroup: 150
       securityContext:

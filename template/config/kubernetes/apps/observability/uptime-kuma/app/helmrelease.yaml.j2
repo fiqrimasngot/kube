@@ -36,6 +36,11 @@ spec:
               - identifier: main
                 port: *port
         annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Monitoring
+          gethomepage.dev/name: Uptime Kuma
+          gethomepage.dev/icon: sh-uptime-kuma
+          gethomepage.dev/description: Service monitoring
           nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
           nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
           nginx.ingress.kubernetes.io/server-snippets: |

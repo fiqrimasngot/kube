@@ -363,17 +363,17 @@ spec:
       route:
         main:
           enabled: true
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/group: Infrastructure
+            gethomepage.dev/name: Grafana
+            gethomepage.dev/icon: sh-grafana
+            gethomepage.dev/description: "Monitoring"
           parentRefs:
             - namespace: network
               name: envoy-external
           hostnames:
             - grafana.${SECRET_DOMAIN}
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/name: Grafana
-          gethomepage.dev/icon: sh-grafana
-          gethomepage.dev/description: "Monitoring"
       grafana.ini:
         auth.generic_oauth:
           name: Authentik
@@ -699,17 +699,17 @@ spec:
       route:
         main:
           enabled: true
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/description: Alertmanager
+            gethomepage.dev/group: Infrastructure
+            gethomepage.dev/name: Alertmanager
+            gethomepage.dev/icon: sh-telegraf
           parentRefs:
             - namespace: network
               name: envoy-internal
           hostnames:
             - alert-manager.${SECRET_DOMAIN}
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/description: Alertmanager
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/name: Alertmanager
-          gethomepage.dev/icon: sh-telegraf
       alertmanagerSpec:
         logLevel: debug
         storage:

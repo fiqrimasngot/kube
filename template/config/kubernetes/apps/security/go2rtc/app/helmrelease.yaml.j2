@@ -67,6 +67,12 @@ spec:
     route:
       app:
         enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Video
+          gethomepage.dev/name: go2rtc
+          gethomepage.dev/icon: mdi-video-wireless
+          gethomepage.dev/description: Camera stream gateway
         hostnames:
           - go2rtc.${SECRET_DOMAIN}
         parentRefs:
