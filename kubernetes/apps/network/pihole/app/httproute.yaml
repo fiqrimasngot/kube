@@ -9,9 +9,7 @@ metadata:
     gethomepage.dev/name: pihole
     gethomepage.dev/icon: sh-piholevault
     gethomepage.dev/description: "DNS Blackhole"
-    gethomepage.dev/widget.url: "http://pihole-web.network.svc.cluster.local:80"
-    gethomepage.dev/widget.type: pihole
-    gethomepage.dev/widget.key: "${PIHOLE_API}"
+
 spec:
   hostnames:
     - pihole.${SECRET_DOMAIN}

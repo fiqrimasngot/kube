@@ -125,7 +125,7 @@ spec:
     route:
       app:
         annotations:
-          gethomepage.dev/enabled: "true"
+          gethomepage.dev/enabled: "false"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: "{{ .Release.Name }}"
