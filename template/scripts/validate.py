@@ -372,6 +372,9 @@ class Hermes(Model):
     username: str = ""
     password: str = ""
     secret: str = ""
+    slack_bot_token: str = ""
+    slack_app_token: str = ""
+    slack_allowed_users: str = ""
 
 class Garage(Model):
     rpc_secret: str = ""

@@ -64,6 +64,8 @@ platform_toolsets:
     - vision
     - web
 platforms:
+  slack:
+    enabled: true
   whatsapp:
     enabled: true
   telegram:
