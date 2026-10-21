@@ -370,7 +370,7 @@ spec:
             gethomepage.dev/icon: sh-grafana
             gethomepage.dev/description: "Monitoring"
             gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
-            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-grafana.observability.svc.cluster.local:80
+            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-grafana.observability.svc.cluster.local:80/api/health
           parentRefs:
             - namespace: network
               name: envoy-external
@@ -708,7 +708,7 @@ spec:
             gethomepage.dev/name: Alertmanager
             gethomepage.dev/icon: sh-telegraf
             gethomepage.dev/pod-selector: app.kubernetes.io/name=alertmanager
-            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-alertmanager.observability.svc.cluster.local:9093
+            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-alertmanager.observability.svc.cluster.local:9093/-/ready
           parentRefs:
             - namespace: network
               name: envoy-internal
