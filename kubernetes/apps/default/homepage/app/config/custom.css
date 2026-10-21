@@ -57,3 +57,9 @@ footer {
   background: var(--oled-black) !important;
   box-shadow: none !important;
 }
+
+.service-card {
+  background-color: #2b2b2b !important;
+  color: #f2f2f2 !important;
+  border: 1px solid #454545 !important;
+}
