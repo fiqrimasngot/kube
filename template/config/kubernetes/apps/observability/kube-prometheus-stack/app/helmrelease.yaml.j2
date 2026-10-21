@@ -370,7 +370,7 @@ spec:
             gethomepage.dev/icon: sh-grafana
             gethomepage.dev/description: "Monitoring"
             gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
-            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-grafana.observability.svc.cluster.local:80/api/health
+            gethomepage.dev/siteMonitor: http://kube-prometheus-stack-grafana.observability.svc.cluster.local:80/public/img/grafana_icon.svg
           parentRefs:
             - namespace: network
               name: envoy-external
