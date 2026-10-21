@@ -57,3 +57,16 @@ footer {
   background: var(--oled-black) !important;
   box-shadow: none !important;
 }
+
+.service-card {
+  background-color: #b9dcff !important;
+  color: #0b1d33 !important;
+  border: 1px solid #8fc5f5 !important;
+}
+
+.service-card a,
+.service-card .service-title-text,
+.service-card .text-theme-700,
+.service-card .dark\:text-theme-200 {
+  color: #0b1d33 !important;
+}
