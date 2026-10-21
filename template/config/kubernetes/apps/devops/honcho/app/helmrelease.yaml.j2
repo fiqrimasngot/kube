@@ -107,4 +107,4 @@ spec:
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: mdi-brain
-          gethomepage.dev/siteMonitor: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "app" "ports" "http" "port" }}'
+          gethomepage.dev/siteMonitor: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "app" "ports" "http" "port" }}/health'
