@@ -1,10 +1,13 @@
 dashboard:
   public_url: https://hermes.fiqriha.kim
   oauth:
+    provider: self-hosted
     self_hosted:
       issuer: https://auth.fiqriha.kim/application/o/hermes/
       client_id: O03jOEniqUJo7RXWc6HOGqcxyOp9NyJuFrdzKLd9
-      scopes: openid profile email
+      scopes: openid profile email offline_access
+  trusted_proxies:
+    - 10.42.0.0/16
 model:
   provider: openai-codex
   base_url: https://chatgpt.com/backend-api/codex
