@@ -237,6 +237,7 @@ spec:
           gethomepage.dev/name: Hermes
           gethomepage.dev/icon: sh-hermes
           gethomepage.dev/description: Hermes Agent
+          gethomepage.dev/siteMonitor: http://hermes.devops.svc.cluster.local:9119
         parentRefs:
           - name: envoy-external
             namespace: network
@@ -268,6 +269,7 @@ spec:
           gethomepage.dev/icon: mdi-code-braces
           gethomepage.dev/description: Hermes configuration editor
           gethomepage.dev/pod-selector: app.kubernetes.io/controller=codeserver
+          gethomepage.dev/siteMonitor: http://hermes-codeserver.devops.svc.cluster.local:12321
         parentRefs:
           - name: envoy-internal
             namespace: network

@@ -61,6 +61,7 @@ spec:
           gethomepage.dev/name: Garage WebUI
           gethomepage.dev/icon: mdi-archive-cog
           gethomepage.dev/description: Garage object storage admin
+          gethomepage.dev/siteMonitor: http://garage-webui.storage.svc.cluster.local:3909
         hostnames:
           - "garage.${SECRET_DOMAIN}"
         parentRefs:
