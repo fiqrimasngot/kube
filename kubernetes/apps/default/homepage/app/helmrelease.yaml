@@ -71,6 +71,8 @@ spec:
             path: /app/config/widgets.yaml
           - subPath: custom.css
             path: /app/config/custom.css
+          - subPath: custom.js
+            path: /app/config/custom.js
     serviceAccount:
       homepage: {}
     rbac:
