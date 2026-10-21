@@ -74,6 +74,9 @@ spec:
         # runAsGroup: 82
         # runAsNonRoot: true
         # readOnlyRootFilesystem: false
+      podSecurityContext:
+        fsGroup: 33
+        fsGroupChangePolicy: OnRootMismatch
       extraInitContainers:
         - name: init-db
           image: ghcr.io/onedr0p/postgres-init:17.4@sha256:43dd04e91e861cf912378bad987afa168fa4f13d05528304907ad0aa351195d6
@@ -251,9 +254,6 @@ spec:
       enabled: true
       securityContext:
         runAsGroup: 33
-    securityContext:
-      fsGroup: 33
-      fsGroupChangePolicy: OnRootMismatch
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
