@@ -1,0 +1,59 @@
+/* OLED-friendly Homepage theme: pure black backgrounds, restrained contrast. */
+:root {
+  --oled-black: #000000;
+  --oled-panel: #050505;
+  --oled-border: #1a1a1a;
+  --oled-text: #f2f2f2;
+  --oled-muted: #9a9a9a;
+}
+
+html,
+body,
+#__next {
+  background: var(--oled-black) !important;
+  color: var(--oled-text) !important;
+}
+
+body::before,
+body::after {
+  display: none !important;
+}
+
+.bg-cover,
+.bg-fixed,
+[class*="bg-\\[url"] {
+  background-image: none !important;
+}
+
+.bg-theme-100,
+.bg-theme-200,
+.bg-theme-300,
+.bg-theme-900\\/50,
+.bg-black\\/20,
+.bg-black\\/30,
+.bg-white\\/5,
+.bg-white\\/10 {
+  background-color: var(--oled-panel) !important;
+}
+
+.rounded-xl,
+.rounded-lg {
+  border-color: var(--oled-border) !important;
+}
+
+.text-theme-100,
+.text-theme-200,
+.text-theme-300 {
+  color: var(--oled-text) !important;
+}
+
+.text-theme-500,
+.text-theme-600 {
+  color: var(--oled-muted) !important;
+}
+
+header,
+footer {
+  background: var(--oled-black) !important;
+  box-shadow: none !important;
+}
