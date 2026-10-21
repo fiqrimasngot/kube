@@ -369,6 +369,7 @@ spec:
             gethomepage.dev/name: Grafana
             gethomepage.dev/icon: sh-grafana
             gethomepage.dev/description: "Monitoring"
+            gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
           parentRefs:
             - namespace: network
               name: envoy-external
@@ -705,6 +706,7 @@ spec:
             gethomepage.dev/group: Infrastructure
             gethomepage.dev/name: Alertmanager
             gethomepage.dev/icon: sh-telegraf
+            gethomepage.dev/pod-selector: app.kubernetes.io/name=alertmanager
           parentRefs:
             - namespace: network
               name: envoy-internal
