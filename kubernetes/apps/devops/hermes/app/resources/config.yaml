@@ -15,6 +15,11 @@ model:
   api_mode: codex_responses
 toolsets:
   - hermes-cli
+mcp_servers:
+  mealie:
+    url: http://mealie-mcp.default.svc.cluster.local:3000/mcp
+    timeout: 180
+    connect_timeout: 60
 terminal:
   backend: local
   cwd: /opt/data/workspace

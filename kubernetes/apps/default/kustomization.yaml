@@ -13,6 +13,7 @@ resources:
   # - ./n8n/ks.yaml
   # - ./kiwix/ks.yaml
   - ./mealie/ks.yaml
+  - ./mealie-mcp/ks.yaml
   - ./shlink/ks.yaml
   # - ./homebox/ks.yaml
   - ./homepage/ks.yaml
