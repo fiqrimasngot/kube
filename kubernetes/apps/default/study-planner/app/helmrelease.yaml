@@ -71,3 +71,4 @@ spec:
         globalMounts:
           - path: /var/cache/nginx
           - path: /var/run
+          - path: /tmp
