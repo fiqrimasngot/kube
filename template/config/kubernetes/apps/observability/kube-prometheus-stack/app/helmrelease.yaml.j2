@@ -686,7 +686,7 @@ spec:
           - name: "dummy"
         route:
           receiver: "dummy"
-          group_by: ["..."]
+          group_by: ["alertname", "namespace", "severity"]
           group_wait: 30s
           group_interval: 5m
           repeat_interval: 1d
