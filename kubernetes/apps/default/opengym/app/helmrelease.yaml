@@ -38,7 +38,7 @@ spec:
               ORIGIN: https://opengym.fiqriha.kim
               RP_NAME: openGym
               FIRST_USER_ADMIN: "1"
-              INVITE_ONLY: "1"
+              INVITE_ONLY: "0"
               ALLOW_GUEST: "0"
               SESSION_DAYS: "90"
             ports:
