@@ -26,3 +26,4 @@ resources:
   - ./searxng/ks.yaml
   - ./nextcloud/ks.yaml
   - ./opengym/ks.yaml
+  - ./study-planner/ks.yaml

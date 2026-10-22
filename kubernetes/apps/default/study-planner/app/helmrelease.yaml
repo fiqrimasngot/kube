@@ -1,0 +1,73 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app study-planner
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      study-planner:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: nginx
+              tag: 1.29.1-alpine
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+            probes:
+              liveness: { enabled: true }
+              readiness: { enabled: true }
+    service:
+      app:
+        controller: study-planner
+        ports:
+          http:
+            port: 80
+    route:
+      app:
+        hostnames: ["study.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Services
+          gethomepage.dev/name: Study Planner
+          gethomepage.dev/icon: mdi-calendar-check
+          gethomepage.dev/description: Plan and track study sessions
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:80"
+    persistence:
+      config:
+        type: configMap
+        name: study-planner
+        globalMounts:
+          - path: /usr/share/nginx/html/index.html
+            subPath: index.html
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /var/cache/nginx
+          - path: /var/run

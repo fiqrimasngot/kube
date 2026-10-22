@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: study-planner
+  labels:
+    app.kubernetes.io/name: study-planner
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>Study Planner</title>
+      <style>
+        :root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#111827;color:#f3f4f6}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#111827,#1f2937);min-height:100vh}.wrap{max-width:1050px;margin:auto;padding:28px 18px}h1{margin:0 0 6px;font-size:clamp(2rem,5vw,3.5rem)}p{color:#9ca3af}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}.card{background:#1f2937cc;border:1px solid #374151;border-radius:18px;padding:20px;box-shadow:0 10px 30px #0003}.form{display:grid;gap:10px}.form input,.form select,.form button{font:inherit;padding:11px;border-radius:10px;border:1px solid #4b5563;background:#111827;color:#fff}.form button,.complete{background:#2563eb;border:0;cursor:pointer}.task{display:flex;gap:10px;align-items:center;border-bottom:1px solid #374151;padding:12px 0}.task:last-child{border:0}.task.done span{text-decoration:line-through;color:#6b7280}.task button{margin-left:auto;background:transparent;color:#f87171;border:0;cursor:pointer}.stats{display:flex;gap:10px;flex-wrap:wrap}.stat{background:#111827;border-radius:12px;padding:12px 15px;min-width:110px}.stat b{display:block;font-size:1.4rem;color:#60a5fa}.empty{color:#9ca3af;text-align:center;padding:24px}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day{background:#111827;border-radius:10px;padding:10px;min-height:80px}.day small{color:#9ca3af}.day strong{display:block;margin-top:8px}@media(max-width:700px){.grid{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}}
+      </style>
+    </head>
+    <body><main class="wrap"><h1>Study Planner</h1><p>Plan your sessions, track progress, and keep the week moving.</p>
+      <section class="stats"><div class="stat"><b id="total">0</b>Total tasks</div><div class="stat"><b id="done">0</b>Completed</div><div class="stat"><b id="hours">0</b>Planned hours</div></section>
+      <div class="grid"><section class="card"><h2>Add a study task</h2><form class="form" id="form"><input id="title" required placeholder="e.g. Revise algebra"><input id="subject" placeholder="Subject"><input id="date" type="date" required><input id="duration" type="number" min="0.25" step="0.25" value="1" placeholder="Hours"><button>Add task</button></form><div id="week" class="week" style="margin-top:18px"></div></section>
+      <section class="card"><h2>Task list</h2><div id="tasks"></div></section></div>
+    </main><script>
+      const key='study-planner-tasks';let tasks=JSON.parse(localStorage.getItem(key)||'[]');const $=id=>document.getElementById(id);const save=()=>{localStorage.setItem(key,JSON.stringify(tasks));render()};
+      $('form').onsubmit=e=>{e.preventDefault();tasks.push({id:Date.now(),title:$('title').value,subject:$('subject').value,date:$('date').value,duration:+$('duration').value||0,done:false});e.target.reset();$('duration').value=1;save()};
+      function render(){let complete=tasks.filter(t=>t.done);$('total').textContent=tasks.length;$('done').textContent=complete.length;$('hours').textContent=tasks.reduce((n,t)=>n+t.duration,0).toFixed(2);$('tasks').innerHTML=tasks.length?tasks.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${t.id})"><span><b>${esc(t.title)}</b><br><small>${esc(t.subject||'General')} · ${t.date} · ${t.duration}h</small></span><button onclick="removeTask(${t.id})">Delete</button></div>`).join(''):'<div class="empty">No tasks yet. Add your first study session.</div>';let now=new Date(),start=new Date(now);start.setDate(now.getDate()-((now.getDay()+6)%7));$('week').innerHTML=Array.from({length:7},(_,i)=>{let d=new Date(start);d.setDate(start.getDate()+i);let s=d.toISOString().slice(0,10),n=tasks.filter(t=>t.date===s).length;return `<div class="day"><small>${d.toLocaleDateString(undefined,{weekday:'short'})}</small><strong>${n} task${n===1?'':'s'}</strong></div>`}).join('')};
+      function toggle(id){let t=tasks.find(x=>x.id===id);t.done=!t.done;save()}function removeTask(id){tasks=tasks.filter(x=>x.id!==id);save()}function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}render();
+    </script></body></html>

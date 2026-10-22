@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: study-planner
+  labels:
+    app.kubernetes.io/name: study-planner
+data:
+  index.html: |
+    <!-- Source is maintained in kubernetes/apps/default/study-planner/app/configmap.yaml. -->
+    <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Study Planner</title><style>body{font-family:system-ui;max-width:900px;margin:40px auto;padding:20px;background:#111827;color:#f3f4f6}input,button{padding:10px;margin:4px;border-radius:8px;border:1px solid #4b5563;background:#1f2937;color:white}button{background:#2563eb;cursor:pointer}.task{padding:12px;border-bottom:1px solid #374151}.done{text-decoration:line-through;color:#9ca3af}</style></head><body><h1>Study Planner</h1><p>Use the deployed planner at study.${SECRET_DOMAIN}.</p><div id="app"></div><script>let t=JSON.parse(localStorage.t||'[]');function r(){app.innerHTML='<input id="x" placeholder="New task"><button onclick="a()">Add</button>'+t.map((x,i)=>`<div class="task ${x.d?'done':''}"><input type="checkbox" ${x.d?'checked':''} onchange="t[${i}].d=!t[${i}].d;s()">${x.n}</div>`).join('')}function a(){if(x.value){t.push({n:x.value});x.value='';s()}}function s(){localStorage.t=JSON.stringify(t);r()}r()</script></body></html>
