@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opengym-data
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: zfs-k8s-0-library
+  resources:
+    requests:
+      storage: 5Gi
