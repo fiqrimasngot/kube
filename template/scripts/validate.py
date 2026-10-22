@@ -380,6 +380,8 @@ class Garage(Model):
     rpc_secret: str = ""
     admin_token: str = ""
     metrics_token: str = ""
+    default_access_key: str = ""
+    default_secret_key: str = ""
 
 class Node(Model):
     name: str = Field(pattern=r"^[a-z0-9][a-z0-9\-]{0,61}[a-z0-9]$|^[a-z0-9]$")
