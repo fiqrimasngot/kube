@@ -27,11 +27,12 @@ spec:
             image:
               repository: ghcr.io/astral-sh/uv
               tag: python3.12-bookworm-slim
-            command: [uvx]
+            command: [sh, -c]
             args:
-              - --from
-              - git+https://github.com/rldiao/mealie-mcp-server
-              - mealie-mcp-server
+              - >-
+                apt-get update -qq && apt-get install -y -qq --no-install-recommends git
+                >/dev/null && exec uvx --from git+https://github.com/rldiao/mealie-mcp-server
+                mealie-mcp-server
             env:
               MEALIE_BASE_URL: http://mealie.default.svc.cluster.local:9000
               MEALIE_API_KEY:
