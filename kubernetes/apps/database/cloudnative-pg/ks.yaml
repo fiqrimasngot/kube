@@ -7,7 +7,7 @@ metadata:
 spec:
   targetNamespace: database
   dependsOn:
-    - name: minio
+    - name: garage
       namespace: storage
   postBuild:
     substituteFrom:
@@ -32,7 +32,7 @@ metadata:
 spec:
   targetNamespace: database
   dependsOn:
-    - name: minio
+    - name: garage
       namespace: storage
     - name: cloudnative-pg
   commonMetadata:

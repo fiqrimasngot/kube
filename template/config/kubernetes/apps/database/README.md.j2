@@ -69,7 +69,7 @@ Then you should able to just recover the cluster on next deployment
 cloudanative-pg are really useful when booting up on each db by only using initdb as a init for creating the db
 should able to use the following hostname postgres-rw.database.svc.cluster.local
 
-the following will ensure the db is backup into the minio via s3
+the following will ensure the db is backup into Garage via S3
 ```
   backup:
     retentionPolicy: 30d
@@ -80,7 +80,7 @@ the following will ensure the db is backup into the minio via s3
         compression: bzip2
         maxParallel: 8
       destinationPath: s3://cloudnative-pg/
-      endpointURL: http://minio.storage.svc.cluster.local:9000
+      endpointURL: http://garage.storage.svc.cluster.local:3900
       # Note: serverName version needs to be incremented
       # when recovering from an existing cnpg cluster
       serverName: &currentCluster postgres-immich-v1
