@@ -131,7 +131,7 @@ spec:
         spec:
           failureDomain: osd
           replicated:
-            size: 2
+            size: 1
         storageClass:
           enabled: true
           name: ceph-block
@@ -164,11 +164,11 @@ spec:
           metadataPool:
             failureDomain: osd
             replicated:
-              size: 2
+              size: 1
           dataPools:
             - failureDomain: osd
               replicated:
-                size: 2
+                size: 1
               name: data0
           metadataServer:
             activeCount: 1
