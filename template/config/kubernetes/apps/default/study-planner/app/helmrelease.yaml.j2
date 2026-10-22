@@ -24,7 +24,7 @@ spec:
         containers:
           app:
             image:
-              repository: nginx
+              repository: nginxinc/nginx-unprivileged
               tag: 1.29.1-alpine
             securityContext:
               allowPrivilegeEscalation: false
@@ -37,7 +37,7 @@ spec:
       app:
         controller: study-planner
         ports:
-          http: { port: 80 }
+          http: { port: 8080 }
     route:
       app:
         hostnames: ["study.${SECRET_DOMAIN}"]
@@ -51,7 +51,7 @@ spec:
           gethomepage.dev/name: Study Planner
           gethomepage.dev/icon: mdi-calendar-check
           gethomepage.dev/description: Plan and track study sessions
-          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:80"
+          gethomepage.dev/siteMonitor: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:8080"
     persistence:
       config:
         type: configMap
