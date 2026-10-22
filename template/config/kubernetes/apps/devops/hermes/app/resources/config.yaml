@@ -17,7 +17,7 @@ toolsets:
   - hermes-cli
 mcp_servers:
   mealie:
-    url: http://mealie-mcp.default.svc.cluster.local:3000/mcp
+    url: http://mealie-mcp.default.svc.cluster.local:8765/mcp
     timeout: 180
     connect_timeout: 60
 terminal:

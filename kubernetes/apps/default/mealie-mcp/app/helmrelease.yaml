@@ -25,39 +25,26 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/mdlopresti/mealie-mcp
-              tag: 1.8.2
+              repository: ghcr.io/astral-sh/uv
+              tag: python3.12-bookworm-slim
+            command: [uvx]
+            args:
+              - --from
+              - git+https://github.com/rldiao/mealie-mcp-server
+              - mealie-mcp-server
             env:
-              MEALIE_URL: http://mealie.default.svc.cluster.local:9000
-              MEALIE_API_TOKEN:
+              MEALIE_BASE_URL: http://mealie.default.svc.cluster.local:9000
+              MEALIE_API_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: cluster-secrets
                     key: MEALIE_API
-              MCP_TRANSPORT: http
-              PORT: "3000"
-              HOST: 0.0.0.0
-              ALLOWED_HOSTS: mealie-mcp.default.svc.cluster.local
+              MCP_TRANSPORT: streamable-http
+              MCP_HOST: 0.0.0.0
+              MCP_PORT: "8765"
             ports:
-              - containerPort: 3000
+              - containerPort: 8765
                 name: http
-            probes:
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: http
-                  initialDelaySeconds: 20
-              readiness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /health
-                    port: http
-                  initialDelaySeconds: 10
             resources:
               requests:
                 cpu: 25m
@@ -69,4 +56,4 @@ spec:
         controller: mealie-mcp
         ports:
           http:
-            port: 3000
+            port: 8765
