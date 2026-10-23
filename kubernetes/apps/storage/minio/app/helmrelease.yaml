@@ -110,7 +110,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        controller: minio
+        enabled: false
         ports:
           http:
             port: &port 9001
@@ -118,6 +118,7 @@ spec:
             port: 9000
     serviceMonitor:
       app:
+        enabled: false
         endpoints:
           - port: s3
             scheme: http
@@ -126,6 +127,7 @@ spec:
             scrapeTimeout: 10s
     route:
       app:
+        enabled: false
         annotations:
           gethomepage.dev/enabled: "false"
           gethomepage.dev/group: Infrastructure
@@ -144,6 +146,7 @@ spec:
               - identifier: app
                 port: *port
       s3:
+        enabled: false
         hostnames: ["s3.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
