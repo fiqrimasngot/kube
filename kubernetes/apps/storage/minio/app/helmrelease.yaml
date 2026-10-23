@@ -21,6 +21,7 @@ spec:
   values:
     controllers:
       minio:
+        controller: deployment
         enabled: false
         replicas: 0
         annotations:
