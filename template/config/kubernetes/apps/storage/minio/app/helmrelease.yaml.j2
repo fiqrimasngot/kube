@@ -111,6 +111,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
+        controller: minio
         ports:
           http:
             port: &port 9001
