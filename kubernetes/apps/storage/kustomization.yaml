@@ -13,5 +13,6 @@ resources:
   - ./minio/ks.yaml
   - ./garage/ks.yaml
   - ./garage/ui/ks.yaml
+  - ./harbor/ks.yaml
   - ./csi-driver-nfs/ks.yaml
   - ./samba/ks.yaml
