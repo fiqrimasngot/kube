@@ -5,7 +5,7 @@ metadata:
   name: harbor
 spec:
   interval: 1h
-  path: ./kubernetes/apps/storage/harbor/app
+  path: ./kubernetes/apps/devops/harbor/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -15,6 +15,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: storage
+  targetNamespace: devops
   wait: true
   timeout: 15m

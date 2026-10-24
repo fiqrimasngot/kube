@@ -10,6 +10,7 @@ resources:
   - ./gha-runner-scale-set/ks.yaml
   - ./hermes/ks.yaml
   - ./honcho/ks.yaml
+  - ./harbor/ks.yaml
   - ./namespace.yaml
   # - ./sparknova/ks.yaml
   # - ./kafka/ks.yaml
