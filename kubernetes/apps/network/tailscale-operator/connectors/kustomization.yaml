@@ -6,3 +6,4 @@ resources:
   - dns.yaml
   - nfs.yaml
   - hermes-egress.yaml
+  - dnsconfig.yaml

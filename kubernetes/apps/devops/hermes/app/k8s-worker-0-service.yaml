@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: k8s-worker-0
   annotations:
-    tailscale.com/tailnet-ip: "100.82.77.39"
+    tailscale.com/tailnet-fqdn: "k8s-worker-0.tail33c6ba.ts.net"
     tailscale.com/proxy-group: "hermes-egress"
 spec:
   type: ExternalName
