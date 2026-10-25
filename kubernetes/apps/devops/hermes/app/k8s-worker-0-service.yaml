@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-worker-0
+  annotations:
+    tailscale.com/tailnet-fqdn: "k8s-worker-0.tail33c6ba.ts.net"
+    tailscale.com/proxy-group: "hermes-egress"
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: talos
+      port: 50000
+      protocol: TCP
+    - name: kubernetes
+      port: 6443
+      protocol: TCP

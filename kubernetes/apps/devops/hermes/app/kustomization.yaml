@@ -7,6 +7,8 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./k8s-controlplane-service.yaml
+  - ./k8s-worker-0-service.yaml
+  - ./k8s-worker-1-service.yaml
 configMapGenerator:
   - name: hermes-configmap
     files:
