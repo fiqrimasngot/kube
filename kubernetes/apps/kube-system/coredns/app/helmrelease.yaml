@@ -54,6 +54,17 @@ spec:
           - name: log
             configBlock: |-
               class error
+      - zones:
+          - zone: ts.net
+            scheme: dns://
+            use_tcp: true
+        port: 53
+        plugins:
+          - name: errors
+          - name: cache
+            parameters: 30
+          - name: forward
+            parameters: . 10.43.209.197
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
