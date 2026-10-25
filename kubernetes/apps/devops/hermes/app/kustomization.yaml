@@ -6,6 +6,7 @@ resources:
   - ./secret.sops.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+  - ./k8s-controlplane-service.yaml
 configMapGenerator:
   - name: hermes-configmap
     files:
