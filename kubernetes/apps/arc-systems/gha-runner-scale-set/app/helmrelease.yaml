@@ -11,6 +11,8 @@ spec:
   values:
     githubConfigUrl: https://github.com/fiqrim-dug
     githubConfigSecret: github-app-secret
+    controllerServiceAccount:
+      name: arc
     runnerGroup: Default
     minRunners: 0
     maxRunners: 10
