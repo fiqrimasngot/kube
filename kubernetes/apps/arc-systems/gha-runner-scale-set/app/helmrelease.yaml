@@ -22,6 +22,11 @@ spec:
       type: dind
     template:
       spec:
+        initContainers:
+          - name: dind
+            image: docker:27-dind
+            securityContext:
+              privileged: true
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:latest
