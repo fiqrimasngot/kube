@@ -1,0 +1,22 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: arc
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set-controller
+  interval: 1h
+  values:
+    fullnameOverride: arc
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    metrics:
+      controllerManagerAddr: ":8080"
+      listenerAddr: ":8080"
+      listenerEndpoint: /metrics
