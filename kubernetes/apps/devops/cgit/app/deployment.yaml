@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cgit
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cgit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cgit
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cgit
+          image: ${CGIT_IMAGE}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: ssh
+              containerPort: 2222
+          env:
+            - name: CGIT_SSH_AUTHORIZED_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: cgit-ssh-authorized-keys
+                  key: authorized_keys
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: repositories
+              mountPath: /srv/git
+      volumes:
+        - name: repositories
+          persistentVolumeClaim:
+            claimName: cgit-repositories

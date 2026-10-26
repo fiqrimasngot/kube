@@ -1,0 +1,21 @@
+scan-path=/srv/git
+root-title=cgit package repositories
+root-desc=Internal read-only source browser for the package repository collection
+enable-index-owner=1
+enable-commit-graph=1
+enable-log-filecount=1
+enable-log-linecount=1
+snapshots=tar.gz tar.xz zip
+source-filter=/usr/lib/cgit/filters/syntax-highlighting.py
+about-filter=/usr/lib/cgit/filters/about-formatting.sh
+readme=:README.md
+clone-url=https://cgit.kube.dug.com/$CGIT_REPO_URL
+clone-url=ssh://git@cgit.kube.dug.com:22/$CGIT_REPO_URL
+cache-size=100
+cache-dir=/srv/git/.cgit-cache
+max-blob-size=5242880
+
+css=/cgit.css
+logo=/cgit.png
+
+root-readme=/README.md

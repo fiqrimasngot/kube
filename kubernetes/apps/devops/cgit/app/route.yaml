@@ -1,0 +1,32 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cgit
+spec:
+  secretName: cgit-tls
+  dnsNames:
+    - cgit.kube.dug.com
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cgit
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: cgit.kube.dug.com
+spec:
+  hostnames:
+    - cgit.kube.dug.com
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: cgit
+          port: 8080
