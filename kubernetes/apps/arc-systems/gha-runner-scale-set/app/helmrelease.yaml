@@ -17,6 +17,7 @@ spec:
     runnerGroup: Default
     minRunners: 0
     maxRunners: 10
+    listenerConfig: null
     containerMode:
       type: dind
     template:
