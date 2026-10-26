@@ -13,6 +13,7 @@ spec:
     githubConfigSecret: github-app-secret
     controllerServiceAccount:
       name: arc
+      namespace: arc-systems
     runnerGroup: Default
     minRunners: 0
     maxRunners: 10
