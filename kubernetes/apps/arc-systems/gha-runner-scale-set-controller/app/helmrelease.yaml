@@ -4,6 +4,10 @@ kind: HelmRelease
 metadata:
   name: arc
 spec:
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   chartRef:
     kind: OCIRepository
     name: gha-runner-scale-set-controller
