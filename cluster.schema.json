@@ -251,6 +251,38 @@
       "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}$",
       "type": "string"
     },
+    "Garage": {
+      "additionalProperties": false,
+      "properties": {
+        "rpc_secret": {
+          "default": "",
+          "title": "Rpc Secret",
+          "type": "string"
+        },
+        "admin_token": {
+          "default": "",
+          "title": "Admin Token",
+          "type": "string"
+        },
+        "metrics_token": {
+          "default": "",
+          "title": "Metrics Token",
+          "type": "string"
+        },
+        "default_access_key": {
+          "default": "",
+          "title": "Default Access Key",
+          "type": "string"
+        },
+        "default_secret_key": {
+          "default": "",
+          "title": "Default Secret Key",
+          "type": "string"
+        }
+      },
+      "title": "Garage",
+      "type": "object"
+    },
     "Gateways": {
       "additionalProperties": false,
       "properties": {
@@ -339,6 +371,48 @@
         }
       },
       "title": "Grafana",
+      "type": "object"
+    },
+    "Hermes": {
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "default": "",
+          "title": "Api",
+          "type": "string"
+        },
+        "username": {
+          "default": "",
+          "title": "Username",
+          "type": "string"
+        },
+        "password": {
+          "default": "",
+          "title": "Password",
+          "type": "string"
+        },
+        "secret": {
+          "default": "",
+          "title": "Secret",
+          "type": "string"
+        },
+        "slack_bot_token": {
+          "default": "",
+          "title": "Slack Bot Token",
+          "type": "string"
+        },
+        "slack_app_token": {
+          "default": "",
+          "title": "Slack App Token",
+          "type": "string"
+        },
+        "slack_allowed_users": {
+          "default": "",
+          "title": "Slack Allowed Users",
+          "type": "string"
+        }
+      },
+      "title": "Hermes",
       "type": "object"
     },
     "Homeassistant": {
@@ -1032,48 +1106,6 @@
       },
       "title": "Talos",
       "type": "object"
-    },
-    "Hermes": {
-      "additionalProperties": false,
-      "properties": {
-        "api": {
-          "default": "",
-          "title": "Api",
-          "type": "string"
-        },
-        "username": {
-          "default": "",
-          "title": "Username",
-          "type": "string"
-        },
-        "password": {
-          "default": "",
-          "title": "Password",
-          "type": "string"
-        },
-        "secret": {
-          "default": "",
-          "title": "Secret",
-          "type": "string"
-        },
-        "slack_bot_token": {
-          "default": "",
-          "title": "Slack Bot Token",
-          "type": "string"
-        },
-        "slack_app_token": {
-          "default": "",
-          "title": "Slack App Token",
-          "type": "string"
-        },
-        "slack_allowed_users": {
-          "default": "",
-          "title": "Slack Allowed Users",
-          "type": "string"
-        }
-      },
-      "title": "Hermes",
-      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -1144,13 +1176,6 @@
       "default": {
         "enabled": null
       }
-    },
-    "nodes": {
-      "items": {
-        "$ref": "#/$defs/Node"
-      },
-      "title": "Nodes",
-      "type": "array"
     },
     "jwt": {
       "$ref": "#/$defs/Jwt",
@@ -1379,6 +1404,35 @@
         "discord_webhook": "",
         "slack_webhook": ""
       }
+    },
+    "hermes": {
+      "$ref": "#/$defs/Hermes",
+      "default": {
+        "api": "",
+        "username": "",
+        "password": "",
+        "secret": "",
+        "slack_bot_token": "",
+        "slack_app_token": "",
+        "slack_allowed_users": ""
+      }
+    },
+    "garage": {
+      "$ref": "#/$defs/Garage",
+      "default": {
+        "rpc_secret": "",
+        "admin_token": "",
+        "metrics_token": "",
+        "default_access_key": "",
+        "default_secret_key": ""
+      }
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/Node"
+      },
+      "title": "Nodes",
+      "type": "array"
     }
   },
   "required": ["network", "kubernetes", "gateways", "repository", "domain", "dns", "nodes"],
