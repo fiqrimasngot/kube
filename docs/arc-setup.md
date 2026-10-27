@@ -26,7 +26,7 @@ The repository-level scale set is managed by Flux from:
 - GitHub configuration: `https://github.com/fiqrimasngot/kube`.
 - Scale set name: `gha-kube`.
 - Workflows select it with `runs-on: gha-kube`.
-- Capacity: one idle runner, up to ten ephemeral runners.
+- Capacity: one idle runner, up to four ephemeral runners.
 - Runner requests/limits: 500m/1Gi and 2 CPU/4Gi.
 - Container mode: `dind`, enabling Docker builds, service containers, and container actions.
 

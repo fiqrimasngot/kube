@@ -17,7 +17,7 @@ spec:
       namespace: arc-systems
     runnerGroup: Default
     minRunners: 1
-    maxRunners: 10
+    maxRunners: 4
     listenerConfig: null
     containerMode:
       type: dind
