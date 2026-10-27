@@ -1,14 +1,43 @@
-# ⛵ Cluster Template
+# ⛵ Kubernetes Homelab
 
-Welcome to my template designed for deploying a single Kubernetes cluster. Whether you're setting up a cluster at home on bare-metal or virtual machines (VMs), this project aims to simplify the process and make Kubernetes more accessible. This template is inspired by my personal [home-ops](https://github.com/onedr0p/home-ops) repository, providing a practical starting point for anyone interested in managing their own Kubernetes environment.
+This repository contains the configuration for a single-node Talos Kubernetes homelab. It is derived from the [cluster-template](https://github.com/onedr0p/cluster-template) project, but the rendered manifests, cluster configuration, and application layout in this repository are the source of truth for this installation.
 
-At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading the [cluster.toml](./cluster.sample.toml) configuration file—validated and defaulted by [pydantic](https://docs.pydantic.dev/)—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
+At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading the [`cluster.toml`](./cluster.toml) configuration file—validated and defaulted by [pydantic](https://docs.pydantic.dev/)—Makejinja generates the necessary configurations to deploy this Kubernetes cluster with the following features:
 
 - Easy configuration through a single TOML file.
 - Compatibility with home setups, whether on physical hardware or VMs.
 - A modular and extensible approach to cluster deployment and management.
 
-With this approach, you'll gain a solid foundation to build and manage your Kubernetes cluster efficiently.
+With this approach, cluster configuration is generated from `cluster.toml`, while day-to-day changes are made through Git and reconciled by Flux.
+
+## 🧭 Current setup
+
+This checkout currently uses:
+
+| Area                   | Configuration                                                             |
+| ---------------------- | ------------------------------------------------------------------------- |
+| Operating system       | [Talos Linux](https://www.talos.dev/)                                     |
+| CNI and load balancers | [Cilium](https://cilium.io/) with Gateway API / Envoy Gateway             |
+| GitOps                 | [Flux](https://fluxcd.io/) watching the `main` branch                     |
+| Configuration          | `cluster.toml`, rendered by `makejinja`                                   |
+| Secrets                | [SOPS](https://getsops.io/) with an age key                               |
+| Storage                | Rook-Ceph, OpenEBS, Garage, and VolSync/restic                            |
+| Observability          | Prometheus, Grafana, Loki, Promtail, exporters, and Uptime Kuma           |
+| Applications           | Services are organized below `kubernetes/apps/` by namespace and workload |
+
+The repository is configured for the `fiqriha.kim` domain and uses the `10.32.1.0/24` node network. The exact API, gateway, DNS, Git, ingress, and Cilium settings are defined in [`cluster.toml`](./cluster.toml); do not duplicate those values in application manifests or documentation.
+
+### Repository layout
+
+- `cluster.toml` — validated cluster and network configuration.
+- `template/` — Jinja sources and validation scripts used to generate configuration.
+- `bootstrap/` — initial Helmfile/bootstrap resources.
+- `kubernetes/` — Flux resources and application manifests.
+- `talos/` — rendered Talos machine configuration and secrets.
+- `docs/` — focused operational runbooks, including GitHub Actions Runner Controller setup.
+- `justfile` — top-level task entry point; run `just --list` for available commands.
+
+Keep generated files and their templates in sync. When changing a templated resource, update the corresponding file under `template/config/` or `template/overrides/`, then run `just configure` and review the diff before committing.
 
 ## ✨ Features
 
@@ -28,7 +57,7 @@ Does this sound cool to you? If so, continue to read on! 👇
 
 ## 🚀 Let's Go!
 
-There are **6 stages** outlined below for completing this project, make sure you follow the stages in order.
+The following stages describe the setup and maintenance flow for this repository. If the cluster is already bootstrapped, start with **Stage 5** for configuration changes or **Post installation** for routine operations.
 
 ### Stage 1: Hardware Configuration
 
@@ -68,32 +97,42 @@ These guidelines provide a strong baseline, but there are always exceptions and 
 > [!TIP]
 > It is recommended to set the visibility of your repository to `Public` so you can easily request help if you get stuck.
 
-1. Create a new repository by clicking the green `Use this template` button at the top of this page, then clone the new repo you just created and `cd` into it. Alternatively you can use the [GitHub CLI](https://cli.github.com/) ...
+1. Clone this repository and enter its directory:
 
     ```sh
-    export REPONAME="home-ops"
-    gh repo create $REPONAME --template onedr0p/cluster-template --public --clone
-    cd $REPONAME
+    git clone https://github.com/fiqrimasngot/kube.git
+    cd kube
     ```
 
-    📍 _**Not using GitHub?** Any Git provider works (GitLab, Gitea, Forgejo, Codeberg or self-hosted). Create an empty repository on your provider, download this template with `git clone --depth 1 https://github.com/onedr0p/cluster-template`, re-initialize it with `git init` and push it to your repository._
+    For a private checkout, use the repository URL configured in `cluster.toml` and ensure the workstation has Git access before bootstrapping.
 
-2. **Install** the [Mise CLI](https://mise.jdx.dev/getting-started.html#installing-mise-cli) on your local workstation.
+2. **Install** the [Mise CLI](https://mise.jdx.dev/getting-started.html#installing-mise-cli) and [uv](https://docs.astral.sh/uv/getting-started/installation/) on your local workstation. The project requires Python 3.14 or newer for the template validator.
 
 3. **Activate** Mise in your shell by following the [activation guide](https://mise.jdx.dev/getting-started.html#activate-mise).
 
-4. Use `mise` to install the **required** CLI tools:
+4. Use `mise` to install the pinned CLI tools:
 
     ```sh
     mise trust
     mise install
+    uv sync --locked
     ```
+
+    This installs the versions declared in [`.mise/config.toml`](./.mise/config.toml), including `just`, `kubectl`, `kustomize`, `helm`, `flux`, `talosctl`, `sops`, `age`, `topf`, and `cloudflared`.
 
     📍 _**Having trouble installing the tools?** Try unsetting the `GITHUB_TOKEN` env var and then run these commands again_
 
     📍 _**Platforms:** `.mise/mise.lock` pins tool downloads for the platforms listed under `lockfile_platforms` in `.mise/config.toml`: Linux and macOS on amd64 and arm64 (`linux-x64`, `linux-arm64`, `macos-x64`, `macos-arm64`). If you also need musl (e.g. Alpine) or Windows, add the platform to that list (`linux-x64-musl`, `linux-arm64-musl`, `windows-x64`), run `mise lock`, and commit both files. Your own platform is always locked, even when it is not in the list._
 
-5. Logout of the GitHub Container Registry as this may cause authorization problems in future steps when using the public registry:
+5. Ensure the generated local files exist before rendering or bootstrapping:
+
+    ```sh
+    just template doctor
+    ```
+
+    If this is a new checkout, initialize them first with `just init`, then edit `cluster.toml` and run `just configure`. Never commit `age.key`, `deploy.key`, `cloudflare-tunnel.json`, `flux-webhook-token.txt`, or plaintext credentials.
+
+6. Logout of the GitHub Container Registry as this may cause authorization problems in future steps when using the public registry:
 
     ```sh
     docker logout ghcr.io
