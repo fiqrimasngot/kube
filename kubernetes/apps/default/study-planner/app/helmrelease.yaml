@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: nginxinc/nginx-unprivileged
-              tag: 1.29.1-alpine
+              tag: 1.31.7-alpine
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
