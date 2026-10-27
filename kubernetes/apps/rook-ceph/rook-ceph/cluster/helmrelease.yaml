@@ -23,6 +23,10 @@ spec:
     kind: OCIRepository
     name: rook-ceph-cluster
   interval: 1h
+  # A chart rollback must not downgrade the Ceph data-plane image.
+  upgrade:
+    strategy:
+      name: RetryOnFailure
   values:
     route:
       dashboard:
@@ -40,6 +44,8 @@ spec:
     toolbox:
       enabled: true
     cephClusterSpec:
+      cephVersion:
+        image: quay.io/ceph/ceph:v20.2.4
       cephConfig:
         global:
           bdev_enable_discard: "true"
