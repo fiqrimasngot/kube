@@ -31,7 +31,9 @@ spec:
                 set -euo pipefail
                 mkdir -p /opt/data
                 cp /run/config/config.yaml /opt/data/config.yaml
+                cp /run/config/honcho.json /opt/data/honcho.json
                 chown 10000:10000 /opt/data/config.yaml
+                chown 10000:10000 /opt/data/honcho.json
           install-tools:
             image: &image
               repository: nousresearch/hermes-agent
@@ -298,6 +300,8 @@ spec:
             copy-config:
               - path: /run/config/config.yaml
                 subPath: config.yaml
+              - path: /run/config/honcho.json
+                subPath: honcho.json
 
     rbac:
       roles:

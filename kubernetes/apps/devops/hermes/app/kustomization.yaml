@@ -13,6 +13,7 @@ configMapGenerator:
   - name: hermes-configmap
     files:
       - config.yaml=./resources/config.yaml
+      - honcho.json=./resources/honcho.json
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

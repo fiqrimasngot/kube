@@ -29,6 +29,7 @@ terminal:
     - HASS_TOKEN
     - HASS_URL
 memory:
+  provider: honcho
   memory_enabled: true
   user_profile_enabled: true
   auto_migrate: true
@@ -139,6 +140,7 @@ plugins:
     - hermes-tailscale
     - job-search
     - quota
+    - honcho
   disabled: []
 approvals:
   mode: "off"

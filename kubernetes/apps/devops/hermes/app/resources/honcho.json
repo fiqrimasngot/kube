@@ -1,0 +1,13 @@
+{
+  "baseUrl": "http://honcho.devops.svc.cluster.local:8000",
+  "hosts": {
+    "hermes": {
+      "enabled": true,
+      "aiPeer": "hermes",
+      "peerName": "suya",
+      "workspace": "hermes",
+      "saveMessages": true,
+      "recallMode": "hybrid"
+    }
+  }
+}
