@@ -17,7 +17,7 @@ permissions: {}
 
 jobs:
   bootstrap:
-    if: ${{ github.repository == 'onedr0p/cluster-template' }}
+    if: ${{ github.repository == 'fiqrimasngot/kube' }}
     name: bootstrap (qemu)
     runs-on: gha-kube
     permissions:

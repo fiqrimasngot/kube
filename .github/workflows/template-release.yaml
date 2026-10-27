@@ -52,7 +52,15 @@ jobs:
             return `${nextMajorMinor}.${nextPatch}`;
 
       - name: Create Release
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.determine-next-tag.outputs.result }}
-        run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --generate-notes
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: process.env.TAG,
+              generate_release_notes: true,
+            });
