@@ -105,7 +105,7 @@ spec:
           admin: loki-admin
         s3:
           s3ForcePathStyle: true
-          region: my
+          region: garage
           insecure: false
 
     gateway:
