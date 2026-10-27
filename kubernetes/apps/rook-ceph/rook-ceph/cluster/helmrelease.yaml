@@ -28,6 +28,9 @@ spec:
     strategy:
       name: RetryOnFailure
   values:
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v20.2.4
     route:
       dashboard:
         host:
@@ -44,8 +47,13 @@ spec:
     toolbox:
       enabled: true
     cephClusterSpec:
-      cephVersion:
-        image: quay.io/ceph/ceph:v20.2.4
+      security:
+        cephx:
+          daemon:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+          csi:
+            keyType: aes
       cephConfig:
         global:
           bdev_enable_discard: "true"

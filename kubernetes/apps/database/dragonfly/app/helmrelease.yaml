@@ -20,8 +20,6 @@ metadata:
   name: &app dragonfly-operator
 
 spec:
-
-
   chartRef:
     kind: OCIRepository
     name: dragonfly-operator
@@ -29,10 +27,11 @@ spec:
   interval: 1h
 
   values:
-
     controllers:
       dragonfly-operator:
         strategy: RollingUpdate
+        serviceAccount:
+          identifier: dragonfly-operator
         containers:
           app:
             image:
@@ -82,6 +81,7 @@ spec:
               capabilities: { drop: ["ALL"] }
 
     defaultPodOptions:
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534

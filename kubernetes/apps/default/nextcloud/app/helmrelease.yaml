@@ -57,6 +57,9 @@ spec:
   upgrade:
     timeout: 60m
   values:
+    # Upgrade the database one major version at a time before advancing this tag.
+    image:
+      tag: 32-apache
     deploymentAnnotations:
       secret.reloader.stakater.com/reload: &secret nextcloud-secret
     # image:
@@ -84,13 +87,13 @@ spec:
             - secretRef:
                 name: *secret
       extraVolumes:
-      - name: nfs-home
-        nfs:
-          server: ${SECRET_NFS_SVC}
-          path: /doc/nextcloud
+        - name: nfs-home
+          nfs:
+            server: ${SECRET_NFS_SVC}
+            path: /doc/nextcloud
       extraVolumeMounts:
-      - name: nfs-home
-        mountPath: "/mnt/data/home"
+        - name: nfs-home
+          mountPath: "/mnt/data/home"
       extraEnv:
         - name: REDIS_HOST
           value: dragonfly.database.svc.cluster.local
@@ -126,7 +129,7 @@ spec:
         domain: ${SECRET_DOMAIN}
         smtp:
           port: 2525
-          secure: ''
+          secure: ""
       defaultConfigs:
         redis.config.php: false
       configs:

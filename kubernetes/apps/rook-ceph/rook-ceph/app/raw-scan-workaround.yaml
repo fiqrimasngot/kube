@@ -1,0 +1,38 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: ceph-raw-scan-workaround
+spec:
+  failurePolicy: Fail
+  reinvocationPolicy: Never
+  matchConstraints:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: rook-ceph
+    objectSelector:
+      matchLabels:
+        app: rook-ceph-osd
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+  matchConditions:
+    - name: verified-activation-container
+      expression: has(object.spec.initContainers) && size(object.spec.initContainers) > 0 && object.spec.initContainers[0].name == 'activate' && object.spec.initContainers[0].image == 'quay.io/ceph/ceph:v20.2.4' && size(object.spec.initContainers[0].command) == 3 && !object.spec.initContainers[0].command[2].contains('CEPH_RAW_SCAN_FIX')
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: '[JSONPatch{op: "replace", path: "/spec/initContainers/0/command/2", value: "python3 - <<''CEPH_RAW_SCAN_FIX''\nfrom pathlib import Path\nimport ceph_volume.objectstore.raw as raw\npath = Path(raw.__file__)\nsource = path.read_text()\nneedle = \"            device: str = d.get(''NAME'', '''')\\n\"\nreplacement = needle + \"            if device.startswith((''/dev/rbd'', ''/dev/mapper/luks-rbd-'')):\\n                continue\\n\"\nif replacement not in source:\n    assert source.count(needle) == 1, ''Unexpected ceph-volume source; refusing to modify''\n    path.write_text(source.replace(needle, replacement))\nCEPH_RAW_SCAN_FIX\n" + object.spec.initContainers[0].command[2]}]'
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: ceph-raw-scan-workaround
+spec:
+  policyName: ceph-raw-scan-workaround

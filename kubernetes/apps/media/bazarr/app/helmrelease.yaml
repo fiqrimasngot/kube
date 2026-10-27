@@ -35,6 +35,16 @@ spec:
               BAZARR__PORT: &port 6767
               TZ: ${TIMEZONE}
             probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 6767
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 60
               liveness: &probes
                 enabled: true
                 custom: true
@@ -80,7 +90,7 @@ spec:
           gethomepage.dev/group: "{{ title .Release.Namespace }}"
           gethomepage.dev/name: "{{ title .Release.Name }}"
           gethomepage.dev/icon: "{{ .Release.Name }}"
-          gethomepage.dev/widget.url: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values \"service\" \"app\" \"ports\" \"http\" \"port\" }}"
+          gethomepage.dev/widget.url: 'http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "service" "app" "ports" "http" "port" }}'
           gethomepage.dev/widget.type: bazarr
           gethomepage.dev/widget.key: "${BAZARR_API}"
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]

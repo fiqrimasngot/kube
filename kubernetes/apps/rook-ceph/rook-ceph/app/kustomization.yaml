@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./ceph-csi-drivers.yaml
+  - ./raw-scan-workaround.yaml
   # - ./grafanadashboard.yaml
   - ./secret.sops.yaml
