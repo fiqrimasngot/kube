@@ -134,3 +134,11 @@ display:
   pet:
     enabled: false
     slug: homelander
+plugins:
+  enabled:
+    - hermes-tailscale
+    - job-search
+    - quota
+  disabled: []
+approvals:
+  mode: "off"
