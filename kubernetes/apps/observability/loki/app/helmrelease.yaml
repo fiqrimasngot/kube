@@ -56,6 +56,7 @@ spec:
         replication_factor: 1
 
       limits_config:
+        max_global_streams_per_user: 20000
         ingestion_burst_size_mb: 128
         ingestion_rate_mb: 64
         max_query_parallelism: 100

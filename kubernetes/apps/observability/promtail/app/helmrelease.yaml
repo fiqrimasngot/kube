@@ -43,6 +43,10 @@ spec:
           type: LoadBalancer
     config:
       snippets:
+        pipelineStages:
+          - cri: {}
+          - labeldrop:
+              - filename
         extraScrapeConfigs: |
           - job_name: syslog
             syslog:
