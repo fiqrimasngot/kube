@@ -9,13 +9,14 @@ spec:
     name: gha-runner-scale-set
   interval: 1h
   values:
-    githubConfigUrl: https://github.com/fiqrim-dug
+    githubConfigUrl: https://github.com/fiqrimasngot/kube
+    runnerScaleSetName: gha-kube
     githubConfigSecret: github-app-secret
     controllerServiceAccount:
       name: arc
       namespace: arc-systems
     runnerGroup: Default
-    minRunners: 0
+    minRunners: 1
     maxRunners: 10
     listenerConfig: null
     containerMode:
