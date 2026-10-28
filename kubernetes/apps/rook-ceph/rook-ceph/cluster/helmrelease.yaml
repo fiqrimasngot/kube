@@ -53,7 +53,7 @@ spec:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
           csi:
-            keyType: aes
+            keyType: aes256k
       cephConfig:
         global:
           bdev_enable_discard: "true"
