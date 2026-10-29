@@ -14,6 +14,10 @@ configMapGenerator:
     files:
       - config.yaml=./resources/config.yaml
       - honcho.json=./resources/honcho.json
+      - profile-automationops.yaml=./resources/profile-automationops.yaml
+      - profile-kubeimplementer.yaml=./resources/profile-kubeimplementer.yaml
+      - profile-researcher.yaml=./resources/profile-researcher.yaml
+      - profile-reviewer.yaml=./resources/profile-reviewer.yaml
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

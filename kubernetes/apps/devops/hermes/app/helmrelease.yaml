@@ -32,6 +32,18 @@ spec:
                 mkdir -p /opt/data
                 cp /run/config/config.yaml /opt/data/config.yaml
                 cp /run/config/honcho.json /opt/data/honcho.json
+                mkdir -p /opt/data/profiles/automationops
+                cp /run/config/profile-automationops.yaml /opt/data/profiles/automationops/config.yaml
+                chown 10000:10000 /opt/data/profiles/automationops/config.yaml
+                mkdir -p /opt/data/profiles/kubeimplementer
+                cp /run/config/profile-kubeimplementer.yaml /opt/data/profiles/kubeimplementer/config.yaml
+                chown 10000:10000 /opt/data/profiles/kubeimplementer/config.yaml
+                mkdir -p /opt/data/profiles/researcher
+                cp /run/config/profile-researcher.yaml /opt/data/profiles/researcher/config.yaml
+                chown 10000:10000 /opt/data/profiles/researcher/config.yaml
+                mkdir -p /opt/data/profiles/reviewer
+                cp /run/config/profile-reviewer.yaml /opt/data/profiles/reviewer/config.yaml
+                chown 10000:10000 /opt/data/profiles/reviewer/config.yaml
                 chown 10000:10000 /opt/data/config.yaml
                 chown 10000:10000 /opt/data/honcho.json
           install-tools:
