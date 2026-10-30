@@ -9,10 +9,10 @@ dashboard:
   trusted_proxies:
     - 10.42.0.0/16
 model:
-  provider: anthropic
-  base_url: https://api.anthropic.com
-  default: claude-sonnet-5-5
-  api_mode: anthropic_messages
+  provider: openai-codex
+  base_url: https://chatgpt.com/backend-api/codex
+  default: gpt-5.6-luna
+  api_mode: codex_responses
 toolsets:
   - hermes-cli
 mcp_servers:
@@ -93,44 +93,44 @@ kanban:
   auto_decompose: true
 auxiliary:
   profile_describer:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   kanban_decomposer:
-    provider: anthropic
-    model: claude-fable-5
+    provider: openai-codex
+    model: gpt-5.4-mini
   triage_specifier:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   vision:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   compression:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.4-mini
   skills_hub:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   approval:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   review:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-6-luna
   mcp:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
   title_generation:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.4-mini
   curator:
-    provider: anthropic
-    model: claude-opus-5
+    provider: openai-codex
+    model: gpt-5.6-luna
 command_allowlist:
   - script execution via -e/-c flag
   - ssh_config_write
 fallback_providers:
-  - provider: anthropic
-    model: claude-opus-5
+  - provider: openai-codex
+    model: gpt-5.6-sol
 display:
   pet:
     enabled: false
