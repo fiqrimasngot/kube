@@ -59,6 +59,16 @@ spec:
 
                 rm -f /opt/data/.local/bin/hermes /opt/data/.local/bin/docker
 
+                # Make kubectl available to every Hermes profile and Kanban assignee.
+                # Keep it on the shared PVC so workers and chat sessions use the same
+                # pinned client without requiring it in the base image.
+                if [ ! -x /opt/data/.local/bin/kubectl ]; then
+                  cd /tmp
+                  curl -fsSL https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl -o kubectl
+                  chmod 0755 kubectl
+                  mv kubectl /opt/data/.local/bin/kubectl
+                fi
+
                 if [ ! -f /opt/data/.local/bin/gh ]; then
                   cd /tmp
                   curl -fsSL https://github.com/cli/cli/releases/download/v2.61.0/gh_2.61.0_linux_amd64.tar.gz -o gh.tar.gz
