@@ -1,9 +1,13 @@
 model:
   provider: openai-codex
-  default: gpt-6-luna
+  default: gpt-5.6-terra
   base_url: https://chatgpt.com/backend-api/codex
   api_mode: codex_responses
-_config_version: 46
-fallback_providers:
-  - provider: openai-codex
+delegation:
+  provider: openai-codex
+  model: gpt-5.6-luna
+auxiliary:
+  title_generation:
+    provider: openai-codex
     model: gpt-5.6-luna
+_config_version: 46
