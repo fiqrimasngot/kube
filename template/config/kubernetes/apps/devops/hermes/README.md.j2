@@ -14,6 +14,19 @@ configured. Initial config is copied only when no config exists, so UI/CLI chang
 and provider login survive restarts. The Kubernetes service account has read-only
 inspection permissions; it cannot change workloads or read Secrets.
 
+## Skills across profiles
+
+All profiles use `/opt/data/skills` as the shared skill set. This keeps the same
+skill version available to `automationops`, `kubeimplementer`, `researcher`, and
+`reviewer`. A profile can still keep its own extra skills in its local `skills`
+directory, but a local copy does not replace a shared skill.
+
+The init container writes the profile config and removes old local copies of shared
+skills. It also stops Hermes from seeding another bundled copy into each profile.
+If a task requests a skill that the assignee cannot load, Hermes rejects the task
+before writing it to the Kanban database. This avoids a worker starting and crashing
+with `Unknown skill(s)`.
+
 ## Dashboard login
 
 Username: `fiqrim`. Retrieve the generated password locally:

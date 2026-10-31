@@ -15,4 +15,7 @@ terminal:
   cwd: /opt/data/workspace/kube
   timeout: 180
   persistent_shell: true
+skills:
+  external_dirs:
+    - /opt/data/skills
 _config_version: 46

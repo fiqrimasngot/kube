@@ -31,7 +31,94 @@ spec:
                 set -euo pipefail
                 mkdir -p /opt/data
                 cp /run/config/config.yaml /opt/data/config.yaml
+                mkdir -p /opt/data/profiles/automationops
+                cp /run/config/profile-automationops.yaml /opt/data/profiles/automationops/config.yaml
+                chown 10000:10000 /opt/data/profiles/automationops/config.yaml
+                mkdir -p /opt/data/profiles/kubeimplementer
+                cp /run/config/profile-kubeimplementer.yaml /opt/data/profiles/kubeimplementer/config.yaml
+                chown 10000:10000 /opt/data/profiles/kubeimplementer/config.yaml
+                mkdir -p /opt/data/profiles/researcher
+                cp /run/config/profile-researcher.yaml /opt/data/profiles/researcher/config.yaml
+                chown 10000:10000 /opt/data/profiles/researcher/config.yaml
+                mkdir -p /opt/data/profiles/reviewer
+                cp /run/config/profile-reviewer.yaml /opt/data/profiles/reviewer/config.yaml
+                chown 10000:10000 /opt/data/profiles/reviewer/config.yaml
+                for profile in automationops kubeimplementer researcher reviewer; do
+                  profile_dir="/opt/data/profiles/$profile"
+                  mkdir -p "$profile_dir/skills"
+                  touch "$profile_dir/.no-bundled-skills"
+                  if [ -d /opt/data/skills ]; then
+                    for category in /opt/data/skills/*; do
+                      [ -d "$category" ] || continue
+                      for shared_skill in "$category"/*; do
+                        [ -f "$shared_skill/SKILL.md" ] || continue
+                        rm -rf "$profile_dir/skills/${category##*/}/${shared_skill##*/}"
+                      done
+                    done
+                  fi
+                  chown -R 10000:10000 "$profile_dir/skills" "$profile_dir/.no-bundled-skills"
+                done
                 chown 10000:10000 /opt/data/config.yaml
+          patch-kanban-skill-check:
+            image:
+              repository: nousresearch/hermes-agent
+              tag: v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                python3 - <<'PY'
+                from pathlib import Path
+                import shutil
+
+                source = Path("/opt/hermes/hermes_cli")
+                target = Path("/patched-hermes-cli")
+                shutil.copytree(source, target, dirs_exist_ok=True)
+
+                path = target / "kanban_db.py"
+                text = path.read_text(encoding="utf-8")
+                helper = '''def _validate_task_skills_for_assignee(assignee: Optional[str], skills: Optional[list[str]]) -> None:
+                    """Reject a task before it is stored when its assignee cannot load a requested skill."""
+                    if not assignee or not skills:
+                        return
+                    from hermes_cli.profiles import get_profile_dir
+                    from hermes_constants import get_default_hermes_root
+                    from tools.skill_usage import _read_skill_name
+
+                    profile_dir = get_profile_dir(assignee)
+                    if not profile_dir.is_dir():
+                        raise ValueError(f"assignee profile does not exist: {assignee!r}")
+                    roots = [profile_dir / "skills", get_default_hermes_root() / "skills"]
+                    available = set()
+                    for root in roots:
+                        if not root.is_dir():
+                            continue
+                        for skill_md in root.rglob("SKILL.md"):
+                            available.add(skill_md.parent.name)
+                            with contextlib.suppress(OSError):
+                                available.add(_read_skill_name(skill_md, skill_md.parent.name))
+                    missing = [name for name in skills if name not in available]
+                    if missing:
+                        raise ValueError(
+                            f"assignee {assignee!r} cannot load required skill(s): {', '.join(missing)}. "
+                            "Add the skill to the shared skill set or to the assignee profile first."
+                        )
+
+
+                '''
+                function_marker = "def create_task(\n"
+                call_marker = "    skills_list = _normalize_task_skills(skills)\n"
+                if function_marker not in text or call_marker not in text:
+                    raise SystemExit("Hermes kanban source changed, refusing to apply the skill validation patch")
+                text = text.replace(function_marker, helper + function_marker, 1)
+                text = text.replace(
+                    call_marker,
+                    call_marker + "    _validate_task_skills_for_assignee(assignee, skills_list)\n",
+                    1,
+                )
+                path.write_text(text, encoding="utf-8")
+                PY
           kubectl-tools:
             image:
               repository: bitnami/kubectl
@@ -321,6 +408,14 @@ spec:
           - path: /opt/data
       tmp:
         type: emptyDir
+      hermes-cli-patch:
+        type: emptyDir
+        advancedMounts:
+          hermes:
+            patch-kanban-skill-check:
+              - path: /patched-hermes-cli
+            app:
+              - path: /opt/hermes/hermes_cli
 
       config:
         type: configMap
@@ -331,6 +426,14 @@ spec:
             copy-config:
               - path: /run/config/config.yaml
                 subPath: config.yaml
+              - path: /run/config/profile-automationops.yaml
+                subPath: profile-automationops.yaml
+              - path: /run/config/profile-kubeimplementer.yaml
+                subPath: profile-kubeimplementer.yaml
+              - path: /run/config/profile-researcher.yaml
+                subPath: profile-researcher.yaml
+              - path: /run/config/profile-reviewer.yaml
+                subPath: profile-reviewer.yaml
 
     rbac:
       roles:
