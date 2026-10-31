@@ -1,6 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Study Planner API image"
+# Rebuild on workflow changes so registry credential updates can be validated.
 
 on:
   push:
