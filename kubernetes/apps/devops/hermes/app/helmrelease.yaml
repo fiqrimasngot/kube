@@ -46,6 +46,29 @@ spec:
                 chown 10000:10000 /opt/data/profiles/reviewer/config.yaml
                 chown 10000:10000 /opt/data/config.yaml
                 chown 10000:10000 /opt/data/honcho.json
+          kubectl-tools:
+            image:
+              repository: bitnami/kubectl
+              tag: 1.37.1
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                mkdir -p /opt/data/.local/bin
+                cp /opt/bitnami/kubectl/bin/kubectl /opt/data/.local/bin/kubectl.real
+                cat > /opt/data/.local/bin/kubectl <<'EOF'
+                #!/bin/sh
+                set -eu
+                if [ -z "${KUBECONFIG:-}" ]; then
+                  case "$PWD" in
+                    /opt/data/workspace/kube-kl/*) export KUBECONFIG=/opt/data/workspace/kube-kl/k8s/kubeconfig ;;
+                    /opt/data/workspace/kube/*) export KUBECONFIG=/opt/data/workspace/kube/kubeconfig ;;
+                  esac
+                fi
+                exec /opt/data/.local/bin/kubectl.real "$@"
+                EOF
+                chmod 0755 /opt/data/.local/bin/kubectl /opt/data/.local/bin/kubectl.real
           install-tools:
             image: &image
               repository: nousresearch/hermes-agent
@@ -58,16 +81,6 @@ spec:
                 mkdir -p /opt/data/.local/bin /opt/data/.local/go
 
                 rm -f /opt/data/.local/bin/hermes /opt/data/.local/bin/docker
-
-                # Make kubectl available to every Hermes profile and Kanban assignee.
-                # Keep it on the shared PVC so workers and chat sessions use the same
-                # pinned client without requiring it in the base image.
-                if [ ! -x /opt/data/.local/bin/kubectl ]; then
-                  cd /tmp
-                  curl -fsSL https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl -o kubectl
-                  chmod 0755 kubectl
-                  mv kubectl /opt/data/.local/bin/kubectl
-                fi
 
                 if [ ! -f /opt/data/.local/bin/gh ]; then
                   cd /tmp
