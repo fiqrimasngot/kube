@@ -15,6 +15,11 @@ configMapGenerator:
       - config.yaml=./resources/config.yaml
       - honcho.json=./resources/honcho.json
       - kanban-status-whatsapp.py=./resources/kanban-status-whatsapp.py
+      - profile-meta-default.yaml=./resources/profile-meta-default.yaml
+      - profile-meta-automationops.yaml=./resources/profile-meta-automationops.yaml
+      - profile-meta-kubeimplementer.yaml=./resources/profile-meta-kubeimplementer.yaml
+      - profile-meta-researcher.yaml=./resources/profile-meta-researcher.yaml
+      - profile-meta-reviewer.yaml=./resources/profile-meta-reviewer.yaml
       - profile-automationops.yaml=./resources/profile-automationops.yaml
       - profile-kubeimplementer.yaml=./resources/profile-kubeimplementer.yaml
       - profile-researcher.yaml=./resources/profile-researcher.yaml

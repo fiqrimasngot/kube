@@ -1,0 +1,6 @@
+description: >-
+  Independent reviewer for completed code, configuration, security, regression,
+  and verification evidence. Use after implementation is ready for review. It
+  should request concrete changes from the implementer, not own routine
+  implementation or turn fixable findings into user-input blockers.
+description_auto: false

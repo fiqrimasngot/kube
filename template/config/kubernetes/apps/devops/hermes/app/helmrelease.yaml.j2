@@ -31,22 +31,31 @@ spec:
                 set -euo pipefail
                 mkdir -p /opt/data
                 cp /run/config/config.yaml /opt/data/config.yaml
+                cp /run/config/profile-meta-default.yaml /opt/data/profile.yaml
                 mkdir -p /opt/data/scripts
                 cp /run/config/kanban-status-whatsapp.py /opt/data/scripts/kanban-status-whatsapp.py
                 chmod 0755 /opt/data/scripts/kanban-status-whatsapp.py
                 chown 10000:10000 /opt/data/scripts/kanban-status-whatsapp.py
                 mkdir -p /opt/data/profiles/automationops
                 cp /run/config/profile-automationops.yaml /opt/data/profiles/automationops/config.yaml
+                cp /run/config/profile-meta-automationops.yaml /opt/data/profiles/automationops/profile.yaml
                 chown 10000:10000 /opt/data/profiles/automationops/config.yaml
+                chown 10000:10000 /opt/data/profiles/automationops/profile.yaml
                 mkdir -p /opt/data/profiles/kubeimplementer
                 cp /run/config/profile-kubeimplementer.yaml /opt/data/profiles/kubeimplementer/config.yaml
+                cp /run/config/profile-meta-kubeimplementer.yaml /opt/data/profiles/kubeimplementer/profile.yaml
                 chown 10000:10000 /opt/data/profiles/kubeimplementer/config.yaml
+                chown 10000:10000 /opt/data/profiles/kubeimplementer/profile.yaml
                 mkdir -p /opt/data/profiles/researcher
                 cp /run/config/profile-researcher.yaml /opt/data/profiles/researcher/config.yaml
+                cp /run/config/profile-meta-researcher.yaml /opt/data/profiles/researcher/profile.yaml
                 chown 10000:10000 /opt/data/profiles/researcher/config.yaml
+                chown 10000:10000 /opt/data/profiles/researcher/profile.yaml
                 mkdir -p /opt/data/profiles/reviewer
                 cp /run/config/profile-reviewer.yaml /opt/data/profiles/reviewer/config.yaml
+                cp /run/config/profile-meta-reviewer.yaml /opt/data/profiles/reviewer/profile.yaml
                 chown 10000:10000 /opt/data/profiles/reviewer/config.yaml
+                chown 10000:10000 /opt/data/profiles/reviewer/profile.yaml
                 for profile in automationops kubeimplementer researcher reviewer; do
                   profile_dir="/opt/data/profiles/$profile"
                   mkdir -p "$profile_dir/skills"
@@ -63,6 +72,7 @@ spec:
                   chown -R 10000:10000 "$profile_dir/skills" "$profile_dir/.no-bundled-skills"
                 done
                 chown 10000:10000 /opt/data/config.yaml
+                chown 10000:10000 /opt/data/profile.yaml
           patch-kanban-skill-check:
             image:
               repository: nousresearch/hermes-agent
@@ -432,6 +442,16 @@ spec:
                 subPath: config.yaml
               - path: /run/config/kanban-status-whatsapp.py
                 subPath: kanban-status-whatsapp.py
+              - path: /run/config/profile-meta-default.yaml
+                subPath: profile-meta-default.yaml
+              - path: /run/config/profile-meta-automationops.yaml
+                subPath: profile-meta-automationops.yaml
+              - path: /run/config/profile-meta-kubeimplementer.yaml
+                subPath: profile-meta-kubeimplementer.yaml
+              - path: /run/config/profile-meta-researcher.yaml
+                subPath: profile-meta-researcher.yaml
+              - path: /run/config/profile-meta-reviewer.yaml
+                subPath: profile-meta-reviewer.yaml
               - path: /run/config/profile-automationops.yaml
                 subPath: profile-automationops.yaml
               - path: /run/config/profile-kubeimplementer.yaml

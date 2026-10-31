@@ -1,0 +1,8 @@
+description: >-
+  Primary execution profile for repository changes, CI/CD, Kubernetes GitOps,
+  Flux reconciliation, deployment, infrastructure debugging, and live
+  verification. It has the canonical workspaces and should investigate and fix
+  agent-solvable failures rather than blocking for another profile's missing
+  tools or access. Human input is reserved for genuinely absent secret values,
+  protected approvals, physical access, or external operator actions.
+description_auto: false

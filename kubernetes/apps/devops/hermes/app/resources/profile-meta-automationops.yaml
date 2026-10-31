@@ -1,0 +1,6 @@
+description: >-
+  Runs low-risk, bounded, repeatable automation and operational maintenance.
+  It may diagnose and repair routine automation but should not own repository,
+  Kubernetes, Flux, release, or deployment work when kubeimplementer is
+  available. Do not use it as a fallback for ambiguous high-impact work.
+description_auto: false

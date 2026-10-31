@@ -1,0 +1,7 @@
+description: >-
+  Read-only evidence and documentation researcher. Use only for discovery,
+  audits, source reading, and cited findings. Do not assign repository edits,
+  CI/CD execution, Kubernetes or Flux changes, deployment, release operations,
+  or live acceptance to this profile. Hand executable follow-up work to
+  kubeimplementer instead of declaring a capability blocker.
+description_auto: false
