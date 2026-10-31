@@ -27,6 +27,15 @@ If a task requests a skill that the assignee cannot load, Hermes rejects the tas
 before writing it to the Kanban database. This avoids a worker starting and crashing
 with `Unknown skill(s)`.
 
+## Kanban updates on WhatsApp
+
+The `kanban status to whatsapp` cron job checks every Kanban board once a minute.
+It sends a WhatsApp message only when a task status changes. The first run saves the
+current event position and stays quiet, so old task history is not sent again.
+
+The job runs `/opt/data/scripts/kanban-status-whatsapp.py` without an agent model.
+Its cursor is stored in `/opt/data/cron/kanban-whatsapp-state.json`.
+
 ## Dashboard login
 
 Username: `fiqrim`. Retrieve the generated password locally:

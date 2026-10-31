@@ -32,6 +32,10 @@ spec:
                 mkdir -p /opt/data
                 cp /run/config/config.yaml /opt/data/config.yaml
                 cp /run/config/honcho.json /opt/data/honcho.json
+                mkdir -p /opt/data/scripts
+                cp /run/config/kanban-status-whatsapp.py /opt/data/scripts/kanban-status-whatsapp.py
+                chmod 0755 /opt/data/scripts/kanban-status-whatsapp.py
+                chown 10000:10000 /opt/data/scripts/kanban-status-whatsapp.py
                 mkdir -p /opt/data/profiles/automationops
                 cp /run/config/profile-automationops.yaml /opt/data/profiles/automationops/config.yaml
                 chown 10000:10000 /opt/data/profiles/automationops/config.yaml
@@ -451,6 +455,8 @@ spec:
                 subPath: config.yaml
               - path: /run/config/honcho.json
                 subPath: honcho.json
+              - path: /run/config/kanban-status-whatsapp.py
+                subPath: kanban-status-whatsapp.py
               - path: /run/config/profile-automationops.yaml
                 subPath: profile-automationops.yaml
               - path: /run/config/profile-kubeimplementer.yaml
