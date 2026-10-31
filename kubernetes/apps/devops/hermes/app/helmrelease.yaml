@@ -66,12 +66,12 @@ spec:
                 esac
 
                 if [ ! -x /opt/data/.local/bin/kubectl.real ]; then
-                  curl -fsSL "https://dl.k8s.io/release/v1.37.1/bin/linux/${tool_arch}/kubectl" \
+                  curl -fsSL "https://dl.k8s.io/release/v1.37.1/bin/linux/$${tool_arch}/kubectl" \
                     -o /opt/data/.local/bin/kubectl.real
                 fi
 
                 if [ ! -x /opt/data/.local/bin/talosctl.real ]; then
-                  curl -fsSL "https://github.com/siderolabs/talos/releases/download/v1.14.4/talosctl-linux-${tool_arch}" \
+                  curl -fsSL "https://github.com/siderolabs/talos/releases/download/v1.14.4/talosctl-linux-$${tool_arch}" \
                     -o /opt/data/.local/bin/talosctl.real
                 fi
 
