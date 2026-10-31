@@ -368,6 +368,14 @@ spec:
                 subPath: config.yaml
               - path: /run/config/honcho.json
                 subPath: honcho.json
+              - path: /run/config/profile-automationops.yaml
+                subPath: profile-automationops.yaml
+              - path: /run/config/profile-kubeimplementer.yaml
+                subPath: profile-kubeimplementer.yaml
+              - path: /run/config/profile-researcher.yaml
+                subPath: profile-researcher.yaml
+              - path: /run/config/profile-reviewer.yaml
+                subPath: profile-reviewer.yaml
 
     rbac:
       roles:
