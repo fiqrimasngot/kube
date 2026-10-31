@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Study Planner API image"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "kubernetes/apps/default/study-planner/api/**"
+      - ".github/workflows/study-planner-api.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: study-planner-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and publish Study Planner API
+    runs-on: gha-kube
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Log in to Harbor
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.5.0
+        with:
+          registry: harbor.fiqriha.kim
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and publish
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: kubernetes/apps/default/study-planner/api
+          file: kubernetes/apps/default/study-planner/api/Dockerfile
+          push: true
+          tags: harbor.fiqriha.kim/library/study-planner-api:build-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Report immutable image reference
+        run: |
+          echo "harbor.fiqriha.kim/library/study-planner-api:build-${GITHUB_SHA}@${{ steps.image.outputs.digest }}"
