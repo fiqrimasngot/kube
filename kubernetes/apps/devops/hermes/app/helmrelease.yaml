@@ -128,6 +128,8 @@ spec:
                 )
                 path.write_text(text, encoding="utf-8")
                 PY
+                cp /opt/hermes/tools/skills_tool.py /patched-skills/skills_tool.py
+                python3 /run/config/patch-skill-resolver.py /patched-skills/skills_tool.py
           install-tools:
             image: &image
               repository: nousresearch/hermes-agent
@@ -484,6 +486,24 @@ spec:
             app:
               - path: /opt/hermes/hermes_cli
 
+      hermes-skill-patch:
+        type: emptyDir
+        advancedMounts:
+          hermes:
+            patch-kanban-skill-check:
+              - path: /patched-skills
+            app:
+              - path: /opt/hermes/tools/skills_tool.py
+                subPath: skills_tool.py
+      skill-patch-script:
+        type: configMap
+        name: hermes-skill-patch-script
+        defaultMode: 0o755
+        advancedMounts:
+          hermes:
+            patch-kanban-skill-check:
+              - path: /run/config/patch-skill-resolver.py
+                subPath: patch-skill-resolver.py
       config:
         type: configMap
         name: hermes-configmap
