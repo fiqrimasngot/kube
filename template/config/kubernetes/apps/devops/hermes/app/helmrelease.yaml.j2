@@ -65,7 +65,11 @@ spec:
                       [ -d "$category" ] || continue
                       for shared_skill in "$category"/*; do
                         [ -f "$shared_skill/SKILL.md" ] || continue
-                        rm -rf "$profile_dir/skills/${category##*/}/${shared_skill##*/}"
+                        profile_category="$profile_dir/skills/${category##*/}"
+                        profile_skill="$profile_category/${shared_skill##*/}"
+                        mkdir -p "$profile_category"
+                        rm -rf "$profile_skill"
+                        cp -a "$shared_skill" "$profile_skill"
                       done
                     done
                   fi

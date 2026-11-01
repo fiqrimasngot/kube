@@ -16,13 +16,12 @@ inspection permissions; it cannot change workloads or read Secrets.
 
 ## Skills across profiles
 
-All profiles use `/opt/data/skills` as the shared skill set. This keeps the same
-skill version available to `automationops`, `kubeimplementer`, `researcher`, and
-`reviewer`. A profile can still keep its own extra skills in its local `skills`
-directory, but a local copy does not replace a shared skill.
+All profiles receive a synchronized local copy of `/opt/data/skills`. This keeps the
+same skill version available to `automationops`, `kubeimplementer`, `researcher`,
+and `reviewer`, while preserving profile-only skills that have different names.
 
-The init container writes the profile config and removes old local copies of shared
-skills. It also stops Hermes from seeding another bundled copy into each profile.
+The init container writes the profile config and refreshes each shared skill in the
+profile's `skills` directory. It also stops Hermes from seeding another bundled copy.
 If a task requests a skill that the assignee cannot load, Hermes rejects the task
 before writing it to the Kanban database. This avoids a worker starting and crashing
 with `Unknown skill(s)`.
