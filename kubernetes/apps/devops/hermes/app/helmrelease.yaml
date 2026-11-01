@@ -164,6 +164,41 @@ spec:
                     -o /opt/data/.local/bin/talosctl.real
                 fi
 
+                if [ ! -x /opt/data/.local/bin/sops.real ]; then
+                  curl -fsSL "https://github.com/getsops/sops/releases/download/v3.13.3/sops-v3.13.3.linux-$${tool_arch}" \
+                    -o /opt/data/.local/bin/sops.real
+                fi
+
+                cat > /opt/data/.local/bin/sops <<'EOF'
+                #!/bin/sh
+                set -eu
+                if [ -z "${SOPS_AGE_KEY_FILE:-}" ]; then
+                  repo_root="$(git -c safe.directory='*' -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
+                  remote=""
+                  if [ -n "$repo_root" ]; then
+                    remote="$(git -c safe.directory='*' -C "$repo_root" remote get-url origin 2>/dev/null || true)"
+                  fi
+                  case "$remote" in
+                    *fiqrimasngot/kube.git|*fiqrimasngot/kube)
+                      SOPS_AGE_KEY_FILE=/opt/data/workspace/kube/age.key
+                      ;;
+                    *dugeo/it-k8s.git|*dugeo/it-k8s)
+                      SOPS_AGE_KEY_FILE=/opt/data/workspace/kube-kl/k8s/age.key
+                      ;;
+                    *)
+                      echo "sops: no age identity mapping for repository origin: ${remote:-unknown}" >&2
+                      exit 64
+                      ;;
+                  esac
+                  if [ ! -r "$SOPS_AGE_KEY_FILE" ]; then
+                    echo "sops: selected age identity is not readable" >&2
+                    exit 66
+                  fi
+                  export SOPS_AGE_KEY_FILE
+                fi
+                exec /opt/data/.local/bin/sops.real "$@"
+                EOF
+
                 cat > /opt/data/.local/bin/kubectl <<'EOF'
                 #!/bin/sh
                 set -eu
@@ -199,6 +234,8 @@ spec:
                 chmod 0755 \
                   /opt/data/.local/bin/kubectl \
                   /opt/data/.local/bin/kubectl.real \
+                  /opt/data/.local/bin/sops \
+                  /opt/data/.local/bin/sops.real \
                   /opt/data/.local/bin/talosctl \
                   /opt/data/.local/bin/talosctl.real
 
