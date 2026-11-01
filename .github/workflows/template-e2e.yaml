@@ -123,6 +123,9 @@ jobs:
       - name: Run init recipe
         run: just init
 
+      - name: Remove checked-in rendered files
+        run: yes | just template reset
+
       - name: Prepare files
         run: |
           cp ./.github/template-tests/valid/${{ matrix.fixture }}.toml cluster.toml

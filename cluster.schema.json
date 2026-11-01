@@ -427,6 +427,18 @@
       "title": "Homeassistant",
       "type": "object"
     },
+    "Honcho": {
+      "additionalProperties": false,
+      "properties": {
+        "db_password": {
+          "default": "",
+          "title": "Db Password",
+          "type": "string"
+        }
+      },
+      "title": "Honcho",
+      "type": "object"
+    },
     "Immich": {
       "additionalProperties": false,
       "properties": {
@@ -1415,6 +1427,12 @@
         "slack_bot_token": "",
         "slack_app_token": "",
         "slack_allowed_users": ""
+      }
+    },
+    "honcho": {
+      "$ref": "#/$defs/Honcho",
+      "default": {
+        "db_password": ""
       }
     },
     "garage": {

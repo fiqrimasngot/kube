@@ -376,6 +376,10 @@ class Hermes(Model):
     slack_app_token: str = ""
     slack_allowed_users: str = ""
 
+class Honcho(Model):
+    db_password: str = ""
+
+
 class Garage(Model):
     rpc_secret: str = ""
     admin_token: str = ""
@@ -456,6 +460,7 @@ class Config(Model):
     prowlarr: Prowlarr = Prowlarr()
     alert_manager: AlertManager = AlertManager()
     hermes: Hermes = Hermes()
+    honcho: Honcho = Honcho()
     garage: Garage = Garage()
     nodes: list[Node]
 
