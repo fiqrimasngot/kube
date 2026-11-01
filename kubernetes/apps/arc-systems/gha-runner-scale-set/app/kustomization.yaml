@@ -5,3 +5,5 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
+  - ./study-planner-helmrelease.yaml
+  - ./study-planner-networkpolicy.yaml
