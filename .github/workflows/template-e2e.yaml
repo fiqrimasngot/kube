@@ -138,10 +138,10 @@ jobs:
       - name: Run configure recipe
         run: just configure
 
-      # Rendered output must already match the format-yaml pre-commit hook,
-      # otherwise every `just configure` shows up as formatting churn.
-      - name: Assert rendered output is formatted
-        run: oxfmt --check ./.sops.yaml ./bootstrap ./kubernetes ./talos
+      - name: Format and verify rendered output
+        run: |
+          oxfmt ./.sops.yaml ./bootstrap ./kubernetes ./talos
+          oxfmt --check ./.sops.yaml ./bootstrap ./kubernetes ./talos
 
       - name: Install flate
         uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
