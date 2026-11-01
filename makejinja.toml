@@ -1,7 +1,11 @@
 [makejinja]
 inputs = ["./template/overrides","./template/config"]
 output = "./"
-exclude_patterns = ["*.partial.yaml.j2"]
+# Study Planner Release owns this live manifest; generation must not reset it.
+exclude_patterns = [
+  "*.partial.yaml.j2",
+  "kubernetes/apps/default/study-planner/app/helmrelease.yaml*",
+]
 import_paths = ["./template/scripts"]
 loaders = ["plugin:Plugin"]
 jinja_suffix = ".j2"
