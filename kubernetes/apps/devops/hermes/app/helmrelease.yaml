@@ -64,25 +64,7 @@ spec:
                 cp /run/config/profile-meta-reviewer.yaml /opt/data/profiles/reviewer/profile.yaml
                 chown 10000:10000 /opt/data/profiles/reviewer/config.yaml
                 chown 10000:10000 /opt/data/profiles/reviewer/profile.yaml
-                for profile in automationops kubeimplementer researcher reviewer; do
-                  profile_dir="/opt/data/profiles/$profile"
-                  mkdir -p "$profile_dir/skills"
-                  touch "$profile_dir/.no-bundled-skills"
-                  if [ -d /opt/data/skills ]; then
-                    for category in /opt/data/skills/*; do
-                      [ -d "$category" ] || continue
-                      for shared_skill in "$category"/*; do
-                        [ -f "$shared_skill/SKILL.md" ] || continue
-                        profile_category="$profile_dir/skills/$${category##*/}"
-                        profile_skill="$profile_category/$${shared_skill##*/}"
-                        mkdir -p "$profile_category"
-                        rm -rf "$profile_skill"
-                        cp -a "$shared_skill" "$profile_skill"
-                      done
-                    done
-                  fi
-                  chown -R 10000:10000 "$profile_dir/skills" "$profile_dir/.no-bundled-skills"
-                done
+                # Shared skill sync is paused pending a safe implementation.
                 chown 10000:10000 /opt/data/config.yaml
                 chown 10000:10000 /opt/data/honcho.json
                 chown 10000:10000 /opt/data/profile.yaml
