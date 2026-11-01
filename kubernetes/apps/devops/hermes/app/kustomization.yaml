@@ -11,6 +11,8 @@ resources:
   - ./k8s-worker-1-service.yaml
 configMapGenerator:
   - name: hermes-configmap
+    options:
+      disableNameSuffixHash: true
     files:
       - config.yaml=./resources/config.yaml
       - honcho.json=./resources/honcho.json
@@ -24,7 +26,11 @@ configMapGenerator:
       - profile-kubeimplementer.yaml=./resources/profile-kubeimplementer.yaml
       - profile-researcher.yaml=./resources/profile-researcher.yaml
       - profile-reviewer.yaml=./resources/profile-reviewer.yaml
+  - name: hermes-skill-patch-script
+    files:
+      - patch-skill-resolver.py=./resources/patch-skill-resolver.py
+configurations:
+  - ./kustomize-config.yaml
 generatorOptions:
-  disableNameSuffixHash: true
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled
