@@ -72,8 +72,8 @@ spec:
                       [ -d "$category" ] || continue
                       for shared_skill in "$category"/*; do
                         [ -f "$shared_skill/SKILL.md" ] || continue
-                        profile_category="$profile_dir/skills/${category##*/}"
-                        profile_skill="$profile_category/${shared_skill##*/}"
+                        profile_category="$profile_dir/skills/$${category##*/}"
+                        profile_skill="$profile_category/$${shared_skill##*/}"
                         mkdir -p "$profile_category"
                         rm -rf "$profile_skill"
                         cp -a "$shared_skill" "$profile_skill"
@@ -158,7 +158,7 @@ spec:
                 cat > /opt/data/.local/bin/kubectl <<'EOF'
                 #!/bin/sh
                 set -eu
-                if [ -z "${KUBECONFIG:-}" ]; then
+                if [ -z "$${KUBECONFIG:-}" ]; then
                   case "$PWD" in
                     /opt/data/workspace/kube-kl/*) export KUBECONFIG=/opt/data/workspace/kube-kl/k8s/kubeconfig ;;
                     /opt/data/workspace/kube/*) export KUBECONFIG=/opt/data/workspace/kube/kubeconfig ;;
@@ -194,7 +194,7 @@ spec:
                 cat > /opt/data/.local/bin/sops <<'EOF'
                 #!/bin/sh
                 set -eu
-                if [ -z "${SOPS_AGE_KEY_FILE:-}" ]; then
+                if [ -z "$${SOPS_AGE_KEY_FILE:-}" ]; then
                   repo_root="$(git -c safe.directory='*' -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
                   remote=""
                   if [ -n "$repo_root" ]; then
@@ -208,7 +208,7 @@ spec:
                       SOPS_AGE_KEY_FILE=/opt/data/workspace/kube-kl/k8s/age.key
                       ;;
                     *)
-                      echo "sops: no age identity mapping for repository origin: ${remote:-unknown}" >&2
+                      echo "sops: no age identity mapping for repository origin: $${remote:-unknown}" >&2
                       exit 64
                       ;;
                   esac
