@@ -47,6 +47,13 @@ spec:
                 cp /run/config/profile-meta-kubeimplementer.yaml /opt/data/profiles/kubeimplementer/profile.yaml
                 chown 10000:10000 /opt/data/profiles/kubeimplementer/config.yaml
                 chown 10000:10000 /opt/data/profiles/kubeimplementer/profile.yaml
+                # This implementation profile owns authenticated repository and
+                # Actions work. Reuse the operator-managed gh credential store
+                # without copying token-bearing files into the profile home.
+                mkdir -p /opt/data/profiles/kubeimplementer/home/.config
+                ln -sfn /opt/data/.config/gh /opt/data/profiles/kubeimplementer/home/.config/gh
+                chown 10000:10000 /opt/data/profiles/kubeimplementer/home/.config
+                chown -h 10000:10000 /opt/data/profiles/kubeimplementer/home/.config/gh
                 mkdir -p /opt/data/profiles/researcher
                 cp /run/config/profile-researcher.yaml /opt/data/profiles/researcher/config.yaml
                 cp /run/config/profile-meta-researcher.yaml /opt/data/profiles/researcher/profile.yaml
