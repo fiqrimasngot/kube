@@ -19,7 +19,7 @@ jobs:
   bootstrap:
     if: ${{ github.repository == 'fiqrimasngot/kube' }}
     name: bootstrap (qemu)
-    runs-on: gha-kube
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     services:
