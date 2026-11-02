@@ -242,6 +242,16 @@ spec:
                 # only if the parent tree is writable. Without this, brew fails on
                 # a fresh PVC before the first `brew install`.
                 mkdir -p /opt/data/.local/homebrew/var/homebrew/locks
+
+                # Shared non-secret build utilities used by every Kanban assignee.
+                if ! /opt/data/.local/homebrew/bin/brew list --formula flex >/dev/null 2>&1; then
+                  /opt/data/.local/homebrew/bin/brew install flex
+                fi
+                if ! /opt/data/.local/homebrew/bin/brew list --formula m4 >/dev/null 2>&1; then
+                  /opt/data/.local/homebrew/bin/brew install m4
+                fi
+                ln -sfn /opt/data/.local/homebrew/bin/flex /opt/data/.local/bin/flex
+                ln -sfn /opt/data/.local/homebrew/bin/m4 /opt/data/.local/bin/m4
         containers:
           app:
             image: *image
