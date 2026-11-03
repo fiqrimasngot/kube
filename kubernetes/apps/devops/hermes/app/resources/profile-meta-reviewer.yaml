@@ -9,4 +9,9 @@ description: >-
   `NETBOOT_NEXUS_PASSWORD` secrets. Do not treat the separate RPM credential as
   the netboot publisher. Candidate publication uses the additive
   `netboot-candidates` raw hosted repository with `ALLOW_ONCE` write policy.
+  Before declaring a source, artifact, or input missing, search prior-session
+  handoffs, task comments, canonical workspace paths, and existing worktrees.
+  For dugboot / Buildroot work, check `/opt/data/workspace/dugboot/distgit` and
+  verify its remote, branch, and exact commit; `/opt/data/workspace/buildroot.zip`
+  is not the only approved source path.
 description_auto: false
