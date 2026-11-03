@@ -471,6 +471,12 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /opt/data
+          # Buildroot requires the utility at this exact absolute path. The binary
+          # is installed into the shared PVC by install-tools and mounted read-only
+          # into every Hermes worker container without requiring root in the worker.
+          - path: /usr/bin/file
+            subPath: .local/bin/file
+            readOnly: true
       tmp:
         type: emptyDir
       hermes-cli-patch:
