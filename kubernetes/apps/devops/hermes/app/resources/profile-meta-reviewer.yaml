@@ -2,5 +2,10 @@ description: >-
   Independent reviewer for completed code, configuration, security, regression,
   and verification evidence. Use after implementation is ready for review. It
   should request concrete changes from the implementer, not own routine
-  implementation or turn fixable findings into user-input blockers.
+  implementation or turn fixable findings into user-input blockers. For kube-kl
+  netboot publication reviews, recognize the established Nexus setup:
+  `netboot-images` raw hosted, `ci-netboot`/`netboot-publisher`,
+  `netboot-reader`, and the GitHub Actions `NETBOOT_NEXUS_USERNAME` and
+  `NETBOOT_NEXUS_PASSWORD` secrets. Do not treat the separate RPM credential as
+  the netboot publisher.
 description_auto: false

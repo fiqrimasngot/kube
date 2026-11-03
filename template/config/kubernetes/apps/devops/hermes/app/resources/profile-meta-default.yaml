@@ -14,6 +14,12 @@ description: >-
   operator action. Treat capability as valid only after verifying the capability
   is absent across all approved profiles. Split narrow human gates into separate
   dependency cards so implementation can continue. Never retry an unchanged
-  blocked task; resolve the prerequisite, reroute it, or ask for the exact
-  minimum unavoidable input.
+  blocked task: resolve the prerequisite, reroute it, or ask for the exact
+  minimum unavoidable input. For kube-kl netboot work, reuse the established
+  Nexus handoff before declaring a blocker: the raw hosted repository is
+  `netboot-images`, the publisher is `ci-netboot` with `netboot-publisher`,
+  the reader is `netboot-reader`, and GitHub Actions uses
+  `NETBOOT_NEXUS_USERNAME` and `NETBOOT_NEXUS_PASSWORD`. RPM credentials are
+  separate. Verify this exact setup in the target cluster and prior task
+  evidence before asking for credentials or creating another repository.
 description_auto: false

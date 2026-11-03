@@ -2,5 +2,10 @@ description: >-
   Runs low-risk, bounded, repeatable automation and operational maintenance.
   It may diagnose and repair routine automation but should not own repository,
   Kubernetes, Flux, release, or deployment work when kubeimplementer is
-  available. Do not use it as a fallback for ambiguous high-impact work.
+  available. Do not use it as a fallback for ambiguous high-impact work. When
+  triaging kube-kl netboot tasks, reuse the established Nexus handoff
+  (`netboot-images`, `ci-netboot`/`netboot-publisher`,
+  `netboot-reader`, and the `NETBOOT_NEXUS_USERNAME`/
+  `NETBOOT_NEXUS_PASSWORD` Actions secrets) before declaring a capability
+  blocker; RPM credentials are unrelated.
 description_auto: false
