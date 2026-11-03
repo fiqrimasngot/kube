@@ -320,7 +320,15 @@ spec:
                   failureThreshold: 3
               readiness: *probes
               startup:
-                enabled: false
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 60
             securityContext:
               # Don't drop capabilities: s6-overlay init runs as root and needs
               # CAP_CHOWN (fix /opt/data ownership) plus CAP_SETUID/CAP_SETGID to
@@ -333,7 +341,7 @@ spec:
                 cpu: 100m
                 memory: 1Gi
               limits:
-                memory: 3Gi
+                memory: 8Gi
       codeserver:
         strategy: Recreate
         # hermes owns its home (/opt/data) as uid 10000, mode 0700, and resets it on
