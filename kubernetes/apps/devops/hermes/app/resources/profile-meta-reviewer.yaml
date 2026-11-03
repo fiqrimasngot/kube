@@ -7,5 +7,6 @@ description: >-
   `netboot-images` raw hosted, `ci-netboot`/`netboot-publisher`,
   `netboot-reader`, and the GitHub Actions `NETBOOT_NEXUS_USERNAME` and
   `NETBOOT_NEXUS_PASSWORD` secrets. Do not treat the separate RPM credential as
-  the netboot publisher.
+  the netboot publisher. Candidate publication uses the additive
+  `netboot-candidates` raw hosted repository with `ALLOW_ONCE` write policy.
 description_auto: false

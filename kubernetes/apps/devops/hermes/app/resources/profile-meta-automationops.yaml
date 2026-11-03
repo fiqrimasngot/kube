@@ -7,5 +7,7 @@ description: >-
   (`netboot-images`, `ci-netboot`/`netboot-publisher`,
   `netboot-reader`, and the `NETBOOT_NEXUS_USERNAME`/
   `NETBOOT_NEXUS_PASSWORD` Actions secrets) before declaring a capability
-  blocker; RPM credentials are unrelated.
+  blocker; RPM credentials are unrelated. Candidate publication uses the
+  additive `netboot-candidates` raw hosted repository with `ALLOW_ONCE` write
+  policy.
 description_auto: false

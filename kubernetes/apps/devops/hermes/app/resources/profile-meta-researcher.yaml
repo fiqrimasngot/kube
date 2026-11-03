@@ -7,5 +7,7 @@ description: >-
   kube-kl netboot prerequisites, use the established Nexus handoff:
   `netboot-images`, `ci-netboot`/`netboot-publisher`, `netboot-reader`, and
   GitHub Actions secrets `NETBOOT_NEXUS_USERNAME` and
-  `NETBOOT_NEXUS_PASSWORD`; RPM credentials are a different scope.
+  `NETBOOT_NEXUS_PASSWORD`; RPM credentials are a different scope. Candidate
+  publication uses the additive `netboot-candidates` raw hosted repository with
+  `ALLOW_ONCE` write policy.
 description_auto: false

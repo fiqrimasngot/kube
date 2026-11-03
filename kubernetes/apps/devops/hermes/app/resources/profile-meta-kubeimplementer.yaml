@@ -9,6 +9,8 @@ description: >-
   repository `netboot-images`; publisher `ci-netboot` with `netboot-publisher`;
   reader `netboot-reader`; GitHub Actions secrets
   `NETBOOT_NEXUS_USERNAME` and `NETBOOT_NEXUS_PASSWORD`. Do not substitute
-  `nexus-rpm-publisher-credentials`; verify the target cluster and task history
-  before reporting a missing credential or repository.
+  `nexus-rpm-publisher-credentials`; candidate publication uses the additive
+  `netboot-candidates` raw hosted repository with `ALLOW_ONCE` write policy.
+  Verify the target cluster and task history before reporting a missing
+  credential or repository.
 description_auto: false

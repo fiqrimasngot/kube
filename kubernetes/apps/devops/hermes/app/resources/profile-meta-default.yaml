@@ -20,6 +20,8 @@ description: >-
   `netboot-images`, the publisher is `ci-netboot` with `netboot-publisher`,
   the reader is `netboot-reader`, and GitHub Actions uses
   `NETBOOT_NEXUS_USERNAME` and `NETBOOT_NEXUS_PASSWORD`. RPM credentials are
-  separate. Verify this exact setup in the target cluster and prior task
-  evidence before asking for credentials or creating another repository.
+  separate. Candidate publication uses the additive `netboot-candidates` raw
+  hosted repository with `ALLOW_ONCE` write policy and the same scoped publisher
+  role. Verify this exact setup in the target cluster and prior task evidence
+  before asking for credentials or creating another repository.
 description_auto: false
