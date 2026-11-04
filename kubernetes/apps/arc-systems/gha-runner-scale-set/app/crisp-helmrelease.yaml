@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gha-crisp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: gha-runner-scale-set
+  interval: 1h
+  values:
+    githubConfigUrl: https://github.com/fiqrimasngot/crisp
+    runnerScaleSetName: gha-crisp
+    githubConfigSecret: github-app-secret
+    controllerServiceAccount:
+      name: arc
+      namespace: arc-systems
+    runnerGroup: Default
+    minRunners: 1
+    maxRunners: 1
+    containerMode:
+      type: dind
+    template:
+      spec:
+        automountServiceAccountToken: false
+        containers:
+          - name: runner
+            image: ghcr.io/actions/actions-runner:latest
+            command:
+              - /home/runner/run.sh
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 2
+                memory: 4Gi

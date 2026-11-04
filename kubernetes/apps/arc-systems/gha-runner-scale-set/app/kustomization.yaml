@@ -7,3 +7,5 @@ resources:
   - ./networkpolicy.yaml
   - ./study-planner-helmrelease.yaml
   - ./study-planner-networkpolicy.yaml
+  - ./crisp-helmrelease.yaml
+  - ./crisp-networkpolicy.yaml
