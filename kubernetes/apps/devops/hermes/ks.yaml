@@ -7,18 +7,18 @@ metadata:
 spec:
   targetNamespace: devops
   dependsOn:
-  - name: rook-ceph-cluster
-    namespace: rook-ceph
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   path: ./kubernetes/apps/devops/hermes/app
   prune: true
   postBuild:
     substituteFrom:
-    - name: cluster-secrets
-      kind: Secret
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 50Gi
-      VOLSYNC_CACHE_CAPACITY: 20Gi
+      VOLSYNC_CAPACITY: 100Gi
+      VOLSYNC_CACHE_CAPACITY: 40Gi
   sourceRef:
     kind: GitRepository
     name: flux-system
