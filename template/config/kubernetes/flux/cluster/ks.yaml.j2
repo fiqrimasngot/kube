@@ -52,6 +52,28 @@ spec:
               target:
                 group: helm.toolkit.fluxcd.io
                 kind: HelmRelease
+            # Ceph is the one workload where automatic rollback is unsafe.
+            # Ceph does not support downgrading the data plane, so when an
+            # upgrade fails, rolling back to the previous Helm revision
+            # re-applies an older cephImage and the mons crash-loop with
+            # "on disk data includes unsupported features". A failed upgrade
+            # must stay failed and visible instead of self-destructing.
+            - patch: |-
+                apiVersion: helm.toolkit.fluxcd.io/v2
+                kind: HelmRelease
+                metadata:
+                  name: rook-ceph-cluster
+                spec:
+                  upgrade:
+                    strategy:
+                      name: RetryOnFailure
+                    remediation:
+                      retries: 3
+                      remediateLastFailure: false
+              target:
+                group: helm.toolkit.fluxcd.io
+                kind: HelmRelease
+                name: rook-ceph-cluster
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
