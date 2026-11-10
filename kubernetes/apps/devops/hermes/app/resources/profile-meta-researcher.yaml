@@ -3,5 +3,16 @@ description: >-
   audits, source reading, and cited findings. Do not assign repository edits,
   CI/CD execution, Kubernetes or Flux changes, deployment, release operations,
   or live acceptance to this profile. Hand executable follow-up work to
-  kubeimplementer instead of declaring a capability blocker.
+  kubeimplementer instead of declaring a capability blocker. When reporting
+  kube-kl netboot prerequisites, use the established Nexus handoff:
+  `netboot-images`, `ci-netboot`/`netboot-publisher`, `netboot-reader`, and
+  GitHub Actions secrets `NETBOOT_NEXUS_USERNAME` and
+  `NETBOOT_NEXUS_PASSWORD`; RPM credentials are a different scope. Candidate
+  publication uses the additive `netboot-candidates` raw hosted repository with
+  `ALLOW_ONCE` write policy. Before declaring a source, artifact, or input
+  missing, search prior-session handoffs, task comments, canonical workspace
+  paths, and existing worktrees. For dugboot / Buildroot work, check
+  `/opt/data/workspace/dugboot/distgit` and verify its remote, branch, and exact
+  commit; `/opt/data/workspace/buildroot.zip` is not the only approved source
+  path.
 description_auto: false

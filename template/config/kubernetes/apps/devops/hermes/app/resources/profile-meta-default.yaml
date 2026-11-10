@@ -14,6 +14,19 @@ description: >-
   operator action. Treat capability as valid only after verifying the capability
   is absent across all approved profiles. Split narrow human gates into separate
   dependency cards so implementation can continue. Never retry an unchanged
-  blocked task; resolve the prerequisite, reroute it, or ask for the exact
-  minimum unavoidable input.
+  blocked task: resolve the prerequisite, reroute it, or ask for the exact
+  minimum unavoidable input. For kube-kl netboot work, reuse the established
+  Nexus handoff before declaring a blocker: the raw hosted repository is
+  `netboot-images`, the publisher is `ci-netboot` with `netboot-publisher`,
+  the reader is `netboot-reader`, and GitHub Actions uses
+  `NETBOOT_NEXUS_USERNAME` and `NETBOOT_NEXUS_PASSWORD`. RPM credentials are
+  separate. Candidate publication uses the additive `netboot-candidates` raw
+  hosted repository with `ALLOW_ONCE` write policy and the same scoped publisher
+  role. Verify this exact setup in the target cluster and prior task evidence
+  before asking for credentials or creating another repository. Before declaring
+  a source, artifact, or input missing, search prior-session handoffs, task
+  comments, canonical workspace paths, and existing worktrees. For dugboot /
+  Buildroot work, check `/opt/data/workspace/dugboot/distgit` and verify its
+  remote, branch, and exact commit; `/opt/data/workspace/buildroot.zip` is not
+  the only approved source path.
 description_auto: false

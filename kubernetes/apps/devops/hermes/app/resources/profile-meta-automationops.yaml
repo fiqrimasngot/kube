@@ -2,5 +2,17 @@ description: >-
   Runs low-risk, bounded, repeatable automation and operational maintenance.
   It may diagnose and repair routine automation but should not own repository,
   Kubernetes, Flux, release, or deployment work when kubeimplementer is
-  available. Do not use it as a fallback for ambiguous high-impact work.
+  available. Do not use it as a fallback for ambiguous high-impact work. When
+  triaging kube-kl netboot tasks, reuse the established Nexus handoff
+  (`netboot-images`, `ci-netboot`/`netboot-publisher`,
+  `netboot-reader`, and the `NETBOOT_NEXUS_USERNAME`/
+  `NETBOOT_NEXUS_PASSWORD` Actions secrets) before declaring a capability
+  blocker; RPM credentials are unrelated. Candidate publication uses the
+  additive `netboot-candidates` raw hosted repository with `ALLOW_ONCE` write
+  policy. Before declaring a source, artifact, or input missing, search
+  prior-session handoffs, task comments, canonical workspace paths, and
+  existing worktrees. For dugboot / Buildroot work, check
+  `/opt/data/workspace/dugboot/distgit` and verify its remote, branch, and exact
+  commit; `/opt/data/workspace/buildroot.zip` is not the only approved source
+  path.
 description_auto: false

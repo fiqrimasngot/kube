@@ -27,3 +27,4 @@ resources:
   - ./nextcloud/ks.yaml
   - ./opengym/ks.yaml
   - ./study-planner/ks.yaml
+  - ./crisp/ks.yaml
