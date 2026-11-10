@@ -28,14 +28,24 @@ spec:
             hostPath:
               path: /dev/kvm
               type: CharDevice
+          - name: tun
+            hostPath:
+              path: /dev/net/tun
+              type: CharDevice
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:latest
             command:
               - /home/runner/run.sh
+            securityContext:
+              capabilities:
+                add:
+                  - NET_ADMIN
             volumeMounts:
               - name: kvm
                 mountPath: /dev/kvm
+              - name: tun
+                mountPath: /dev/net/tun
             resources:
               requests:
                 cpu: 500m
