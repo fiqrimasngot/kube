@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Full-fidelity bootstrap e2e: takes maintenance-mode Talos VMs, discovers
+# Representative bootstrap e2e: takes maintenance-mode Talos VMs, discovers
 # their hardware the same way the README instructs users to, writes a
 # cluster.toml from the discovered facts, and runs the template's real
 # bootstrap flow against them.
@@ -176,6 +176,10 @@ just configure
 echo "==> publishing rendered repo"
 mkdir -p "$STATE/gitwork"
 cp -r kubernetes "$STATE/gitwork/"
+# Keep production rendering intact, but publish only the core controllers to
+# this small QEMU cluster. The full application stack cannot fit on its disks.
+python3 "$E2E_DIR/minimal_apps.py" "$STATE/gitwork/kubernetes"
+kubectl kustomize "$STATE/gitwork/kubernetes/apps" >/dev/null
 git -C "$STATE/gitwork" init --quiet --initial-branch main
 git -C "$STATE/gitwork" add --all
 git -C "$STATE/gitwork" -c user.name=e2e -c user.email=e2e@cluster.local \
