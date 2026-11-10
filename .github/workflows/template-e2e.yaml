@@ -19,7 +19,7 @@ permissions: {}
 
 jobs:
   validate-invalid:
-    if: ${{ github.repository == 'fiqrimasngot/kube' }}
+    if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     name: reject-invalid (${{ matrix.fixture }})
     runs-on: gha-kube
     permissions:
@@ -54,6 +54,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install Node runtime dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libatomic1
+
       - name: Setup mise
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         env:
@@ -71,7 +76,7 @@ jobs:
           uv run --quiet --locked --no-dev ./template/scripts/validate.py "$fixture" || true
 
   validator-tests:
-    if: ${{ github.repository == 'fiqrimasngot/kube' }}
+    if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     name: validator-tests
     runs-on: gha-kube
     permissions:
@@ -82,6 +87,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install Node runtime dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libatomic1
+
       - name: Setup mise
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         env:
@@ -91,7 +101,7 @@ jobs:
         run: uv run --quiet --locked pytest ./template/scripts/test_validate.py
 
   validate-valid:
-    if: ${{ github.repository == 'fiqrimasngot/kube' }}
+    if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     name: accept-valid (${{ matrix.fixture }})
     runs-on: gha-kube
     permissions:
@@ -113,6 +123,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Install Node runtime dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libatomic1
 
       - name: Setup mise
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7

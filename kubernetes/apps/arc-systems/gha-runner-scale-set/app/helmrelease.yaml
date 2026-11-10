@@ -23,11 +23,19 @@ spec:
       type: dind
     template:
       spec:
+        volumes:
+          - name: kvm
+            hostPath:
+              path: /dev/kvm
+              type: CharDevice
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:latest
             command:
               - /home/runner/run.sh
+            volumeMounts:
+              - name: kvm
+                mountPath: /dev/kvm
             resources:
               requests:
                 cpu: 500m

@@ -17,7 +17,7 @@ permissions: {}
 
 jobs:
   bootstrap:
-    if: ${{ github.repository == 'fiqrimasngot/kube' }}
+    if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     name: bootstrap (qemu)
     runs-on: gha-kube
     permissions:
@@ -54,7 +54,8 @@ jobs:
       - name: Install QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends gettext-base qemu-system-x86 qemu-utils ovmf
+          sudo apt-get install --yes --no-install-recommends gettext-base libatomic1 qemu-system-x86 qemu-utils ovmf
+          test -c /dev/kvm
 
       - name: Setup mise
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
