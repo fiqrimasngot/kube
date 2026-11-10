@@ -37,10 +37,10 @@ spec:
             image: ghcr.io/actions/actions-runner:latest
             command:
               - /home/runner/run.sh
+            # Talos QEMU needs KVM device access and network namespace mounts.
+            # This grants jobs host-level access; only use this scale set for trusted code.
             securityContext:
-              capabilities:
-                add:
-                  - NET_ADMIN
+              privileged: true
             volumeMounts:
               - name: kvm
                 mountPath: /dev/kvm
