@@ -155,6 +155,14 @@ def test_node_defaults_exported():
     assert node["secureboot"] is False
     assert node["kernel_modules"] == []
 
+def test_node_accepts_ipv6_minimum_mtu_for_nested_qemu():
+    raw = config_from("private.toml")
+    raw["nodes"][0]["mtu"] = 1280
+    assert _load_raw(raw).nodes[0].mtu == 1280
+    raw["nodes"][0]["mtu"] = 1279
+    with pytest.raises(ConfigError, match="mtu"):
+        _load_raw(raw)
+
 
 def test_gateways_may_leave_node_cidr_only_with_bgp():
     with_bgp = config_from("public.toml", **{"gateways.external": "192.168.50.1"})

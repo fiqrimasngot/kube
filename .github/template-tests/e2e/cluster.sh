@@ -129,6 +129,13 @@ for ip in "${NODES[@]}"; do
 done
 
 echo "==> generating cluster.toml"
+E2E_NODE_MTU=1500
+if [ "$PROVISIONED" = true ]; then
+    # QEMU traffic crosses the runner pod's overlay on its way to registries.
+    E2E_NODE_MTU="$(cat /sys/class/net/eth0/mtu)"
+fi
+export E2E_NODE_MTU
+echo "    node mtu=$E2E_NODE_MTU"
 export E2E_CIDR="$CIDR"
 export E2E_GATEWAY="${E2E_GATEWAY:-$PREFIX.1}"
 export E2E_GIT_HOST="$GIT_HOST"
@@ -146,7 +153,7 @@ for ip in "${NODES[@]}"; do
     export E2E_NODE_CONTROLLER="$controller"
     export E2E_NODE_DISK="${DISKS[$ip]}"
     export E2E_NODE_MAC="${MACS[$ip]}"
-    envsubst '${E2E_NODE_ADDRESS} ${E2E_NODE_CONTROLLER} ${E2E_NODE_DISK} ${E2E_NODE_MAC} ${E2E_NODE_NAME}' \
+    envsubst '${E2E_NODE_ADDRESS} ${E2E_NODE_CONTROLLER} ${E2E_NODE_DISK} ${E2E_NODE_MAC} ${E2E_NODE_NAME} ${E2E_NODE_MTU}' \
         < "$E2E_DIR/node.toml.tmpl" >> cluster.toml
     index=$((index + 1))
 done

@@ -760,7 +760,7 @@
         "mtu": {
           "default": 1500,
           "maximum": 9000,
-          "minimum": 1450,
+          "minimum": 1280,
           "title": "Mtu",
           "type": "integer"
         },

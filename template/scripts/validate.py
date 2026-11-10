@@ -395,7 +395,7 @@ class Node(Model):
     mac_addr: str = Field(pattern=r"^([0-9a-f]{2}:){5}[0-9a-f]{2}$")
     # Falls back to talos.schematic_id when unset.
     schematic_id: str | None = Field(default=None, pattern=r"^[a-z0-9]{64}$")
-    mtu: int = Field(default=1500, ge=1450, le=9000)
+    mtu: int = Field(default=1500, ge=1280, le=9000)
     secureboot: bool = False
     encrypt_disk: bool = False
     kernel_modules: list[str] = []

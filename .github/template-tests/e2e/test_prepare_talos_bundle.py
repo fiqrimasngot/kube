@@ -3,7 +3,9 @@
 import os
 from pathlib import Path
 import subprocess
+from string import Template
 import tempfile
+import tomllib
 import unittest
 
 
@@ -37,6 +39,14 @@ class PrepareTalosBundleTest(unittest.TestCase):
 
     def test_local_preserves_existing_bundle(self):
         self.run_prepare_steps(provisioned=False, should_remove=False)
+
+    def test_qemu_node_uses_runner_mtu(self):
+        template = SCRIPT.with_name("node.toml.tmpl").read_text()
+        env = {**os.environ, "E2E_NODE_NAME": "e2e-0", "E2E_NODE_ADDRESS": "10.9.0.2",
+               "E2E_NODE_CONTROLLER": "true", "E2E_NODE_DISK": "/dev/vda",
+               "E2E_NODE_MAC": "02:00:00:00:00:01", "E2E_NODE_MTU": "1280"}
+        rendered = Template(template).substitute(env)
+        self.assertEqual(tomllib.loads(rendered)["nodes"][0]["mtu"], 1280)
 
 
 if __name__ == "__main__":
