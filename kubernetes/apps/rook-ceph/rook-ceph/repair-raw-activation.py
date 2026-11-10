@@ -45,8 +45,8 @@ def main():
         if "CEPH_RAW_SCAN_FIX" in command[-1]:
             print(f"{name}: already patched")
             continue
-        if activate["image"] != "quay.io/ceph/ceph:v20.2.4":
-            raise RuntimeError(f"{name}: image differs from the verified v20.2.4")
+        if activate["image"] != "quay.io/ceph/ceph:v21.2.0":
+            raise RuntimeError(f"{name}: image differs from the verified v21.2.0")
         if len(command) != 3 or command[:2] != ["/bin/bash", "-c"]:
             raise RuntimeError(f"{name}: unexpected activation command")
         patch = {

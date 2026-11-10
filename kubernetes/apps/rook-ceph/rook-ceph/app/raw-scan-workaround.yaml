@@ -24,7 +24,7 @@ spec:
           - pods
   matchConditions:
     - name: verified-activation-container
-      expression: has(object.spec.initContainers) && size(object.spec.initContainers) > 0 && object.spec.initContainers[0].name == 'activate' && object.spec.initContainers[0].image == 'quay.io/ceph/ceph:v20.2.4' && size(object.spec.initContainers[0].command) == 3 && !object.spec.initContainers[0].command[2].contains('CEPH_RAW_SCAN_FIX')
+      expression: has(object.spec.initContainers) && size(object.spec.initContainers) > 0 && object.spec.initContainers[0].name == 'activate' && object.spec.initContainers[0].image == 'quay.io/ceph/ceph:v21.2.0' && size(object.spec.initContainers[0].command) == 3 && !object.spec.initContainers[0].command[2].contains('CEPH_RAW_SCAN_FIX')
   mutations:
     - patchType: JSONPatch
       jsonPatch:

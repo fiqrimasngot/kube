@@ -28,6 +28,11 @@ spec:
     strategy:
       name: RetryOnFailure
   values:
+    # Ceph does not support downgrades. The mon/mgr/mds stores on this cluster
+    # were written by 21.2.0 ("umbrella" on-disk layout, incompat feature 18),
+    # so a 20.2.4 binary cannot open them and the mon crash-loops with
+    # "on disk data includes unsupported features". Keep this pinned at or
+    # above the version that has already touched the data plane.
     cephImage:
       repository: quay.io/ceph/ceph
       tag: v21.2.0
