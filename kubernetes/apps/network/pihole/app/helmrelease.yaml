@@ -154,7 +154,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: pihole/pihole
-      tag: 2026.10.0
+      tag: 2026.10.1
     ingress:
       annotations:
         nginx.ingress.kubernetes.io/app-root: /admin
@@ -179,7 +179,7 @@ spec:
         image:
           pullPolicy: IfNotPresent
           repository: ekofr/pihole-exporter
-          tag: v1.3.0
+          tag: v1.3.1
         port: 9617
         resources:
           limits:
