@@ -33,7 +33,7 @@ spec:
           api:
             image:
               repository: harbor.fiqriha.kim/library/study-planner-api
-              tag: build-752c617b1f7a041b17f542dcb52582c5db748349@sha256:f403fb41b44fe12d5b8d109ee78c1db6837c874734a6facad574e93e449c8b53
+              tag: build-79ed60249cabb7d5e93eec93e30571d38c586301@sha256:81223a269bde6f8d5bdb967130ca4e352a6ff3ca8f68058eeb78439aed79a341
             env:
               BIND_HOST: 0.0.0.0
               DB_HOST:
@@ -73,7 +73,7 @@ spec:
           web:
             image:
               repository: harbor.fiqriha.kim/library/study-planner-web
-              tag: build-752c617b1f7a041b17f542dcb52582c5db748349@sha256:73102af28df2ea93feb5f133b0420f2d8e0f0a4b74c544d44af7316b056b4973
+              tag: build-79ed60249cabb7d5e93eec93e30571d38c586301@sha256:1dd7e33509ef3b6f3b014773deff70308b99d82ec2de32f12aa7c9c14bf120a0
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
