@@ -32,6 +32,9 @@ class MinimalAppsTest(unittest.TestCase):
                               if item["kind"] == "Kustomization"}
             self.assertEqual(kustomizations, {"cilium", "coredns", "flux-operator", "flux-instance"})
             self.assertNotIn("HelmRelease", {item["kind"] for item in documents})
+            self.assertIn(("kube-system", "cluster-secrets"),
+                          {(item["metadata"].get("namespace"), item["metadata"]["name"])
+                           for item in documents if item["kind"] == "Secret"})
             self.assertIn("default", {item["metadata"]["name"] for item in documents
                                       if item["kind"] == "Namespace"})
             self.assertTrue((kubernetes / "apps/default/kustomization.yaml").exists())

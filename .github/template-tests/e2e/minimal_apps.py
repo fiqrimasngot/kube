@@ -20,9 +20,10 @@ def main(kubernetes: Path) -> None:
     apps = kubernetes / "apps"
     for namespace, workloads in APPS.items():
         resources = ["./namespace.yaml", *(f"./{name}/ks.yaml" for name in workloads)]
+        components = "components:\n  - ../../components/sops\n" if workloads else ""
         (apps / namespace / "kustomization.yaml").write_text(
             "---\napiVersion: kustomize.config.k8s.io/v1beta1\n"
-            f"kind: Kustomization\nnamespace: {namespace}\nresources:\n"
+            f"kind: Kustomization\nnamespace: {namespace}\n{components}resources:\n"
             + "".join(f"  - {resource}\n" for resource in resources)
         )
     (apps / "kustomization.yaml").write_text(
