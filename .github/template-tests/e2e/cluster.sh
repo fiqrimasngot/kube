@@ -156,6 +156,11 @@ just init
 # The rendered Ceph dashboard secret currently reads the tunnel fixture even
 # when this cluster has no DNS provider. Keep the CI value synthetic.
 printf '%s\n' '{"AccountTag":"fake","TunnelSecret":"fake","TunnelID":"fake"}' > cloudflare-tunnel.json
+# CI checks out the production bundle, which its freshly generated age key
+# cannot decrypt. Let topf create an independent bundle for the QEMU cluster.
+if [ "$PROVISIONED" = true ]; then
+    rm -f -- talos/secrets.sops.yaml
+fi
 just configure
 
 # Flux's FluxInstance only reports Ready once its Git sync succeeds, so the
