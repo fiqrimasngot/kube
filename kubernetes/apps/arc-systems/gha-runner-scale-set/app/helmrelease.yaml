@@ -49,7 +49,8 @@ spec:
             resources:
               requests:
                 cpu: 500m
-                memory: 1Gi
+                memory: 2Gi
               limits:
                 cpu: 2
-                memory: 4Gi
+                # QEMU guests reserve 4Gi + 3Gi in the runner container.
+                memory: 10Gi

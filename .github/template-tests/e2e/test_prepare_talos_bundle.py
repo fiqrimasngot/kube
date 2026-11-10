@@ -1,5 +1,6 @@
 """Check that E2E preparation never reuses the production Talos bundle."""
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -47,6 +48,23 @@ class PrepareTalosBundleTest(unittest.TestCase):
                "E2E_NODE_MAC": "02:00:00:00:00:01", "E2E_NODE_MTU": "1280"}
         rendered = Template(template).substitute(env)
         self.assertEqual(tomllib.loads(rendered)["nodes"][0]["mtu"], 1280)
+
+    def test_runner_memory_fits_both_qemu_guests(self):
+        root = SCRIPT.parents[3]
+
+        def yaml(path):
+            return json.loads(subprocess.run(["yq", "-o=json", ".", str(path)],
+                                             capture_output=True, text=True, check=True).stdout)
+
+        cluster = yaml(SCRIPT.with_name("talos-cluster.yaml"))["spec"]
+        helm = yaml(root / "kubernetes/apps/arc-systems/gha-runner-scale-set/app/helmrelease.yaml")
+        runner = next(c for c in helm["spec"]["values"]["template"]["spec"]["containers"]
+                      if c["name"] == "runner")
+        guest_gib = sum(cluster[role]["count"] * int(cluster[role]["memory"].removesuffix("GiB"))
+                        for role in ("controlplanes", "workers"))
+        limit_gib = int(runner["resources"]["limits"]["memory"].removesuffix("Gi"))
+        self.assertGreaterEqual(limit_gib, guest_gib + 2,
+                                "runner needs guest memory plus room for CI tools")
 
 
 if __name__ == "__main__":
