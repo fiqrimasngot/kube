@@ -260,16 +260,23 @@ spec:
                 # only if the parent tree is writable. Without this, brew fails on
                 # a fresh PVC before the first `brew install`.
                 mkdir -p /opt/data/.local/homebrew/var/homebrew/locks
+                chown 10000:10000 /opt/data/.local/homebrew/var/homebrew/locks
+
+                # Homebrew refuses root. Use the image's Hermes user for brew,
+                # while keeping root for the CLI files installed above.
+                brew() {
+                  /command/s6-setuidgid hermes env HOME=/opt/data /opt/data/.local/homebrew/bin/brew "$@"
+                }
 
                 # Shared non-secret build utilities used by every Kanban assignee.
-                if ! /opt/data/.local/homebrew/bin/brew list --formula flex >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install flex
+                if ! brew list --formula flex >/dev/null 2>&1; then
+                  brew install flex
                 fi
-                if ! /opt/data/.local/homebrew/bin/brew list --formula m4 >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install m4
+                if ! brew list --formula m4 >/dev/null 2>&1; then
+                  brew install m4
                 fi
-                if ! /opt/data/.local/homebrew/bin/brew list --formula file >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install file
+                if ! brew list --formula file >/dev/null 2>&1; then
+                  brew install file
                 fi
                 ln -sfn /opt/data/.local/homebrew/bin/flex /opt/data/.local/bin/flex
                 ln -sfn /opt/data/.local/homebrew/bin/m4 /opt/data/.local/bin/m4
@@ -420,10 +427,9 @@ spec:
       securityContext:
         # hermes-agent uses s6-overlay: its entrypoint must start as root to fix
         # /run permissions, then drops to the image's internal hermes user (uid 10000).
-        # Forcing runAsUser breaks s6 preinit ("/run belongs to uid 0 ... lacking
-        # privileges to fix it"), so only set fsGroup to match the image user.
-        fsGroup: 10000
-        fsGroupChangePolicy: OnRootMismatch
+        # Keep the image's root startup. Both services use uid 10000 for data
+        # access, so fsGroup is unnecessary. Hermes resets its home to 0700,
+        # which would make OnRootMismatch scan the entire PVC on every start.
         seccompProfile: { type: RuntimeDefault }
 
     service:
