@@ -77,7 +77,18 @@ schema:
 [doc('Remove rendered files (bootstrap/, kubernetes/, talos/, .sops.yaml)')]
 [group('template')]
 reset:
+    study_planner_helmrelease="{{ kubernetes_dir }}/apps/default/study-planner/app/helmrelease.yaml"
+    study_planner_backup="$(mktemp)"
+    if [ -f "$study_planner_helmrelease" ]; then
+        cp "$study_planner_helmrelease" "$study_planner_backup"
+    else
+        rm -f "$study_planner_backup"
+    fi
     rm -rf "{{ bootstrap_dir }}" "{{ kubernetes_dir }}" "{{ talos_dir }}" "{{ justfile_dir() }}/.sops.yaml"
+    if [ -f "$study_planner_backup" ]; then
+        mkdir -p "$(dirname "$study_planner_helmrelease")"
+        mv "$study_planner_backup" "$study_planner_helmrelease"
+    fi
 
 # tidy-archive moves template/ (this module's source) away, so it runs as a
 # subsequent dependency: the tidy script itself must spawn while the module
