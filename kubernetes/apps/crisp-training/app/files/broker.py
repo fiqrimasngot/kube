@@ -99,7 +99,8 @@ for name in ("run_training_job.py", "prepare_training_source.py", "validate_trai
     if not (Path("/work/scripts") / name).is_file():
         raise RuntimeError("missing pinned trainer script: " + name)
 '''
-    command = ["/bin/sh", "-ec", "python -m pip install --user --no-cache-dir 'tensorflow[and-cuda]==2.21.0' && "
+    command = ["/bin/sh", "-ec", "python -m pip install --user --no-cache-dir 'nvidia-cudnn-cu12==9.28.1.4' && "
+               "export LD_LIBRARY_PATH=/work/.local/lib/python3.11/site-packages/nvidia/cudnn/lib:${LD_LIBRARY_PATH:-} && "
                "python -c \"$BOOTSTRAP\" && python /work/scripts/run_training_job.py " + name]
     return {
         "apiVersion": "batch/v1", "kind": "Job",
