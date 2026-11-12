@@ -120,7 +120,7 @@ for name in ("run_training_job.py", "prepare_training_source.py", "validate_trai
                                                                {"name": "HOME", "value": "/work"},
                                                                {"name": "PYTHONUNBUFFERED", "value": "1"}],
                                                        "workingDir": "/work", "resources": {
-                                                           "requests": {"nvidia.com/gpu": "1", "memory": "8Gi", "cpu": "2"},
+                                                           "requests": {"nvidia.com/gpu": "1", "memory": "8Gi", "cpu": "100m"},
                                                            "limits": {"nvidia.com/gpu": "1", "memory": "16Gi", "cpu": "8"}},
                                                        "securityContext": {"allowPrivilegeEscalation": False,
                                                                            "capabilities": {"drop": ["ALL"]}},
