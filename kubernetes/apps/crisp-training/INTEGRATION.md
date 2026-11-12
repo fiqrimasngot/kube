@@ -16,7 +16,7 @@ kubectl apply --dry-run=server -k kubernetes/apps/crisp-training/app
 
 The admission policy must accept only the broker's fixed Job shape; a dry-run does **not** prove live admission. The Job image is pinned to `tensorflow/tensorflow:2.21.0-gpu` by digest. It checks TensorFlow GPU visibility before training. The dataset is read-only in the trainer; its working directory is ephemeral. The model claim is not mounted in ARC. Each trainer sees only its own Job-named `subPath` of the claim. The trainer needs public HTTPS to download pinned source and CUDA dependencies, so review both sources before dispatch. NetworkPolicy does not prevent exfiltration to public HTTPS; do not put private data in this dataset claim.
 
-After Flux reconciles, check the namespace, both PVCs, broker rollout, service endpoints, quota, policy and binding, and the updated ARC NetworkPolicy. Then test the broker from an assigned `gha-crisp` runner. A healthy Deployment alone does not prove GitHub OIDC or runner connectivity.
+After Flux reconciles, check the namespace, both PVCs, broker rollout, service endpoints, quota, policy and binding, and the updated ARC NetworkPolicy. Cilium translates the Kubernetes Service address before enforcing policy here, so `apiserver-network.yaml` grants the broker the `kube-apiserver` entity instead of relying on a node IP. Confirm a broker API request returns an authenticated 404 for a nonexistent Job, then test the broker from an assigned `gha-crisp` runner. A healthy Deployment alone does not prove API access, GitHub OIDC, or runner connectivity.
 
 ## Seed the public dataset once
 
