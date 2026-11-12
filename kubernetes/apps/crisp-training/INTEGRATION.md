@@ -4,7 +4,7 @@ This setup lets a manual `fiqrimasngot/crisp` workflow ask a broker to start one
 
 ## Publish and verify the manifests
 
-The `app/files/broker.py` copy must match `fiqrimasngot/crisp/training_broker/broker.py`. The app Kustomization packages that file into a hash-named ConfigMap and rewrites the broker Deployment reference. The Python base image is pinned by digest; startup installs PyJWT 2.10.1 and cryptography 46.0.3. For an offline/reproducible deployment, replace startup installation with a tested, digest-pinned broker image.
+The `app/files/broker.py` copy must match `fiqrimasngot/crisp/training_broker/broker.py`. The app Kustomization packages that file into a hash-named ConfigMap and rewrites the broker Deployment reference. The Python base image is pinned by digest; startup installs PyJWT 2.15.0 and cryptography 46.0.3. For an offline/reproducible deployment, replace startup installation with a tested, digest-pinned broker image.
 
 Run these checks from the kube repository before publishing:
 
