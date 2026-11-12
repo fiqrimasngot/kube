@@ -16,6 +16,7 @@ ISSUER = "https://token.actions.githubusercontent.com"
 JWKS_URL = "https://token.actions.githubusercontent.com/.well-known/jwks"
 AUDIENCE = "crisp-gpu-training-broker"
 REPO = "fiqrimasngot/crisp"
+OWNER_ID = "39836635"
 REPO_ID = "1445010308"
 REF = "refs/heads/main"
 WORKFLOW = "fiqrimasngot/crisp/.github/workflows/train-gpu.yaml@refs/heads/main"
@@ -48,7 +49,9 @@ def authorize(token):
         claims = jwt.decode(token, public_key, algorithms=["RS256"], audience=AUDIENCE,
                             issuer=ISSUER, options={"require": ["exp", "iat", "nbf", "iss", "aud", "sub"]})
         expected = {
-            "iss": ISSUER, "aud": AUDIENCE, "sub": f"repo:{REPO}:ref:{REF}",
+            # The organization configures GitHub's ID-bound OIDC subject template.
+            "iss": ISSUER, "aud": AUDIENCE,
+            "sub": f"repo:fiqrimasngot@{OWNER_ID}/crisp@{REPO_ID}:ref:{REF}",
             "repository": REPO, "repository_id": REPO_ID, "ref": REF,
             "workflow_ref": WORKFLOW, "event_name": "workflow_dispatch",
         }
