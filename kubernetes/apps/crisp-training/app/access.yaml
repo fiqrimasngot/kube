@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: crisp-training-broker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: crisp-training-job
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: crisp-training-broker
+rules:
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [create, get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: crisp-training-broker
+subjects:
+  - kind: ServiceAccount
+    name: crisp-training-broker
+    namespace: crisp-training
+roleRef:
+  kind: Role
+  name: crisp-training-broker
+  apiGroup: rbac.authorization.k8s.io

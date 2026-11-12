@@ -23,6 +23,15 @@ spec:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
     - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: crisp-training
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: crisp-training-broker
+      ports:
+        - { protocol: TCP, port: 8080 }
+    - to:
         - ipBlock:
             cidr: 0.0.0.0/0
             except:
