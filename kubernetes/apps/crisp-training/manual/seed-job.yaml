@@ -1,0 +1,87 @@
+# Run manually once, outside Flux reconciliation, after PVC binding and a
+# controlled review of this public archive. Never put this Job in kustomization.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: crisp-public-dataset-seed-20261112
+  namespace: crisp-training
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: crisp-training-seed
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: seed
+          image: python:3.13.11-slim@sha256:2b9c9803c6a287cafa0a8c917211dddd23dcd2016f049690ee5219f5d3f1636e
+          command: [/bin/sh, -ec]
+          args:
+            - |
+              export TMPDIR=/deps HOME=/deps
+              pip install --no-cache-dir --target /deps gdown==5.2.0
+              PYTHONPATH=/deps python - <<'PY'
+              import hashlib, os, pathlib, stat, zipfile
+              import gdown
+              root = pathlib.Path('/dataset')
+              marker = root / '.seed-sha256'
+              expected = '12593cb29b693db7d14cd145afd2293720be3ed9fa1a6e3f6aaae492def6ae74'
+              if marker.exists():
+                  assert marker.read_text().strip() == expected, 'different dataset already seeded'
+                  print('Already seeded; checksum marker matches')
+                  raise SystemExit(0)
+              archive = root / 'source.zip'
+              gdown.download(id='1tc9MGn5bpyVe63k2uDb-ABx8KC2yRpqP', output=str(archive), quiet=False, fuzzy=True)
+              assert archive.stat().st_size == 14918553729, 'archive byte count mismatch'
+              h = hashlib.sha256()
+              with archive.open('rb') as src:
+                  for chunk in iter(lambda: src.read(8 * 1024 * 1024), b''):
+                      h.update(chunk)
+              assert h.hexdigest() == expected, 'archive SHA256 mismatch'
+              extracted = 0
+              total_bytes = 0
+              with zipfile.ZipFile(archive) as z:
+                  entries = [i for i in z.infolist() if not i.is_dir()]
+                  assert sum(i.file_size for i in entries) == 16519380466, 'uncompressed byte count mismatch'
+                  for item in entries:
+                      name = pathlib.PurePosixPath(item.filename)
+                      assert not name.is_absolute() and '..' not in name.parts and name.parts[0] == 'dataset' and len(name.parts) > 1, 'unsafe archive path'
+                      assert not stat.S_ISLNK(item.external_attr >> 16), 'symlink in archive'
+                      dest = root.joinpath(*name.parts[1:])
+                      dest.parent.mkdir(parents=True, exist_ok=True)
+                      with z.open(item) as src, dest.open('wb') as dst:
+                          while chunk := src.read(8 * 1024 * 1024):
+                              dst.write(chunk)
+                              total_bytes += len(chunk)
+                      assert dest.stat().st_size == item.file_size
+                      extracted += 1
+              assert extracted == len(entries) and total_bytes == 16519380466
+              assert sum(1 for p in root.rglob('*') if p.is_file() and p != archive) == len(entries), 'extracted file count mismatch'
+              marker.write_text(expected + '\n')
+              archive.unlink()
+              print(f'Verified sha256={expected}, extracted files={extracted}, bytes={total_bytes}')
+              PY
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: "2", memory: 2Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: dataset, mountPath: /dataset }
+            - { name: deps, mountPath: /deps }
+      volumes:
+        - name: dataset
+          persistentVolumeClaim: { claimName: crisp-public-dataset }
+        - name: deps
+          emptyDir: { sizeLimit: 256Mi }

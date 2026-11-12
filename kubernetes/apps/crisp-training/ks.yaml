@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: crisp-training
+  namespace: flux-system
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/crisp-training/app
+  prune: true
+  targetNamespace: crisp-training
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false

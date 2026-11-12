@@ -1,0 +1,44 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: crisp-training-broker-jobs
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [batch]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [jobs]
+  matchConditions:
+    - name: broker-identity
+      expression: "request.userInfo.username == 'system:serviceaccount:crisp-training:crisp-training-broker'"
+  validations:
+    - expression: "object.metadata.namespace == 'crisp-training' && object.metadata.name.startsWith('crisp-train-')"
+      message: "Broker jobs must use the crisp-training namespace and crisp-train- name prefix"
+    - expression: "has(object.spec.activeDeadlineSeconds) && object.spec.activeDeadlineSeconds <= 86400 && has(object.spec.ttlSecondsAfterFinished) && object.spec.ttlSecondsAfterFinished <= 86400 && object.spec.backoffLimit == 0 && object.spec.parallelism == 1 && object.spec.completions == 1"
+      message: "Broker jobs must be bounded single-run jobs"
+    - expression: "object.spec.template.metadata.labels['app.kubernetes.io/name'] == 'crisp-training-job' && object.spec.template.spec.serviceAccountName == 'crisp-training-job' && object.spec.template.spec.automountServiceAccountToken == false && object.spec.template.spec.restartPolicy == 'Never' && object.spec.template.spec.runtimeClassName == 'nvidia'"
+      message: "Broker jobs must use the isolated job identity and label without an API token"
+    - expression: "!has(object.spec.template.spec.hostNetwork) && !has(object.spec.template.spec.hostPID) && !has(object.spec.template.spec.hostIPC) && !has(object.spec.template.spec.nodeName) && !has(object.spec.template.spec.initContainers) && !has(object.spec.template.spec.ephemeralContainers) && !has(object.spec.template.spec.imagePullSecrets) && !has(object.spec.template.spec.hostAliases)"
+      message: "Host access, sidecars, init containers and image credentials are forbidden"
+    - expression: "size(object.spec.template.spec.containers) == 1 && object.spec.template.spec.containers[0].name == 'trainer' && object.spec.template.spec.containers[0].image == 'tensorflow/tensorflow:2.21.0-gpu@sha256:61fe1ce25bd26b0a38e310463a5588d4067d2d01b6bdb058a3ca4f5cf2e18f15' && !has(object.spec.template.spec.containers[0].envFrom) && object.spec.template.spec.containers[0].env.all(e, !has(e.valueFrom))"
+      message: "Use exactly one digest-pinned Crisp trainer without Secret references"
+    - expression: "object.spec.template.spec.containers[0].resources['requests']['nvidia.com/gpu'] == '1' && object.spec.template.spec.containers[0].resources['limits']['nvidia.com/gpu'] == '1' && 'cpu' in object.spec.template.spec.containers[0].resources['requests'] && 'memory' in object.spec.template.spec.containers[0].resources['requests'] && 'cpu' in object.spec.template.spec.containers[0].resources['limits'] && 'memory' in object.spec.template.spec.containers[0].resources['limits']"
+      message: "Trainer must request exactly one GPU and bounded CPU/memory"
+    - expression: "size(object.spec.template.spec.volumes) == 3 && object.spec.template.spec.volumes.exists(v, v.name == 'dataset' && has(v.persistentVolumeClaim) && v.persistentVolumeClaim.claimName == 'crisp-public-dataset' && v.persistentVolumeClaim.readOnly) && object.spec.template.spec.volumes.exists(v, v.name == 'output' && has(v.persistentVolumeClaim) && v.persistentVolumeClaim.claimName == 'crisp-model-output') && object.spec.template.spec.volumes.exists(v, v.name == 'work' && has(v.emptyDir)) && size(object.spec.template.spec.containers[0].volumeMounts) == 3 && object.spec.template.spec.containers[0].volumeMounts.exists(m, m.name == 'dataset' && m.mountPath == '/dataset' && m.readOnly) && object.spec.template.spec.containers[0].volumeMounts.exists(m, m.name == 'output' && m.mountPath == '/models' && m.subPath == object.metadata.name) && object.spec.template.spec.containers[0].volumeMounts.exists(m, m.name == 'work' && m.mountPath == '/work')"
+      message: "Only the read-only dataset, dedicated model output, and ephemeral work directory may be mounted"
+    - expression: "has(object.spec.template.spec.containers[0].securityContext) && !has(object.spec.template.spec.containers[0].securityContext.privileged) && object.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation == false && object.spec.template.spec.containers[0].securityContext.capabilities.drop.exists(c, c == 'ALL')"
+      message: "Trainer must not request privilege escalation"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: crisp-training-broker-jobs
+spec:
+  policyName: crisp-training-broker-jobs
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: crisp-training
