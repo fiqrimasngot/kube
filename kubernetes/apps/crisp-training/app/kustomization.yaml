@@ -4,6 +4,7 @@ resources:
   - ./storage.yaml
   - ./access.yaml
   - ./network.yaml
+  - ./apiserver-network.yaml
   - ./admission.yaml
   - ./broker.yaml
 configMapGenerator:

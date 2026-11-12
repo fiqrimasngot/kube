@@ -38,17 +38,7 @@ spec:
       ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    - to:
-        - ipBlock:
-            cidr: 10.43.0.1/32
-      ports:
-        - { protocol: TCP, port: 443 }
-    # Cilium may evaluate policy after translating the Service to this API backend.
-    - to:
-        - ipBlock:
-            cidr: 10.32.1.51/32
-      ports:
-        - { protocol: TCP, port: 6443 }
+
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
