@@ -98,7 +98,9 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Run validator tests
-        run: uv run --quiet --locked pytest ./template/scripts/test_validate.py
+        run: |
+          python3 ./.github/template-tests/test_retry_network.py
+          uv run --quiet --locked pytest ./template/scripts/test_validate.py
 
   validate-valid:
     if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -151,7 +153,7 @@ jobs:
         run: taplo check --schema "file://$PWD/cluster.schema.json" ./cluster.toml
 
       - name: Run configure recipe
-        run: just configure
+        run: bash ./.github/template-tests/retry-network.sh just configure
 
       - name: Format and verify rendered output
         run: |
@@ -164,10 +166,10 @@ jobs:
           base: ""
 
       - name: Run flate test
-        run: flate test all -p ./kubernetes/flux/cluster
+        run: bash ./.github/template-tests/retry-network.sh flate test all -p ./kubernetes/flux/cluster
 
       - name: Render bootstrap helmfile charts
-        run: just template test-helmfile
+        run: bash ./.github/template-tests/retry-network.sh just template test-helmfile
 
       - name: Dry run bootstrap talos recipe
         run: just --dry-run bootstrap talos
