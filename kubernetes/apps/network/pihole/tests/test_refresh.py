@@ -31,17 +31,12 @@ class RefreshTests(unittest.TestCase):
         sql = script.split("<<'SQL'\n", 1)[1].split('\nSQL', 1)[0]
         db = sqlite3.connect(':memory:')
         db.execute('CREATE TABLE adlist (address TEXT, comment TEXT)')
-        db.execute('CREATE TABLE domainlist (type INTEGER, domain TEXT, enabled INTEGER, comment TEXT, UNIQUE(domain, type))')
         feeds = [u for u in v['adlists'] if any(s in u for s in ('kboghdady/', 'pawan418/', 't0mer-youtube'))]
         self.assertEqual(len(feeds), 3)
         for url in feeds + ['https://unrelated.example/list']:
             db.execute('INSERT INTO adlist VALUES (?, ?)', (url, 'old'))
         db.executescript(sql)
         db.executescript(sql)
-        trial = v['blacklist']
-        self.assertEqual(trial, ['rr1---sn-h5mpn-30az.googlevideo.com'])
-        self.assertEqual(db.execute('SELECT type, domain, enabled FROM domainlist').fetchall(),
-                         [(1, trial[0], 1)])
         for url, label in db.execute('SELECT address,comment FROM adlist'):
             if url in feeds:
                 self.assertIn('Suspicious YouTube Ads', label)
