@@ -147,6 +147,24 @@ spec:
       # REV_SERVER_DOMAIN: lan
       # REV_SERVER_TARGET: 192.168.0.1
     extraEnvVarsSecret: {}
+    extraInitContainers:
+      - name: gravity-update
+        image: pihole/pihole:2026.10.1
+        command: ["sh", "-c"]
+        args:
+          - pihole -g
+        volumeMounts:
+          - name: config
+            mountPath: /etc/pihole
+          - name: adlists
+            mountPath: /etc/pihole/adlists.list
+            subPath: adlists.list
+          - name: regex
+            mountPath: /etc/pihole/regex.list
+            subPath: regex.list
+          - name: whitelist
+            mountPath: /etc/pihole/whitelist.txt
+            subPath: whitelist.txt
     ftl:
       MAXDBDAYS: 90
     hostNetwork: "false"
