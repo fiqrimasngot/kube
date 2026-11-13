@@ -19,9 +19,10 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            runAsGroup: 65534
+            # Host-networked processes need an effective bind capability for ports 80/554.
+            runAsNonRoot: false
+            runAsUser: 0
+            runAsGroup: 0
         containers:
           app:
             image:
