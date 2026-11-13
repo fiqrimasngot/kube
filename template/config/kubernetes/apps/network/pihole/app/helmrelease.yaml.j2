@@ -34,6 +34,28 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
+  # Copy into the writable image layer: mounting /crontab.txt would break
+  # the image's sed -i randomization (rename over a bind mount).
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: pihole
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: pihole
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: pihole
+                        command:
+                          - /bin/sh
+                          - -ec
+                          - cp /etc/pihole/crontab.txt /crontab.txt; exec /usr/bin/start.sh
   values:
     DNS1: 10.32.1.1
     adlists:
@@ -56,7 +78,6 @@ spec:
       - https://v.firebog.net/hosts/AdguardDNS.txt
       - https://v.firebog.net/hosts/Admiral.txt
       - https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt
-      - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
       - https://v.firebog.net/hosts/Easylist.txt
       - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
       - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
@@ -65,7 +86,7 @@ spec:
       # Experimental YouTube hostnames; may affect video playback.
       - https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/refs/heads/master/youtubelist.txt
       - https://raw.githubusercontent.com/pawan418/yt-ad-blocker/main/hosts
-      # Domain-only snapshot of t0mer's AdGuard-format YouTube list.
+      # Preserve the deployed snapshot; daily downloads do not sync its upstream.
       - https://raw.githubusercontent.com/fiqrimasngot/kube/main/kubernetes/apps/network/pihole/blocklists/t0mer-youtube.txt
       # Tracking and Telemetry
       - https://v.firebog.net/hosts/Easyprivacy.txt
@@ -152,13 +173,37 @@ spec:
       # REV_SERVER_CIDR: 192.168.0.0/24
       # REV_SERVER_DOMAIN: lan
       # REV_SERVER_TARGET: 192.168.0.1
+    # No PVC: rebuild Gravity and labels on each pod replacement.
+    persistentVolumeClaim:
+      enabled: false
     extraEnvVarsSecret: {}
     extraInitContainers:
       - name: gravity-update
         image: pihole/pihole:2026.10.1
         command: ["sh", "-c"]
         args:
-          - pihole -g
+          - |
+            set -eu
+            # Seed a writable crontab in emptyDir; the image installs it at startup.
+            while IFS= read -r line; do
+              case "$line" in
+                *"pihole updateGravity"*)
+                  printf '%s\n' '17 3 * * * PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log 2>&1 || cat /var/log/pihole/pihole_updateGravity.log'
+                  ;;
+                *) printf '%s\n' "$line" ;;
+              esac
+            done < /crontab.txt > /etc/pihole/crontab.txt
+            pihole -g
+            # Exact URLs, not ephemeral database IDs. No query-timing inference.
+            pihole-FTL sqlite3 /etc/pihole/gravity.db <<'SQL'
+            UPDATE adlist SET comment = 'Suspicious YouTube Ads (daily upstream refresh)'
+            WHERE address IN (
+              'https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/refs/heads/master/youtubelist.txt',
+              'https://raw.githubusercontent.com/pawan418/yt-ad-blocker/main/hosts'
+            );
+            UPDATE adlist SET comment = 'Suspicious YouTube Ads (static t0mer snapshot; not upstream-synced)'
+            WHERE address = 'https://raw.githubusercontent.com/fiqrimasngot/kube/main/kubernetes/apps/network/pihole/blocklists/t0mer-youtube.txt';
+            SQL
         volumeMounts:
           - name: config
             mountPath: /etc/pihole
