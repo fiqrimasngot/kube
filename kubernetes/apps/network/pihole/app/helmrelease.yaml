@@ -150,7 +150,9 @@ spec:
       avoidRelease: pihole1
       enabled: false
       strict: true
-    blacklist: {}
+    # Temporary PS5 YouTube trial; shared video hosts can break normal playback.
+    blacklist:
+      - rr1---sn-h5mpn-30az.googlevideo.com
     customVolumes:
       config: {}
       enabled: false
