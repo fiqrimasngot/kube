@@ -205,6 +205,9 @@ spec:
             );
             UPDATE adlist SET comment = 'Suspicious YouTube Ads (static t0mer snapshot; not upstream-synced)'
             WHERE address = 'https://raw.githubusercontent.com/fiqrimasngot/kube/main/kubernetes/apps/network/pihole/blocklists/t0mer-youtube.txt';
+            -- Pi-hole v6 does not import blacklist.txt on an existing Gravity DB.
+            INSERT OR IGNORE INTO domainlist (type, domain, enabled, comment)
+            VALUES (0, 'rr1---sn-h5mpn-30az.googlevideo.com', 1, 'Temporary PS5 YouTube trial; may break playback');
             SQL
         volumeMounts:
           - name: config
