@@ -41,7 +41,7 @@ class RefreshTests(unittest.TestCase):
         trial = v['blacklist']
         self.assertEqual(trial, ['rr1---sn-h5mpn-30az.googlevideo.com'])
         self.assertEqual(db.execute('SELECT type, domain, enabled FROM domainlist').fetchall(),
-                         [(0, trial[0], 1)])
+                         [(1, trial[0], 1)])
         for url, label in db.execute('SELECT address,comment FROM adlist'):
             if url in feeds:
                 self.assertIn('Suspicious YouTube Ads', label)
