@@ -62,6 +62,8 @@ spec:
       - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
       - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
       - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
+      # Experimental YouTube hostnames; may affect video playback.
+      - https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/refs/heads/master/youtubelist.txt
       # Tracking and Telemetry
       - https://v.firebog.net/hosts/Easyprivacy.txt
       - https://v.firebog.net/hosts/Prigent-Ads.txt
