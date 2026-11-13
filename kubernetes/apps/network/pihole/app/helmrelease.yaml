@@ -179,7 +179,7 @@ spec:
     extraEnvVarsSecret: {}
     extraInitContainers:
       - name: gravity-update
-        image: pihole/pihole:2026.10.1
+        image: pihole/pihole:2026.11.0
         command: ["sh", "-c"]
         args:
           - |
@@ -223,7 +223,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: pihole/pihole
-      tag: 2026.10.1
+      tag: 2026.11.0
     ingress:
       annotations:
         nginx.ingress.kubernetes.io/app-root: /admin
