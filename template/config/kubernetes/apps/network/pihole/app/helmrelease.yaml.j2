@@ -196,6 +196,9 @@ spec:
             pihole -g
             # Exact URLs, not ephemeral database IDs. No query-timing inference.
             pihole-FTL sqlite3 /etc/pihole/gravity.db <<'SQL'
+            .bail on
+            PRAGMA foreign_keys = ON;
+            BEGIN IMMEDIATE;
             UPDATE adlist SET comment = 'Suspicious YouTube Ads (daily upstream refresh)'
             WHERE address IN (
               'https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/refs/heads/master/youtubelist.txt',
@@ -203,6 +206,35 @@ spec:
             );
             UPDATE adlist SET comment = 'Suspicious YouTube Ads (static t0mer snapshot; not upstream-synced)'
             WHERE address = 'https://raw.githubusercontent.com/fiqrimasngot/kube/main/kubernetes/apps/network/pihole/blocklists/t0mer-youtube.txt';
+            -- Temporary, user-authorized PS5-only trial; shared video may break.
+            -- Rollback: remove this trial block in both manifests and roll out a new pod.
+            INSERT OR IGNORE INTO "group" (name,enabled,description)
+            VALUES ('PS5 exact-host trial',1,'Temporary exact-host trial for PS5 only; may break video');
+            UPDATE "group" SET enabled=1 WHERE name='PS5 exact-host trial' AND enabled<>1;
+            INSERT OR IGNORE INTO client (ip,comment) VALUES ('10.32.1.59','PS5 exact-host trial');
+            -- Explicit clients do not inherit Default implicitly. Keep their other mappings.
+            INSERT OR IGNORE INTO client_by_group (client_id,group_id)
+            SELECT id,0 FROM client WHERE ip='10.32.1.59';
+            INSERT OR IGNORE INTO client_by_group (client_id,group_id)
+            SELECT c.id,g.id FROM client c CROSS JOIN "group" g
+            WHERE c.ip='10.32.1.59' AND g.name='PS5 exact-host trial';
+            -- This dedicated group must never include another client.
+            DELETE FROM client_by_group
+            WHERE group_id=(SELECT id FROM "group" WHERE name='PS5 exact-host trial')
+              AND client_id<>(SELECT id FROM client WHERE ip='10.32.1.59');
+            -- Pi-hole v6 type 1 is exact deny; type 0 is allow. No global blacklist.txt.
+            INSERT OR IGNORE INTO domainlist (type,domain,enabled,comment)
+            VALUES (1,'rr3---sn-h5mpn-30ay.googlevideo.com',1,'Temporary PS5-only trial; shared video may break');
+            UPDATE domainlist SET enabled=1
+            WHERE type=1 AND domain='rr3---sn-h5mpn-30ay.googlevideo.com' AND enabled<>1;
+            -- The insert trigger adds Default (0): remove it and every non-trial mapping.
+            DELETE FROM domainlist_by_group
+            WHERE domainlist_id=(SELECT id FROM domainlist WHERE type=1 AND domain='rr3---sn-h5mpn-30ay.googlevideo.com')
+              AND group_id<>(SELECT id FROM "group" WHERE name='PS5 exact-host trial');
+            INSERT OR IGNORE INTO domainlist_by_group (domainlist_id,group_id)
+            SELECT d.id,g.id FROM domainlist d CROSS JOIN "group" g
+            WHERE d.type=1 AND d.domain='rr3---sn-h5mpn-30ay.googlevideo.com' AND g.name='PS5 exact-host trial';
+            COMMIT;
             SQL
         volumeMounts:
           - name: config
