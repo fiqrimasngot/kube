@@ -88,12 +88,12 @@ spec:
           gotenberg:
             image:
               repository: gotenberg/gotenberg
-              tag: 9.3.0
+              tag: 8.40.0
               pullPolicy: IfNotPresent
             ports:
               - containerPort: 3000
             env:
-              - {name: DISABLE_GOOGLE_CHROME, value: "1"}
+              - { name: DISABLE_GOOGLE_CHROME, value: "1" }
 
     service:
       app:
@@ -115,35 +115,34 @@ spec:
           - name: envoy-external
             namespace: network
 
-
     persistence:
-     # backup:
-     #   existingClaim: backups
-     data:
-       enabled: true
-       globalMounts:
-         - path: /usr/src/paperless/data
-       type: nfs
-       server: ${SECRET_NFS_SVC}
-       path: "/doc/paperless/data"
-     media:
-       enabled: true
-       globalMounts:
-         - path: /usr/src/paperless/media
-       type: nfs
-       server: ${SECRET_NFS_SVC}
-       path: "/doc/paperless/media"
-     consume:
-       enabled: true
-       globalMounts:
-         - path: /usr/src/paperless/consume
-       type: nfs
-       server: ${SECRET_NFS_SVC}
-       path: "/doc/paperless/incoming"
-     export:
-       enabled: true
-       globalMounts:
-         - path: /usr/src/paperless/export
-       type: nfs
-       server: ${SECRET_NFS_SVC}
-       path: "/doc/paperless/export"
+      # backup:
+      #   existingClaim: backups
+      data:
+        enabled: true
+        globalMounts:
+          - path: /usr/src/paperless/data
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: "/doc/paperless/data"
+      media:
+        enabled: true
+        globalMounts:
+          - path: /usr/src/paperless/media
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: "/doc/paperless/media"
+      consume:
+        enabled: true
+        globalMounts:
+          - path: /usr/src/paperless/consume
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: "/doc/paperless/incoming"
+      export:
+        enabled: true
+        globalMounts:
+          - path: /usr/src/paperless/export
+        type: nfs
+        server: ${SECRET_NFS_SVC}
+        path: "/doc/paperless/export"
