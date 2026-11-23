@@ -196,9 +196,25 @@ done
 
 echo "==> asserting flux reconciliation"
 kubectl wait fluxinstance/flux --namespace flux-system --for=condition=Ready --timeout=10m
-kubectl wait gitrepositories --all --all-namespaces --for=condition=Ready --timeout=5m
-kubectl wait kustomizations --all --all-namespaces --for=condition=Ready --timeout=10m
-kubectl wait helmreleases --all --all-namespaces --for=condition=Ready --timeout=10m
+kubectl wait gitrepository/flux-system --namespace flux-system --for=condition=Ready --timeout=5m
+# Flux creates these resources asynchronously. `wait --all` only sees a
+# snapshot and can succeed too early (or fail if no HelmReleases exist yet).
+for resource in flux-system cluster-apps flux-operator flux-instance; do
+    kubectl wait "kustomization/$resource" --namespace flux-system --for=create --timeout=10m
+    kubectl wait "kustomization/$resource" --namespace flux-system --for=condition=Ready --timeout=10m
+done
+for resource in cilium coredns; do
+    kubectl wait "kustomization/$resource" --namespace kube-system --for=create --timeout=10m
+    kubectl wait "kustomization/$resource" --namespace kube-system --for=condition=Ready --timeout=10m
+done
+for resource in flux-operator flux-instance; do
+    kubectl wait "helmrelease/$resource" --namespace flux-system --for=create --timeout=10m
+    kubectl wait "helmrelease/$resource" --namespace flux-system --for=condition=Ready --timeout=10m
+done
+for resource in cilium coredns; do
+    kubectl wait "helmrelease/$resource" --namespace kube-system --for=create --timeout=10m
+    kubectl wait "helmrelease/$resource" --namespace kube-system --for=condition=Ready --timeout=10m
+done
 }
 
 foundation() {

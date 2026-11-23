@@ -51,6 +51,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Test Flux reconciliation waits
+        run: python3 ./.github/template-tests/e2e/test_cluster_health.py
+
       - name: Install QEMU
         run: |
           sudo apt-get update
