@@ -1,0 +1,26 @@
+# Reference-only stand-ins for SOPS-encrypted keys in the generated E2E tree.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-secrets
+  namespace: default
+stringData:
+  SECRET_NFS_SVC: nfs.example.invalid
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-secrets
+  namespace: media
+stringData:
+  SECRET_NFS_SVC: nfs.example.invalid
+  SECRET_DOMAIN: ghost.example.invalid
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-secrets
+  namespace: storage
+stringData:
+  SECRET_NFS_SVC: nfs.example.invalid

@@ -146,6 +146,8 @@ jobs:
       - name: Prepare files
         run: |
           cp ./.github/template-tests/valid/${{ matrix.fixture }}.toml cluster.toml
+          # SOPS leaves empty strings readable; Flate's --supply cannot replace them.
+          printf '\n[samba]\ninternal = "nfs.example.invalid"\n' >> cluster.toml
           echo '{"AccountTag":"fake","TunnelSecret":"fake","TunnelID":"fake"}' > cloudflare-tunnel.json
           touch kubeconfig
 
@@ -166,7 +168,18 @@ jobs:
           base: ""
 
       - name: Run flate test
+        env:
+          FLATE_SUPPLY: ./.github/template-tests/flate-inputs.yaml
         run: bash ./.github/template-tests/retry-network.sh flate test all -p ./kubernetes/flux/cluster
+
+      - name: Check rendered NFS servers and Ghost hostname
+        if: matrix.fixture == 'no-webhook'
+        env:
+          FLATE_SUPPLY: ./.github/template-tests/flate-inputs.yaml
+        shell: bash
+        run: |
+          flate build ks -p ./kubernetes/flux/cluster --only-kinds HelmRelease -o json |
+            jq -e -f ./.github/template-tests/test-flate-substitutions.jq
 
       - name: Render bootstrap helmfile charts
         run: bash ./.github/template-tests/retry-network.sh just template test-helmfile
