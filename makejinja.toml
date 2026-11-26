@@ -5,6 +5,7 @@ output = "./"
 exclude_patterns = [
   "*.partial.yaml.j2",
   "kubernetes/apps/default/study-planner/app/helmrelease.yaml*",
+  "kubernetes/apps/default/amdglobal/app/helmrelease.yaml*",
 ]
 import_paths = ["./template/scripts"]
 loaders = ["plugin:Plugin"]
