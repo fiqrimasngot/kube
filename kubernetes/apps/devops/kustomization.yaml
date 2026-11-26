@@ -6,11 +6,9 @@ components:
   - ../../components/sops
   - ../../components/repos
 resources:
-
   - ./hermes/ks.yaml
   - ./honcho/ks.yaml
   - ./harbor/ks.yaml
-  - ./cgit/ks.yaml
   - ./namespace.yaml
   # - ./sparknova/ks.yaml
   # - ./kafka/ks.yaml
