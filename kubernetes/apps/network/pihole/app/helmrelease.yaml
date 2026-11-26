@@ -280,7 +280,7 @@ spec:
         image:
           pullPolicy: IfNotPresent
           repository: ekofr/pihole-exporter
-          tag: v1.3.1
+          tag: v1.4.0
         port: 9617
         resources:
           limits:
