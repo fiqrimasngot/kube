@@ -1,0 +1,62 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app amdglobal
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      amdglobal:
+        containers:
+          web:
+            image:
+              repository: harbor.fiqriha.kim/library/amdglobal-web
+              tag: bootstrap
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+            probes:
+              liveness: { enabled: true }
+              readiness: { enabled: true }
+    service:
+      app:
+        controller: amdglobal
+        ports:
+          http:
+            port: 8080
+    route:
+      app:
+        hostnames: ["amdglobal.fiqriha.kim"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+    persistence:
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /var/cache/nginx
+          - path: /var/run
+          - path: /tmp
