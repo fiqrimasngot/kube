@@ -27,7 +27,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/plastic-labs/honcho
-              tag: latest@sha256:f6c9e7ba1d1167da6146478faae5af2b4751499f98bf5aef6a000414d91b56f2
+              tag: latest@sha256:9c5479d33d4d2cbcb54514e7dd24e8580ba5d73906862fb6fe6ea436558a0a14
             command:
               - /bin/sh
               - docker/entrypoint.sh
