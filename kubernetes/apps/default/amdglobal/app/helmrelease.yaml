@@ -23,7 +23,7 @@ spec:
           web:
             image:
               repository: harbor.fiqriha.kim/amdglobal/amdglobal-web
-              tag: bootstrap
+              tag: build-77744c317e0bc74a1287b35b0e8c5065d43c0638@sha256:44cd912b8bb9f22f092ca5eb78b55148ba029bb87ff03470cefd1be036310423
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
