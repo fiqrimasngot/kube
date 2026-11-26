@@ -2,15 +2,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: amdglobal-runners
+  name: amdglobal-release-runners
 spec:
   chartRef:
     kind: OCIRepository
     name: gha-runner-scale-set
   interval: 1h
   values:
-    githubConfigUrl: https://github.com/fiqrimasngot/amdglobal
-    runnerScaleSetName: amdglobal-runners
+    githubConfigUrl: https://github.com/fiqrimasngot/amdglobal-release-control
+    runnerScaleSetName: amdglobal-release-runners
     githubConfigSecret: github-app-secret
     controllerServiceAccount:
       name: arc
