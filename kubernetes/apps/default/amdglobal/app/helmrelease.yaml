@@ -19,6 +19,9 @@ spec:
   values:
     controllers:
       amdglobal:
+        pod:
+          imagePullSecrets:
+            - name: amdglobal-harbor-pull
         containers:
           web:
             image:
