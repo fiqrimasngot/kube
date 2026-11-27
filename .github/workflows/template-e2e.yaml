@@ -100,7 +100,7 @@ jobs:
       - name: Run validator tests
         run: |
           python3 ./.github/template-tests/test_retry_network.py
-          uv run --quiet --locked pytest ./template/scripts/test_validate.py
+          uv run --quiet --locked pytest ./template/scripts/test_validate.py ./template/scripts/test_release_owned_manifest.py
 
   validate-valid:
     if: ${{ github.repository == 'fiqrimasngot/kube' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
