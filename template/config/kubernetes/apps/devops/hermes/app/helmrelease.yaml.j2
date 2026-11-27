@@ -128,29 +128,6 @@ spec:
                 PY
                 cp /opt/hermes/tools/skills_tool.py /patched-skills/skills_tool.py
                 python3 /run/config/patch-skill-resolver.py /patched-skills/skills_tool.py
-          kubectl-tools:
-            image:
-              repository: bitnami/kubectl
-              tag: 1.37.1
-            command:
-              - /bin/sh
-              - -c
-              - |
-                set -eu
-                mkdir -p /opt/data/.local/bin
-                cp /opt/bitnami/kubectl/bin/kubectl /opt/data/.local/bin/kubectl.real
-                cat > /opt/data/.local/bin/kubectl <<'EOF'
-                #!/bin/sh
-                set -eu
-                if [ -z "$${KUBECONFIG:-}" ]; then
-                  case "$PWD" in
-                    /opt/data/workspace/kube-kl/*) export KUBECONFIG=/opt/data/workspace/kube-kl/k8s/kubeconfig ;;
-                    /opt/data/workspace/kube/*) export KUBECONFIG=/opt/data/workspace/kube/kubeconfig ;;
-                  esac
-                fi
-                exec /opt/data/.local/bin/kubectl.real "$@"
-                EOF
-                chmod 0755 /opt/data/.local/bin/kubectl /opt/data/.local/bin/kubectl.real
           install-tools:
             image: &image
               repository: nousresearch/hermes-agent
@@ -169,6 +146,16 @@ spec:
                   aarch64) tool_arch=arm64 ;;
                   *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
                 esac
+
+                if [ ! -x /opt/data/.local/bin/kubectl.real ]; then
+                  curl -fsSL "https://dl.k8s.io/release/v1.37.1/bin/linux/$${tool_arch}/kubectl" \
+                    -o /opt/data/.local/bin/kubectl.real
+                fi
+
+                if [ ! -x /opt/data/.local/bin/talosctl.real ]; then
+                  curl -fsSL "https://github.com/siderolabs/talos/releases/download/v1.14.4/talosctl-linux-$${tool_arch}" \
+                    -o /opt/data/.local/bin/talosctl.real
+                fi
 
                 if [ ! -x /opt/data/.local/bin/sops.real ]; then
                   curl -fsSL "https://github.com/getsops/sops/releases/download/v3.13.3/sops-v3.13.3.linux-$${tool_arch}" \
@@ -204,17 +191,46 @@ spec:
                 fi
                 exec /opt/data/.local/bin/sops.real "$@"
                 EOF
-                chmod 0755 /opt/data/.local/bin/sops /opt/data/.local/bin/sops.real
 
-                # Make kubectl available to every Hermes profile and Kanban assignee.
-                # Keep it on the shared PVC so workers and chat sessions use the same
-                # pinned client without requiring it in the base image.
-                if [ ! -x /opt/data/.local/bin/kubectl ]; then
-                  cd /tmp
-                  curl -fsSL https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl -o kubectl
-                  chmod 0755 kubectl
-                  mv kubectl /opt/data/.local/bin/kubectl
+                cat > /opt/data/.local/bin/kubectl <<'EOF'
+                #!/bin/sh
+                set -eu
+                if [ -z "$${KUBECONFIG:-}" ]; then
+                  case "$PWD" in
+                    /opt/data/workspace/kube-kl/k8s|/opt/data/workspace/kube-kl/k8s/*)
+                      export KUBECONFIG=/opt/data/workspace/kube-kl/k8s/kubeconfig
+                      ;;
+                    /opt/data/workspace/kube|/opt/data/workspace/kube/*)
+                      export KUBECONFIG=/opt/data/workspace/kube/kubeconfig
+                      ;;
+                  esac
                 fi
+                exec /opt/data/.local/bin/kubectl.real "$@"
+                EOF
+
+                cat > /opt/data/.local/bin/talosctl <<'EOF'
+                #!/bin/sh
+                set -eu
+                if [ -z "$${TALOSCONFIG:-}" ]; then
+                  case "$PWD" in
+                    /opt/data/workspace/kube-kl/k8s|/opt/data/workspace/kube-kl/k8s/*)
+                      export TALOSCONFIG=/opt/data/workspace/kube-kl/k8s/talos/talosconfig
+                      ;;
+                    /opt/data/workspace/kube|/opt/data/workspace/kube/*)
+                      export TALOSCONFIG=/opt/data/workspace/kube/talos/talosconfig
+                      ;;
+                  esac
+                fi
+                exec /opt/data/.local/bin/talosctl.real "$@"
+                EOF
+
+                chmod 0755 \
+                  /opt/data/.local/bin/kubectl \
+                  /opt/data/.local/bin/kubectl.real \
+                  /opt/data/.local/bin/sops \
+                  /opt/data/.local/bin/sops.real \
+                  /opt/data/.local/bin/talosctl \
+                  /opt/data/.local/bin/talosctl.real
 
                 if [ ! -f /opt/data/.local/bin/gh ]; then
                   cd /tmp
@@ -242,20 +258,71 @@ spec:
                 # only if the parent tree is writable. Without this, brew fails on
                 # a fresh PVC before the first `brew install`.
                 mkdir -p /opt/data/.local/homebrew/var/homebrew/locks
+                chown 10000:10000 /opt/data/.local/homebrew/var/homebrew/locks
+
+                # Homebrew refuses root. Use the image's Hermes user for brew,
+                # while keeping root for the CLI files installed above.
+                brew() {
+                  /command/s6-setuidgid hermes env HOME=/opt/data /opt/data/.local/homebrew/bin/brew "$@"
+                }
 
                 # Shared non-secret build utilities used by every Kanban assignee.
-                if ! /opt/data/.local/homebrew/bin/brew list --formula flex >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install flex
+                if ! brew list --formula flex >/dev/null 2>&1; then
+                  brew install flex
                 fi
-                if ! /opt/data/.local/homebrew/bin/brew list --formula m4 >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install m4
+                if ! brew list --formula m4 >/dev/null 2>&1; then
+                  brew install m4
                 fi
-                if ! /opt/data/.local/homebrew/bin/brew list --formula file >/dev/null 2>&1; then
-                  /opt/data/.local/homebrew/bin/brew install file
+                if ! brew list --formula file >/dev/null 2>&1; then
+                  brew install file
                 fi
                 ln -sfn /opt/data/.local/homebrew/bin/flex /opt/data/.local/bin/flex
                 ln -sfn /opt/data/.local/homebrew/bin/m4 /opt/data/.local/bin/m4
                 ln -sfn /opt/data/.local/homebrew/bin/file /opt/data/.local/bin/file
+          stage-cli-path:
+            image: *image
+            command:
+              - /bin/sh
+              - -ec
+              - |
+                # Link entry points, never .real clients or another role's home.
+                bin=/run/hermes-cli/bin
+                shared=/opt/data/.local/bin
+                installs=/opt/data/home/.local/share/mise/installs
+                mkdir -p "$bin"
+                case "$(uname -m)" in
+                  x86_64) arch=amd64 ;;
+                  aarch64) arch=arm64 ;;
+                  *) echo "unsupported CLI architecture" >&2; exit 1 ;;
+                esac
+                for tool in gh kubectl talosctl kustomize helm; do
+                  target="$shared/$tool"
+                  if [ ! -x "$target" ]; then
+                    case "$tool" in
+                      helm) target="$installs/helm/latest/linux-$arch/helm" ;;
+                      kustomize) target="$installs/kustomize/latest/kustomize" ;;
+                    esac
+                  fi
+                  ln -sf "$target" "$bin/$tool"
+                  if [ ! -x "$bin/$tool" ]; then
+                    echo "CLI fallback unavailable: $tool" >&2
+                  fi
+                done
+
+                # /etc/profile resets PATH. Restore role-local entries first;
+                # do not edit shell startup files or expose a PVC PATH to root.
+                cat > /run/hermes-cli/path.sh <<'EOF'
+                if [ "$(id -u)" = 10000 ]; then
+                  for cli_dir in "$HOME/.local/bin" /run/hermes-cli/bin; do
+                    case ":$PATH:" in
+                      *":$cli_dir:"*) ;;
+                      *) PATH="$PATH:$cli_dir" ;;
+                    esac
+                  done
+                  unset cli_dir
+                  export PATH
+                fi
+                EOF
         containers:
           app:
             image: *image
@@ -292,7 +359,7 @@ spec:
               HOMEBREW_PREFIX: /opt/data/.local/homebrew
               HOMEBREW_CELLAR: /opt/data/.local/homebrew/Cellar
               HOMEBREW_REPOSITORY: /opt/data/.local/homebrew
-              PATH: /opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              PATH: /opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/run/hermes-cli/bin
               PIP_BREAK_SYSTEM_PACKAGES: "1"
               # Talos Linux disables unprivileged user namespaces at the kernel
               # level (no AppArmor userns file, just a kernel-level restriction).
@@ -481,6 +548,18 @@ spec:
           - path: /opt/data
       tmp:
         type: emptyDir
+      cli-path:
+        type: emptyDir
+        advancedMounts:
+          hermes:
+            stage-cli-path:
+              - path: /run/hermes-cli
+            app:
+              - path: /run/hermes-cli
+                readOnly: true
+              - path: /etc/profile.d/hermes-cli.sh
+                subPath: path.sh
+                readOnly: true
       hermes-cli-patch:
         type: emptyDir
         advancedMounts:

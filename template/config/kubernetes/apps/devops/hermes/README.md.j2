@@ -10,9 +10,11 @@ cluster-internal at **http://hermes.devops.svc.cluster.local:8642/v1**.
 A dedicated 10 GiB `ceph-block` PVC stores `/opt/data`, including configuration,
 provider logins, sessions, skills, and the workspace. `Recreate` avoids simultaneous
 writers during updates. The PVC is protected from Flux pruning; backups are not
-configured. Initial config is copied only when no config exists, so UI/CLI changes
-and provider login survive restarts. The Kubernetes service account has read-only
+configured. The init container copies the managed configs on every pod start.
+Provider logins are separate PVC state. The Kubernetes service account has read-only
 inspection permissions; it cannot change workloads or read Secrets.
+
+For client discovery and access checks, see [Check CLI discovery from a Hermes role](../../../../docs/hermes-cli.md).
 
 ## Skills across profiles
 
