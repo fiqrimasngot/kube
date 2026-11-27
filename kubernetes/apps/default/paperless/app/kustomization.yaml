@@ -4,3 +4,12 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./secrets.sops.yaml
+configMapGenerator:
+  - name: paperless-gotenberg-compat
+    files:
+      - sitecustomize.py=./compat/sitecustomize.py
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+configurations:
+  - ./kustomize-config.yaml

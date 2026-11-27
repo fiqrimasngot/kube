@@ -44,6 +44,8 @@ spec:
 
             env:
               COMPOSE_PROJECT_NAME: *app
+              # Translate Paperless's Gotenberg 8 client requests to the v9 API.
+              PYTHONPATH: /opt/paperless-gotenberg-compat
               PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
 
               # Configure Remote User auth
@@ -116,6 +118,14 @@ spec:
             namespace: network
 
     persistence:
+      gotenberg-compat:
+        type: configMap
+        name: paperless-gotenberg-compat
+        advancedMounts:
+          paperless:
+            app:
+              - path: /opt/paperless-gotenberg-compat
+                readOnly: true
       # backup:
       #   existingClaim: backups
       data:
