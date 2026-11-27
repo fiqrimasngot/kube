@@ -84,10 +84,21 @@ reset:
     else
         rm -f "$study_planner_backup"
     fi
+    amdglobal_helmrelease="{{ kubernetes_dir }}/apps/default/amdglobal/app/helmrelease.yaml"
+    amdglobal_backup="$(mktemp)"
+    if [ -f "$amdglobal_helmrelease" ]; then
+        cp "$amdglobal_helmrelease" "$amdglobal_backup"
+    else
+        rm -f "$amdglobal_backup"
+    fi
     rm -rf "{{ bootstrap_dir }}" "{{ kubernetes_dir }}" "{{ talos_dir }}" "{{ justfile_dir() }}/.sops.yaml"
     if [ -f "$study_planner_backup" ]; then
         mkdir -p "$(dirname "$study_planner_helmrelease")"
         mv "$study_planner_backup" "$study_planner_helmrelease"
+    fi
+    if [ -f "$amdglobal_backup" ]; then
+        mkdir -p "$(dirname "$amdglobal_helmrelease")"
+        mv "$amdglobal_backup" "$amdglobal_helmrelease"
     fi
 
 # tidy-archive moves template/ (this module's source) away, so it runs as a
