@@ -281,6 +281,50 @@ spec:
                 ln -sfn /opt/data/.local/homebrew/bin/flex /opt/data/.local/bin/flex
                 ln -sfn /opt/data/.local/homebrew/bin/m4 /opt/data/.local/bin/m4
                 ln -sfn /opt/data/.local/homebrew/bin/file /opt/data/.local/bin/file
+          stage-cli-path:
+            image: *image
+            command:
+              - /bin/sh
+              - -ec
+              - |
+                # Link entry points, never .real clients or another role's home.
+                bin=/run/hermes-cli/bin
+                shared=/opt/data/.local/bin
+                installs=/opt/data/home/.local/share/mise/installs
+                mkdir -p "$bin"
+                case "$(uname -m)" in
+                  x86_64) arch=amd64 ;;
+                  aarch64) arch=arm64 ;;
+                  *) echo "unsupported CLI architecture" >&2; exit 1 ;;
+                esac
+                for tool in gh kubectl talosctl kustomize helm; do
+                  target="$shared/$tool"
+                  if [ ! -x "$target" ]; then
+                    case "$tool" in
+                      helm) target="$installs/helm/latest/linux-$arch/helm" ;;
+                      kustomize) target="$installs/kustomize/latest/kustomize" ;;
+                    esac
+                  fi
+                  ln -sf "$target" "$bin/$tool"
+                  if [ ! -x "$bin/$tool" ]; then
+                    echo "CLI fallback unavailable: $tool" >&2
+                  fi
+                done
+
+                # /etc/profile resets PATH. Restore role-local entries first;
+                # do not edit shell startup files or expose a PVC PATH to root.
+                cat > /run/hermes-cli/path.sh <<'EOF'
+                if [ "$(id -u)" = 10000 ]; then
+                  for cli_dir in "$HOME/.local/bin" /run/hermes-cli/bin; do
+                    case ":$PATH:" in
+                      *":$cli_dir:"*) ;;
+                      *) PATH="$PATH:$cli_dir" ;;
+                    esac
+                  done
+                  unset cli_dir
+                  export PATH
+                fi
+                EOF
         containers:
           app:
             image: *image
@@ -317,7 +361,7 @@ spec:
               HOMEBREW_PREFIX: /opt/data/.local/homebrew
               HOMEBREW_CELLAR: /opt/data/.local/homebrew/Cellar
               HOMEBREW_REPOSITORY: /opt/data/.local/homebrew
-              PATH: /opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              PATH: /opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:/opt/data/.local/go/bin:/opt/data/.local/homebrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/run/hermes-cli/bin
               PIP_BREAK_SYSTEM_PACKAGES: "1"
               # Talos Linux disables unprivileged user namespaces at the kernel
               # level (no AppArmor userns file, just a kernel-level restriction).
@@ -505,6 +549,18 @@ spec:
           - path: /opt/data
       tmp:
         type: emptyDir
+      cli-path:
+        type: emptyDir
+        advancedMounts:
+          hermes:
+            stage-cli-path:
+              - path: /run/hermes-cli
+            app:
+              - path: /run/hermes-cli
+                readOnly: true
+              - path: /etc/profile.d/hermes-cli.sh
+                subPath: path.sh
+                readOnly: true
       hermes-cli-patch:
         type: emptyDir
         advancedMounts:
