@@ -51,7 +51,7 @@ jobs:
         run: |
           flate test all --supply .github/flate/supply.yaml -p ./kubernetes/flux/cluster
           # Exercise the supplied NFS value even when this PR changes only CI files.
-          flate build hr paperless -n default --supply .github/flate/supply.yaml -p ./kubernetes/flux/cluster > /dev/null
+          env -u FLATE_BASE flate build hr paperless -n default --supply .github/flate/supply.yaml -p ./kubernetes/flux/cluster > /dev/null
 
   success:
     if: ${{ !cancelled() && github.repository == 'fiqrimasngot/kube' && github.event.pull_request.head.repo.full_name == github.repository }}
